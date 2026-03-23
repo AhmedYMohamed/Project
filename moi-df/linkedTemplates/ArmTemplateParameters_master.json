@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "moi-df"
+		},
+		"moi_analytics_password": {
+			"value": ""
+		},
+		"moi_operation_password": {
+			"value": ""
+		},
+		"moi_operations_password": {
+			"value": ""
+		},
+		"moi_analytics_properties_typeProperties_server": {
+			"value": "moi-sql-server.database.windows.net"
+		},
+		"moi_analytics_properties_typeProperties_database": {
+			"value": "moi-al"
+		},
+		"moi_analytics_properties_typeProperties_userName": {
+			"value": "moi-server-admin"
+		},
+		"moi_operation_properties_typeProperties_server": {
+			"value": "moi-sql-server.database.windows.net"
+		},
+		"moi_operation_properties_typeProperties_database": {
+			"value": "moi-ops"
+		},
+		"moi_operation_properties_typeProperties_userName": {
+			"value": "moi-server-admin"
+		},
+		"moi_operations_properties_typeProperties_server": {
+			"value": "moi-server.database.windows.net"
+		},
+		"moi_operations_properties_typeProperties_database": {
+			"value": "moi-database"
+		},
+		"moi_operations_properties_typeProperties_userName": {
+			"value": "moi-server-admin"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

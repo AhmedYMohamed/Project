@@ -1,0 +1,4 @@
+3 LEDS in For Loop Turn on when button triggered to ground
+on PIN 6 and turn off when the switch is off 
+
+

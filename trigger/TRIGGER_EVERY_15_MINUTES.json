@@ -1,0 +1,24 @@
+{
+	"name": "TRIGGER_EVERY_15_MINUTES",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Sync_Operations_To_Analytics",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 6,
+				"startTime": "2025-12-05T17:47:00",
+				"timeZone": "Egypt Standard Time"
+			}
+		}
+	}
+}

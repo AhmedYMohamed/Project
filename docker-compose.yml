@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - LOCAL_STORAGE_PATH=/app/attachments
+      - SQLALCHEMY_DATABASE_URI_OPS=Server=mssql,1433;Database=moi-ops;Uid=sa;Pwd=YourStrong!Passw0rd;Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;
+      - SQLALCHEMY_DATABASE_URI_ANALYTICS=Server=mssql,1433;Database=moi-al;Uid=sa;Pwd=YourStrong!Passw0rd;Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;
+    volumes:
+      - ./app:/app/app
+      - ./attachments:/app/attachments
+    depends_on:
+      - db-init
+    restart: unless-stopped
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_PID=Developer
+    volumes:
+      - mssql-data:/var/opt/mssql
+    restart: unless-stopped
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - mssql
+    volumes:
+      - ./database/shema.sql:/shema.sql
+      - ./init.sh:/init.sh
+    command: bash /init.sh
+
+volumes:
+  mssql-data:

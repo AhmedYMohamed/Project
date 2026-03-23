@@ -1,0 +1,31 @@
+name: moi_reporting_app
+description: A new Flutter project for MoI Reporting System.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  dio: ^5.3.3
+  file_picker: ^6.1.1
+  path_provider: ^2.1.1
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  geolocator: ^10.1.0
+  record: ^5.1.0
+  permission_handler: ^11.3.0
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true

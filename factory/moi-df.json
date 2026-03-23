@@ -1,0 +1,14 @@
+{
+	"name": "moi-df",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "germanywestcentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5e2801db-0c22-4cc3-be1a-72eefc4da023",
+		"tenantId": "0bc92751-071a-4e2c-a48b-633206fef374"
+	}
+}

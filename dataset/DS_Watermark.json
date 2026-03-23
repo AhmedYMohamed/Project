@@ -1,0 +1,32 @@
+{
+	"name": "DS_Watermark",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "moi_operation",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "TableName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "LastExtractedValue",
+				"type": "datetime2",
+				"scale": 7
+			},
+			{
+				"name": "UpdatedAt",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "ETL_Watermark"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,30 @@
+{
+	"name": "P_Data_Archival_90Day",
+	"properties": {
+		"activities": [
+			{
+				"name": "Exec_Archive_Purge",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[sp_ArchiveAndPurge90DayData]"
+				},
+				"linkedServiceName": {
+					"referenceName": "moi_analytics",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-12-05T19:46:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

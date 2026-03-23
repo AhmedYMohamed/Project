@@ -1,0 +1,193 @@
+21:11:16.062281 git.c:502               trace: built-in: git push
+21:11:16.062516 run-command.c:673       trace: run_command: GIT_DIR=.git git remote-https origin https://github.com/AhmedYMohamed/MoI-Reporting-System
+21:11:16.062539 run-command.c:765       trace: start_command: /usr/local/libexec/git-core/git remote-https origin https://github.com/AhmedYMohamed/MoI-Reporting-System
+21:11:16.063946 git.c:806               trace: exec: git-remote-https origin https://github.com/AhmedYMohamed/MoI-Reporting-System
+21:11:16.064128 run-command.c:673       trace: run_command: git-remote-https origin https://github.com/AhmedYMohamed/MoI-Reporting-System
+21:11:16.064191 run-command.c:765       trace: start_command: /usr/local/libexec/git-core/git-remote-https origin https://github.com/AhmedYMohamed/MoI-Reporting-System
+21:11:16.070065 http.c:890              == Info: Couldn't find host github.com in the .netrc file; using defaults
+21:11:16.073020 http.c:890              == Info: Host github.com:443 was resolved.
+21:11:16.073029 http.c:890              == Info: IPv6: (none)
+21:11:16.073031 http.c:890              == Info: IPv4: 140.82.121.4
+21:11:16.073057 http.c:890              == Info:   Trying 140.82.121.4:443...
+21:11:16.080974 http.c:890              == Info: Connected to github.com (140.82.121.4) port 443
+21:11:16.082686 http.c:890              == Info: ALPN: curl offers h2,http/1.1
+21:11:16.082943 http.c:863              => Send SSL data, 0000000005 bytes (0x00000005)
+21:11:16.082949 http.c:878              => Send SSL data: .....
+21:11:16.082956 http.c:890              == Info: TLSv1.3 (OUT), TLS handshake, Client hello (1):
+21:11:16.082958 http.c:863              => Send SSL data, 0000000512 bytes (0x00000200)
+21:11:16.082960 http.c:878              => Send SSL data: ..........L..U?..I.6rHH.^.m.Pmy.....g. |u...;A.]..*f.._....:
+21:11:16.082961 http.c:878              => Send SSL data: .X.q.O.|....>.......,.0.........+./...$.(.k.#.'.g.....9.....
+21:11:16.082963 http.c:878              => Send SSL data: 3.....=.<.5./.....u.........github.com......................
+21:11:16.082964 http.c:878              => Send SSL data: ...................h2.http/1.1.........1.....*.(............
+21:11:16.082965 http.c:878              => Send SSL data: .............................+........-.....3.&.$... ......L
+21:11:16.082967 http.c:878              => Send SSL data: ...!&k.d[e...Y.....,.H.Sv...................................
+21:11:16.082968 http.c:878              => Send SSL data: ............................................................
+21:11:16.082970 http.c:878              => Send SSL data: ............................................................
+21:11:16.082971 http.c:878              => Send SSL data: ................................
+21:11:16.112506 http.c:890              == Info:  CAfile: /etc/ssl/certs/ca-certificates.crt
+21:11:16.112522 http.c:890              == Info:  CApath: /etc/ssl/certs
+21:11:16.112564 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.112568 http.c:878              <= Recv SSL data: ....z
+21:11:16.112578 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, Server hello (2):
+21:11:16.112580 http.c:863              <= Recv SSL data, 0000000122 bytes (0x0000007a)
+21:11:16.112582 http.c:878              <= Recv SSL data: ...v...........V........z'FM......P... |u...;A.]..*f.._....:
+21:11:16.112583 http.c:878              <= Recv SSL data: .X.q.O.|.........+.....3.$... .`Z......h.>....\...C......!.?
+21:11:16.112585 http.c:878              <= Recv SSL data: .\
+21:11:16.112802 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.112810 http.c:878              <= Recv SSL data: .....
+21:11:16.112814 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.112816 http.c:878              <= Recv SSL data: ....$
+21:11:16.112835 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.112837 http.c:878              <= Recv SSL data: .
+21:11:16.112841 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+21:11:16.112843 http.c:863              <= Recv SSL data, 0000000019 bytes (0x00000013)
+21:11:16.112845 http.c:878              <= Recv SSL data: .................h2
+21:11:16.112851 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.112852 http.c:878              <= Recv SSL data: ....P
+21:11:16.112860 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.112862 http.c:878              <= Recv SSL data: .
+21:11:16.112868 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, Certificate (11):
+21:11:16.112870 http.c:863              <= Recv SSL data, 0000003135 bytes (0x00000c3f)
+21:11:16.112872 http.c:878              <= Recv SSL data: ...;...7...0...0..H.........f..b{.....0..I.0...*.H.=...0..1.
+21:11:16.112874 http.c:878              <= Recv SSL data: 0...U....GB1.0...U....Greater Manchester1.0...U....Salford1.
+21:11:16.112875 http.c:878              <= Recv SSL data: 0...U....Sectigo Limited1705..U....Sectigo ECC Domain Valida
+21:11:16.112877 http.c:878              <= Recv SSL data: tion Secure Server CA0...250205000000Z..260205235959Z0.1.0..
+21:11:16.112879 http.c:878              <= Recv SSL data: .U....github.com0Y0...*.H.=....*.H.=....B.. 4\F.,..$..../w..
+21:11:16.112880 http.c:878              <= Recv SSL data: .!6q..&...C..I..F...)..|(..,.\.o.F......-7.........0...0...U
+21:11:16.112882 http.c:878              <= Recv SSL data: .#..0......;....}...,...d{{.0...U......S....N.M.....>0==..0
+21:11:16.112883 http.c:878              <= Recv SSL data: ...U...........0...U.......0.0...U.%..0...+.........+.......
+21:11:16.112885 http.c:878              <= Recv SSL data: 0I..U. .B0@04..+.....1....0%0#..+.........https://sectigo.co
+21:11:16.112886 http.c:878              <= Recv SSL data: m/CPS0...g.....0....+........x0v0O..+.....0..Chttp://crt.sec
+21:11:16.112888 http.c:878              <= Recv SSL data: tigo.com/SectigoECCDomainValidationSecureServerCA.crt0#..+..
+21:11:16.112889 http.c:878              <= Recv SSL data: ...0...http://ocsp.sectigo.com0..~..+.....y......n...j.h.u..
+21:11:16.112891 http.c:878              <= Recv SSL data: .d.UX...C.h7.Bw..:....6nF.?.........k.K.....F0D. ;..>..#....
+21:11:16.112892 http.c:878              <= Recv SSL data: 9m..?N!..wt.7.....\`.. bQ.F.~J.....~.`t...}@.r.h.-a.p..w...
+21:11:16.112893 http.c:878              <= Recv SSL data: ..(.o...ox*M....-r1...]pA-%L.......k.......H0F.!........1...
+21:11:16.112895 http.c:878              <= Recv SSL data: .....t.d...r.....aW...!...$..}K.t..~....,8=.F.m......F...v..
+21:11:16.112896 http.c:878              <= Recv SSL data: 8...|..D_[....n..Y.G.i.......X......k.%.....G0E.!..b..f..SI!
+21:11:16.112897 http.c:878              <= Recv SSL data: ...x.%..t.iQ.N...K.... RB~.H6.9... .Gu.N[k`..A.WK..m].'0%..
+21:11:16.112898 http.c:878              <= Recv SSL data: U....0...github.com..www.github.com0...*.H.=....G.0D. q..n..
+21:11:16.112900 http.c:878              <= Recv SSL data: .u......c,."....P3p$xO..m,. mU.wb...w....F.s...s.~...q..J'..
+21:11:16.112901 http.c:878              <= Recv SSL data: .....0...0............dNkn.P#~.F.{...0...*.H.=...0..1.0...U.
+21:11:16.112902 http.c:878              <= Recv SSL data: ...US1.0...U....New Jersey1.0...U....Jersey City1.0...U....T
+21:11:16.112903 http.c:878              <= Recv SSL data: he USERTRUST Network1.0,..U...%USERTrust ECC Certification A
+21:11:16.112905 http.c:878              <= Recv SSL data: uthority0...181102000000Z..301231235959Z0..1.0...U....GB1.0.
+21:11:16.112906 http.c:878              <= Recv SSL data: ..U....Greater Manchester1.0...U....Salford1.0...U....Sectig
+21:11:16.112908 http.c:878              <= Recv SSL data: o Limited1705..U....Sectigo ECC Domain Validation Secure Ser
+21:11:16.112909 http.c:878              <= Recv SSL data: ver CA0Y0...*.H.=....*.H.=....B..y....m.lW.#.7._.XZ..U.....
+21:11:16.112911 http.c:878              <= Recv SSL data: %... J.zO.0.cI..d!...:5.J.....=.h...H...n0..j0...U.#..0...:.
+21:11:16.112913 http.c:878              <= Recv SSL data: .......vtIv..5.cc.0...U.........;....}...,...d{{.0...U......
+21:11:16.112914 http.c:878              <= Recv SSL data: .....0...U.......0.......0...U.%..0...+.........+.......0...
+21:11:16.112916 http.c:878              <= Recv SSL data: U. ..0.0...U. .0...g.....0P..U...I0G0E.C.A.?http://crl.usert
+21:11:16.112917 http.c:878              <= Recv SSL data: rust.com/USERTrustECCCertificationAuthority.crl0v..+........
+21:11:16.112918 http.c:878              <= Recv SSL data: j0h0?..+.....0..3http://crt.usertrust.com/USERTrustECCAddTru
+21:11:16.112920 http.c:878              <= Recv SSL data: stCA.crt0%..+.....0...http://ocsp.usertrust.com0...*.H.=....
+21:11:16.112921 http.c:878              <= Recv SSL data: h.0e.0K..q\.\.m.B`_s...&..QTlq-..`M(.M...v.JE...J..O.n.1...y
+21:11:16.112923 http.c:878              <= Recv SSL data: *.^......g...!..}.:...e....\....r1..Q.............0...0.....
+21:11:16.112925 http.c:878              <= Recv SSL data: .....Vg...O.Lo..GY.u.0...*.H........0{1.0...U....GB1.0...U..
+21:11:16.112926 http.c:878              <= Recv SSL data: ..Greater Manchester1.0...U....Salford1.0...U....Comodo CA L
+21:11:16.112929 http.c:878              <= Recv SSL data: imited1!0...U....AAA Certificate Services0...190312000000Z..
+21:11:16.112930 http.c:878              <= Recv SSL data: 281231235959Z0..1.0...U....US1.0...U....New Jersey1.0...U...
+21:11:16.112932 http.c:878              <= Recv SSL data: .Jersey City1.0...U....The USERTRUST Network1.0,..U...%USERT
+21:11:16.112933 http.c:878              <= Recv SSL data: rust ECC Certification Authority0v0...*.H.=....+...".b....TZ
+21:11:16.112935 http.c:878              <= Recv SSL data: ..h#.z.$oS.Z.K......sq.....a.........W..]?.!.....y...~-..a..
+21:11:16.112936 http.c:878              <= Recv SSL data: ..%.c.0..p...3....\S._.}2.4.yy...0..0...U.#..0......#>....
+21:11:16.112938 http.c:878              <= Recv SSL data: ..)....0..0...U......:........vtIv..5.cc.0...U...........0.
+21:11:16.112939 http.c:878              <= Recv SSL data: ..U.......0....0...U. ..0.0...U. .0C..U...<0:08.6.4.2http://
+21:11:16.112941 http.c:878              <= Recv SSL data: crl.comodoca.com/AAACertificateServices.crl04..+........(0&0
+21:11:16.112943 http.c:878              <= Recv SSL data: $..+.....0...http://ocsp.comodoca.com0...*.H................
+21:11:16.112944 http.c:878              <= Recv SSL data: .., ......B.r..2...u[,..)@m..r.........=.rB.P..9.l.......u+.
+21:11:16.112946 http.c:878              <= Recv SSL data: .V......|..9....ds.F...#.........3tv;(L..B....#B..zuj..|.g!.
+21:11:16.112947 http.c:878              <= Recv SSL data: 3:9mS...b"...Ul.lCk..........iwI..M...x......../.B;.t.H..l.
+21:11:16.112949 http.c:878              <= Recv SSL data: ...^..gG.....(.J.D1&.7..t6..."..tI......)....._.....t......
+21:11:16.112950 http.c:878              <= Recv SSL data: ...c....x.n....
+21:11:16.114765 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.114772 http.c:878              <= Recv SSL data: ...._
+21:11:16.114781 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.114782 http.c:878              <= Recv SSL data: .
+21:11:16.114796 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, CERT verify (15):
+21:11:16.114798 http.c:863              <= Recv SSL data, 0000000078 bytes (0x0000004e)
+21:11:16.114800 http.c:878              <= Recv SSL data: ...J...F0D. .......V'.Z...].!8...b.......R,.. ...V.a.O....+`
+21:11:16.114801 http.c:878              <= Recv SSL data: .2.... .....fB..[.
+21:11:16.114923 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.114926 http.c:878              <= Recv SSL data: ....5
+21:11:16.114933 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.114934 http.c:878              <= Recv SSL data: .
+21:11:16.114946 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, Finished (20):
+21:11:16.114948 http.c:863              <= Recv SSL data, 0000000036 bytes (0x00000024)
+21:11:16.114950 http.c:878              <= Recv SSL data: ... .....,.$~.7........;\'......0..b
+21:11:16.114988 http.c:863              => Send SSL data, 0000000005 bytes (0x00000005)
+21:11:16.114990 http.c:878              => Send SSL data: .....
+21:11:16.114993 http.c:890              == Info: TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+21:11:16.114996 http.c:863              => Send SSL data, 0000000001 bytes (0x00000001)
+21:11:16.114997 http.c:878              => Send SSL data: .
+21:11:16.115032 http.c:863              => Send SSL data, 0000000005 bytes (0x00000005)
+21:11:16.115033 http.c:878              => Send SSL data: ....5
+21:11:16.115034 http.c:863              => Send SSL data, 0000000001 bytes (0x00000001)
+21:11:16.115035 http.c:878              => Send SSL data: .
+21:11:16.115037 http.c:890              == Info: TLSv1.3 (OUT), TLS handshake, Finished (20):
+21:11:16.115039 http.c:863              => Send SSL data, 0000000036 bytes (0x00000024)
+21:11:16.115040 http.c:878              => Send SSL data: ... -...F.od...!(8.....w.k.+l:&1M...
+21:11:16.115104 http.c:890              == Info: SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256 / X25519 / id-ecPublicKey
+21:11:16.115107 http.c:890              == Info: ALPN: server accepted h2
+21:11:16.115112 http.c:890              == Info: Server certificate:
+21:11:16.115118 http.c:890              == Info:  subject: CN=github.com
+21:11:16.115123 http.c:890              == Info:  start date: Feb  5 00:00:00 2025 GMT
+21:11:16.115126 http.c:890              == Info:  expire date: Feb  5 23:59:59 2026 GMT
+21:11:16.115134 http.c:890              == Info:  subjectAltName: host "github.com" matched cert's "github.com"
+21:11:16.115146 http.c:890              == Info:  issuer: C=GB; ST=Greater Manchester; L=Salford; O=Sectigo Limited; CN=Sectigo ECC Domain Validation Secure Server CA
+21:11:16.115148 http.c:890              == Info:  SSL certificate verify ok.
+21:11:16.115154 http.c:890              == Info:   Certificate level 0: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA256
+21:11:16.115157 http.c:890              == Info:   Certificate level 1: Public key type EC/prime256v1 (256/128 Bits/secBits), signed using ecdsa-with-SHA384
+21:11:16.115161 http.c:890              == Info:   Certificate level 2: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384
+21:11:16.115225 http.c:863              => Send SSL data, 0000000005 bytes (0x00000005)
+21:11:16.115226 http.c:878              => Send SSL data: ....Q
+21:11:16.115228 http.c:863              => Send SSL data, 0000000001 bytes (0x00000001)
+21:11:16.115229 http.c:878              => Send SSL data: .
+21:11:16.115243 http.c:890              == Info: using HTTP/2
+21:11:16.115279 http.c:890              == Info: [HTTP/2] [1] OPENED stream for https://github.com/AhmedYMohamed/MoI-Reporting-System/info/refs?service=git-receive-pack
+21:11:16.115282 http.c:890              == Info: [HTTP/2] [1] [:method: GET]
+21:11:16.115285 http.c:890              == Info: [HTTP/2] [1] [:scheme: https]
+21:11:16.115287 http.c:890              == Info: [HTTP/2] [1] [:authority: github.com]
+21:11:16.115289 http.c:890              == Info: [HTTP/2] [1] [:path: /AhmedYMohamed/MoI-Reporting-System/info/refs?service=git-receive-pack]
+21:11:16.115291 http.c:890              == Info: [HTTP/2] [1] [user-agent: git/2.51.2]
+21:11:16.115293 http.c:890              == Info: [HTTP/2] [1] [accept: */*]
+21:11:16.115295 http.c:890              == Info: [HTTP/2] [1] [accept-encoding: deflate, gzip, br, zstd]
+21:11:16.115296 http.c:890              == Info: [HTTP/2] [1] [accept-language: C, *;q=0.9]
+21:11:16.115298 http.c:890              == Info: [HTTP/2] [1] [pragma: no-cache]
+21:11:16.115316 http.c:863              => Send SSL data, 0000000005 bytes (0x00000005)
+21:11:16.115318 http.c:878              => Send SSL data: .....
+21:11:16.115319 http.c:863              => Send SSL data, 0000000001 bytes (0x00000001)
+21:11:16.115320 http.c:878              => Send SSL data: .
+21:11:16.115331 http.c:837              => Send header, 0000000229 bytes (0x000000e5)
+21:11:16.115336 http.c:849              => Send header: GET /AhmedYMohamed/MoI-Reporting-System/info/refs?service=git-receive-pack HTTP/2
+21:11:16.115338 http.c:849              => Send header: Host: github.com
+21:11:16.115339 http.c:849              => Send header: User-Agent: git/2.51.2
+21:11:16.115341 http.c:849              => Send header: Accept: */*
+21:11:16.115343 http.c:849              => Send header: Accept-Encoding: deflate, gzip, br, zstd
+21:11:16.115344 http.c:849              => Send header: Accept-Language: C, *;q=0.9
+21:11:16.115346 http.c:849              => Send header: Pragma: no-cache
+21:11:16.115348 http.c:849              => Send header:
+21:11:16.122783 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.122794 http.c:878              <= Recv SSL data: ....J
+21:11:16.122819 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.122821 http.c:878              <= Recv SSL data: .
+21:11:16.122852 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+21:11:16.122855 http.c:863              <= Recv SSL data, 0000000057 bytes (0x00000039)
+21:11:16.122857 http.c:878              <= Recv SSL data: ...5... B,.m.......... z..c.|U7.....{gT=..?.V....jLd..S..
+21:11:16.122895 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.122897 http.c:878              <= Recv SSL data: ....J
+21:11:16.122902 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.122903 http.c:878              <= Recv SSL data: .
+21:11:16.122908 http.c:890              == Info: TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+21:11:16.122911 http.c:863              <= Recv SSL data, 0000000057 bytes (0x00000039)
+21:11:16.122913 http.c:878              <= Recv SSL data: ...5... ...6.......... eY1.J.9.b...........i......7.."O..
+21:11:16.122924 http.c:890              == Info: old SSL session ID is stale, removing
+21:11:16.122934 http.c:863              <= Recv SSL data, 0000000005 bytes (0x00000005)
+21:11:16.122936 http.c:878              <= Recv SSL data: ....;
+21:11:16.122949 http.c:863              <= Recv SSL data, 0000000001 bytes (0x00000001)
+21:11:16.122950 http.c:878              <= Recv SSL data: .
+21:11:16.122974 http.c:863              => Send SSL data, 0000000005 bytes (0x00000005)
+21:11:16.122976 http.c:878              => Send SSL data: .....
+21:11:16.122977 http.c:863              => Send SSL data, 0000000001 bytes (0x00000001)
+21:11:16.122978 http.c:878              => Send SSL data: .
