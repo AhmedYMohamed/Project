@@ -19,7 +19,7 @@ def get_whisper_model():
     if _model is None:
         logger.info("Loading Whisper 'turbo' model...")
         # You can change "turbo" to "base" or "small" for faster processing on slower machines
-        _model = whisper.load_model("large-v2")  # Use "base" for better performance on limited resources
+        _model = whisper.load_model("turbo")  # Use "turbo" or "base" for much faster performance
         logger.info("Whisper model loaded successfully.")
     return _model
 
