@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, DateTime, Text, ForeignKey, func, CheckConstraint
+from sqlalchemy import Column, String, Float, DateTime, Text, ForeignKey, func, CheckConstraint, Unicode, UnicodeText
 from sqlalchemy.orm import relationship
 
 from app.core.database import BaseOps  
@@ -19,9 +19,9 @@ class Report(BaseOps):
     )
     
     # Core Data Columns
-    title = Column("title", String(500), nullable=False)
-    descriptionText = Column("descriptionText", Text, nullable=False)
-    locationRaw = Column("locationRaw", String(2048), nullable=True)
+    title = Column("title", Unicode(500), nullable=False)
+    descriptionText = Column("descriptionText", UnicodeText, nullable=False)
+    locationRaw = Column("locationRaw", Unicode(2048), nullable=True)
     
     status = Column("status", String(50), nullable=False, default="Submitted")
     categoryId = Column("categoryId", String(100), nullable=False)
@@ -33,7 +33,7 @@ class Report(BaseOps):
         CheckConstraint('aiConfidence >= 0 AND aiConfidence <= 1'),
         nullable=True
     )
-    transcribedVoiceText = Column("transcribedVoiceText", Text, nullable=True)
+    transcribedVoiceText = Column("transcribedVoiceText", UnicodeText, nullable=True)
 
     # Timestamps
     createdAt = Column(
