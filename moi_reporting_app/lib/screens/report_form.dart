@@ -36,7 +36,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   bool _isRecording = false;
   bool _isTranscribing = false;
 
-  final Map<String, String> _categories = {
+  final Map<String, String> _categories = const {
     'environmental': 'Environmental',
     'infrastructure': 'Infrastructure',
     'utilities': 'Utilities',
@@ -55,6 +55,31 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       setState(() {
         for (var file in result.files) {
           if (file.bytes != null && !_selectedFileNames.contains(file.name)) {
+            // Limit number of files to prevent performance issues
+            if (_selectedFileNames.length >= 5) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Maximum 5 files allowed'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+              break;
+            }
+            // Add file size limit to prevent performance issues
+            const maxFileSize = 10 * 1024 * 1024; // 10MB limit
+            if (file.size > maxFileSize) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${file.name} is too large. Max size: 10MB'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+              continue;
+            }
             _selectedFileBytes.add(file.bytes!);
             _selectedFileNames.add(file.name);
           }

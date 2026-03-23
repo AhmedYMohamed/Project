@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   // IMPORTANT: Replace with your computer's IP address if testing on a real device
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'https://cuddly-dollop-97654ww7wvr6cg9q-8000.app.github.dev/';
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
