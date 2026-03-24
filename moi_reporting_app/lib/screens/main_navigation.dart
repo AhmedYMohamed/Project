@@ -34,10 +34,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF1E3A8A),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Report'),
-          BottomNavigationBarItem(icon: Icon(Icons.history_outlined), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_outline), label: 'Report'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.history_outlined), label: 'History'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),
     );
@@ -46,7 +50,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
 class DashboardScreen extends StatefulWidget {
   final Function(int) onTabSelected;
-  
+
   const DashboardScreen({super.key, required this.onTabSelected});
 
   @override
@@ -69,11 +73,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() => _isLoading = true);
     try {
       final auth = context.read<AuthProvider>();
-      final reports = await ReportService().getUserReports(auth.token!, auth.userId!);
+      final reports =
+          await ReportService().getUserReports(auth.token!, auth.userId!);
       if (mounted) {
         setState(() {
           _totalCount = reports.length;
-          _resolvedCount = reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+          _resolvedCount =
+              reports.where((r) => r.status.toLowerCase() == 'resolved').length;
           _activeCount = _totalCount - _resolvedCount;
           _isLoading = false;
         });
@@ -173,7 +179,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildActionCard(BuildContext context, {required String title, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildActionCard(BuildContext context,
+      {required String title,
+      required IconData icon,
+      required Color color,
+      required VoidCallback onTap}) {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -187,9 +197,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
             leading: Icon(icon, color: color, size: 32),
-            title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(title,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           ),
         ),
@@ -207,8 +219,13 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(count, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        Text(count,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold)),
+        Text(label,
+            style: const TextStyle(color: Colors.white70, fontSize: 12)),
       ],
     );
   }
@@ -220,7 +237,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile', style: TextStyle(color: Colors.white)),
