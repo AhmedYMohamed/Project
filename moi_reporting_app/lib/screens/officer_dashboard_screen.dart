@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:geocoding/geocoding.dart';
 import '../providers/auth_provider.dart';
 import '../services/officer_service.dart';
 import 'officer_report_details_screen.dart';
@@ -77,11 +77,28 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         timeLimit: const Duration(seconds: 30),
       );
 
+      String addressName = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+      try {
+        final List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          // E.g., Nasr City, Cairo
+          addressName = [place.locality, place.administrativeArea]
+              .where((e) => e != null && e.isNotEmpty)
+              .join(', ');
+          if (addressName.isEmpty) {
+            addressName = place.country ?? addressName;
+          }
+        }
+      } catch (e) {
+        print('Reverse geocoding failed: $e');
+      }
+
       if (mounted) {
         setState(() {
           _currentLat = position.latitude;
           _currentLon = position.longitude;
-          _locationStatus = 'Location: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+          _locationStatus = 'Zone: $addressName';
         });
       }
     } catch (e) {
@@ -246,14 +263,16 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   }
 
   Widget _buildStatsRow() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildStatCard('Total\nSubmitted', _stats['Submitted'] ?? 0, [const Color(0xFF4b6cb7), const Color(0xFF182848)], Icons.assignment),
-          _buildStatCard('Under\nExecution', _stats['InProgress'] ?? 0, [const Color(0xFFF2994A), const Color(0xFFF2C94C)], Icons.pending_actions),
-          _buildStatCard('Total\nResolved', _stats['Resolved'] ?? 0, [const Color(0xFF11998e), const Color(0xFF38ef7d)], Icons.check_circle_outline),
+          Expanded(child: _buildStatCard('Submitted', _stats['Submitted'] ?? 0, [const Color(0xFF4b6cb7), const Color(0xFF182848)], Icons.assignment)),
+          const SizedBox(width: 8),
+          Expanded(child: _buildStatCard('Execution', _stats['InProgress'] ?? 0, [const Color(0xFFF2994A), const Color(0xFFF2C94C)], Icons.pending_actions)),
+          const SizedBox(width: 8),
+          Expanded(child: _buildStatCard('Resolved', _stats['Resolved'] ?? 0, [const Color(0xFF11998e), const Color(0xFF38ef7d)], Icons.check_circle_outline)),
         ],
       ),
     );
@@ -261,9 +280,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
 
   Widget _buildStatCard(String title, int value, List<Color> gradientColors, IconData icon) {
     return Container(
-      width: 140,
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -280,13 +297,13 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white, size: 28),
-          const SizedBox(height: 12),
-          Text(value.toString(), style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+          Icon(icon, color: Colors.white, size: 24),
+          const SizedBox(height: 8),
+          Text(value.toString(), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text(title, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 12)),
         ],
       ),
     );

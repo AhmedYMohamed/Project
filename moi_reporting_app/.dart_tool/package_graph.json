@@ -11,6 +11,7 @@
         "dio",
         "file_picker",
         "flutter",
+        "geocoding",
         "geolocator",
         "http",
         "intl",
@@ -85,6 +86,16 @@
         "record_web",
         "record_windows",
         "uuid"
+      ]
+    },
+    {
+      "name": "geocoding",
+      "version": "3.0.0",
+      "dependencies": [
+        "flutter",
+        "geocoding_android",
+        "geocoding_ios",
+        "geocoding_platform_interface"
       ]
     },
     {
@@ -396,6 +407,31 @@
       "dependencies": [
         "crypto",
         "fixnum"
+      ]
+    },
+    {
+      "name": "geocoding_ios",
+      "version": "3.1.0",
+      "dependencies": [
+        "flutter",
+        "geocoding_platform_interface"
+      ]
+    },
+    {
+      "name": "geocoding_android",
+      "version": "3.3.1",
+      "dependencies": [
+        "flutter",
+        "geocoding_platform_interface"
+      ]
+    },
+    {
+      "name": "geocoding_platform_interface",
+      "version": "3.2.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
       ]
     },
     {

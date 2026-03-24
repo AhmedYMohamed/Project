@@ -501,6 +501,8 @@ class ReportService:
     def get_nearby_reports(
         db: Session, 
         user_id: str,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
         skip: int = 0, 
         limit: int = 20,
         radius_deg: float = 0.1
@@ -508,22 +510,26 @@ class ReportService:
         from sqlalchemy import or_
         from app.models.service_area import OfficerServiceArea
         
-        now = utcnow()
-        # Find active service area
-        active_area = db.query(OfficerServiceArea).filter(
-            OfficerServiceArea.userId == user_id,
-            OfficerServiceArea.startDate <= now,
-            or_(OfficerServiceArea.endDate == None, OfficerServiceArea.endDate >= now)
-        ).first()
+        lat = latitude
+        lon = longitude
         
-        if not active_area:
-            raise HTTPException(
-                status_code=404,
-                detail="No active service area found for this officer."
-            )
+        if lat is None or lon is None:
+            now = utcnow()
+            # Find active service area
+            active_area = db.query(OfficerServiceArea).filter(
+                OfficerServiceArea.userId == user_id,
+                OfficerServiceArea.startDate <= now,
+                or_(OfficerServiceArea.endDate == None, OfficerServiceArea.endDate >= now)
+            ).first()
             
-        lat = active_area.latitude
-        lon = active_area.longitude
+            if not active_area:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No active service area found for this officer and no coordinates provided."
+                )
+                
+            lat = active_area.latitude
+            lon = active_area.longitude
         
         # Build query with eager loading
         query = db.query(Report).options(selectinload(Report.attachments))

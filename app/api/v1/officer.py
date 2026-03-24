@@ -18,12 +18,14 @@ router = APIRouter()
 def get_nearby_reports(
     db: Session = Depends(get_db_ops),
     current_user: User = Depends(get_current_user),
+    latitude: Optional[float] = Query(None, description="Officer's current latitude"),
+    longitude: Optional[float] = Query(None, description="Officer's current longitude"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     radius_deg: float = Query(0.1, description="Radius in degrees (approx 10km)")
 ):
     """
-    Finds the active OfficerServiceArea for the current user and returns reports within the specified radius.
+    Finds reports within the specified radius around the provided coordinates or the active OfficerServiceArea.
     """
     if current_user.role.lower() != "officer":
          raise HTTPException(
@@ -34,6 +36,8 @@ def get_nearby_reports(
     return ReportService.get_nearby_reports(
         db=db,
         user_id=current_user.userId,
+        latitude=latitude,
+        longitude=longitude,
         skip=skip,
         limit=limit,
         radius_deg=radius_deg

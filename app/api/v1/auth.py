@@ -66,6 +66,18 @@ def register(
     """
     return UserService.create_user(db, user_in)
 
+@router.post("/register/officer", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def register_officer(
+    user_in: UserCreate,
+    db: Session = Depends(get_db_ops)
+):
+    """
+    Register a new Officer account securely.
+    Ensures the user gets the exactly 'officer' role regardless of request payload.
+    """
+    user_in.role = "officer"
+    return UserService.create_user(db, user_in)
+
 @router.post("/login")
 def login_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
