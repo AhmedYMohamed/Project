@@ -56,11 +56,25 @@ class ReportService:
         # --- 1. Create Report Record ---
         report_id = f"R-{uuid.uuid4().hex[:8].upper()}"
         
+        # Try to parse latitude and longitude from the location string (e.g. "30.01, 31.02")
+        parsed_lat = None
+        parsed_lon = None
+        if report_data.location:
+            try:
+                parts = [p.strip() for p in report_data.location.split(',')]
+                if len(parts) == 2:
+                    parsed_lat = float(parts[0])
+                    parsed_lon = float(parts[1])
+            except (ValueError, TypeError):
+                pass
+        
         db_report = Report(
             reportId=report_id,
             title=report_data.title,
             descriptionText=report_data.descriptionText,
             locationRaw=report_data.location,
+            latitude=parsed_lat,
+            longitude=parsed_lon,
             categoryId=report_data.categoryId.value if report_data.categoryId else "other",
             userId=user_id,
             transcribedVoiceText=report_data.transcribedVoiceText,
