@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../providers/auth_provider.dart';
 import '../services/officer_service.dart';
 import 'officer_report_details_screen.dart';
@@ -21,18 +23,94 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   };
   
   List<Map<String, dynamic>> _nearbyReports = [];
+  double? _currentLat;
+  double? _currentLon;
+  String _locationStatus = 'Fetching location...';
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _fetchLocationAndData();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() => _locationStatus = 'Location services disabled');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location services are disabled. Please enable them.'), backgroundColor: Colors.orange),
+          );
+        }
+        return;
+      }
+
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            setState(() => _locationStatus = 'Location permission denied');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permission is required'), backgroundColor: Colors.orange),
+            );
+          }
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() => _locationStatus = 'Location permission permanently denied');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permission is permanently denied. Please enable it in app settings.'), backgroundColor: Colors.orange),
+          );
+        }
+        return;
+      }
+
+      // Get current position
+      final Position position = await Geolocator.getCurrentPosition(
+        timeLimit: const Duration(seconds: 30),
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentLat = position.latitude;
+          _currentLon = position.longitude;
+          _locationStatus = 'Location: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _locationStatus = 'Error fetching location');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching location: \$e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<void> _fetchLocationAndData() async {
+    setState(() => _isLoading = true);
+    
+    // First, fetch the officer's current location
+    await _getCurrentLocation();
+    
+    // Then fetch data using the location
+    await _fetchData();
   }
 
   Future<void> _fetchData() async {
-    setState(() => _isLoading = true);
     try {
       final statsData = await _officerService.getDashboardStats();
-      final reportsData = await _officerService.getNearbyReports();
+      final reportsData = await _officerService.getNearbyReports(
+        latitude: _currentLat,
+        longitude: _currentLon,
+      );
       
       if (mounted) {
         setState(() {
@@ -88,7 +166,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Greetings, Officer', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                          Text('Service Area: Active Zone', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                          Text(_locationStatus, style: const TextStyle(color: Colors.white, fontSize: 14)),
                         ],
                       ),
                     ),
@@ -97,6 +175,11 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
               ),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: _fetchLocationAndData,
+                tooltip: 'Refresh location and reports',
+              ),
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white),
                 onPressed: () {
@@ -131,7 +214,8 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.refresh),
-                            onPressed: _fetchData,
+                            onPressed: _fetchLocationAndData,
+                            tooltip: 'Refresh location and reports',
                           ),
                         ],
                       ),

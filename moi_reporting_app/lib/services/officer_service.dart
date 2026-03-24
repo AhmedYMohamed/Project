@@ -37,13 +37,21 @@ class OfficerService {
     }
   }
 
-  Future<List<dynamic>> getNearbyReports() async {
+  Future<List<dynamic>> getNearbyReports({double? latitude, double? longitude}) async {
     try {
-      final response = await _dio.get('/api/v1/officer/reports/nearby', queryParameters: {
+      final queryParams = {
         'skip': 0,
         'limit': 50,
         'radius_deg': 0.1,
-      });
+      };
+      
+      // Add officer's current location to the query if available
+      if (latitude != null && longitude != null) {
+        queryParams['latitude'] = latitude;
+        queryParams['longitude'] = longitude;
+      }
+      
+      final response = await _dio.get('/api/v1/officer/reports/nearby', queryParameters: queryParams);
       return response.data['reports'] ?? [];
     } catch (e) {
       if (e is DioException) {
