@@ -4,7 +4,8 @@ import '../models/models.dart';
 
 class ReportService {
   // IMPORTANT: Replace this with your computer's IP address if testing on a real device
-  static const String baseUrl = 'https://cuddly-dollop-97654ww7wvr6cg9q-8000.app.github.dev/';
+  static const String baseUrl =
+      'https://cuddly-dollop-97654ww7wvr6cg9q-8000.app.github.dev/';
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -76,7 +77,8 @@ class ReportService {
     }
   }
 
-  Future<String> transcribeVoice(Uint8List audioBytes, String fileName, String token) async {
+  Future<String> transcribeVoice(
+      Uint8List audioBytes, String fileName, String token) async {
     try {
       FormData formData = FormData.fromMap({
         'file': MultipartFile.fromBytes(

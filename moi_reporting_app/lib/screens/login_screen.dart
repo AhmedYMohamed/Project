@@ -22,13 +22,15 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       context.read<AuthProvider>().setSelectedRole(_roleSelection);
       await context.read<AuthProvider>().login(
-        _emailController.text,
-        _passwordController.text,
-      );
+            _emailController.text,
+            _passwordController.text,
+          );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Login failed: ${e.toString()}'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -46,7 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.shield_outlined, size: 80, color: Color(0xFF1E3A8A)),
+                const Icon(Icons.shield_outlined,
+                    size: 80, color: Color(0xFF1E3A8A)),
                 const SizedBox(height: 24),
                 const Text(
                   'Welcome Back',
@@ -60,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Role Toggle
                 Container(
                   decoration: BoxDecoration(
@@ -71,18 +74,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _roleSelection = 'citizen'),
+                          onTap: () =>
+                              setState(() => _roleSelection = 'citizen'),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
-                              color: _roleSelection == 'citizen' ? const Color(0xFF1E3A8A) : Colors.transparent,
+                              color: _roleSelection == 'citizen'
+                                  ? const Color(0xFF1E3A8A)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'Citizen',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: _roleSelection == 'citizen' ? Colors.white : Colors.grey[600],
+                                color: _roleSelection == 'citizen'
+                                    ? Colors.white
+                                    : Colors.grey[600],
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -91,18 +99,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _roleSelection = 'officer'),
+                          onTap: () =>
+                              setState(() => _roleSelection = 'officer'),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
-                              color: _roleSelection == 'officer' ? const Color(0xFF1E3A8A) : Colors.transparent,
+                              color: _roleSelection == 'officer'
+                                  ? const Color(0xFF1E3A8A)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'Officer',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: _roleSelection == 'officer' ? Colors.white : Colors.grey[600],
+                                color: _roleSelection == 'officer'
+                                    ? Colors.white
+                                    : Colors.grey[600],
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -113,14 +126,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Please enter email' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please enter email'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -130,11 +145,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Password',
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
-                  validator: (value) => value == null ? 'Please enter password' : null,
+                  validator: (value) =>
+                      value == null ? 'Please enter password' : null,
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: context.watch<AuthProvider>().isLoading ? null : _login,
+                  onPressed:
+                      context.watch<AuthProvider>().isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A8A),
                     foregroundColor: Colors.white,
@@ -147,7 +164,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const RegisterScreen()),
                   ),
                   child: const Text('Don\'t have an account? Register here'),
                 ),
