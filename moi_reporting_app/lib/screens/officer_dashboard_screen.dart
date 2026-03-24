@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import '../providers/auth_provider.dart';
 import '../services/officer_service.dart';
 import 'officer_report_details_screen.dart';
@@ -78,20 +77,10 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       );
 
       String addressName = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
-      try {
-        final List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-        if (placemarks.isNotEmpty) {
-          Placemark place = placemarks[0];
-          // E.g., Nasr City, Cairo
-          addressName = [place.locality, place.administrativeArea]
-              .where((e) => e != null && e.isNotEmpty)
-              .join(', ');
-          if (addressName.isEmpty) {
-            addressName = place.country ?? addressName;
-          }
-        }
-      } catch (e) {
-        print('Reverse geocoding failed: $e');
+      
+      final fetchedName = await _officerService.getLocationName(position.latitude, position.longitude);
+      if (fetchedName != null && fetchedName.isNotEmpty) {
+        addressName = fetchedName;
       }
 
       if (mounted) {

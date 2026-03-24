@@ -42,3 +42,72 @@ def get_nearby_reports(
         limit=limit,
         radius_deg=radius_deg
     )
+
+@router.get(
+    "/dashboard/stats",
+    summary="Get Officer Dashboard Stats from Ops DB"
+)
+def get_officer_dashboard_stats(
+    db: Session = Depends(get_db_ops),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get total count of reports per status from the stable Operations Database.
+    Avoids hitting the Analytics DB which might be offline.
+    """
+    if current_user.role.lower() != "officer":
+         raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
+         )
+         
+    from sqlalchemy import func
+    from app.models.report import Report
+    
+    status_counts = db.query(
+        Report.status,
+        func.count(Report.reportId)
+    ).group_by(Report.status).all()
+    
+    counts_dict = {status: count for status, count in status_counts}
+    
+    # Ensure standard keys exist
+    for k in ["Submitted", "InProgress", "Resolved"]:
+        if k not in counts_dict:
+            counts_dict[k] = 0
+            
+    return {"counts": counts_dict}
+
+@router.get(
+    "/location/name",
+    summary="Reverse Geocoding without CORS limits"
+)
+def get_location_name(
+    lat: float = Query(..., description="Latitude"),
+    lon: float = Query(..., description="Longitude"),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Reverse geocodes using OpenStreetMap on the server side to bypass Client-side CORS issues.
+    """
+    import urllib.request
+    import json
+    
+    url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10&addressdetails=1"
+    req = urllib.request.Request(url, headers={'User-Agent': 'MoI_Reporting_Server/1.0'})
+    
+    try:
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+            address = data.get('address', {})
+            city = address.get('city') or address.get('town') or address.get('municipality') or address.get('state') or ''
+            suburb = address.get('suburb') or address.get('neighbourhood') or address.get('village') or ''
+            
+            parts = [p for p in [suburb, city] if p]
+            if parts:
+                return {"name": ", ".join(parts)}
+            else:
+                return {"name": data.get('display_name', "Unknown Region")}
+    except Exception as e:
+        return {"name": f"{lat:.4f}, {lon:.4f}"}
+

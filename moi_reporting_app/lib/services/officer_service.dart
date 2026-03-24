@@ -29,11 +29,26 @@ class OfficerService {
 
   Future<Map<String, dynamic>> getDashboardStats() async {
     try {
-      final response = await _dio.get('/api/v1/admin/dashboard/hot/statuscount');
+      final response = await _dio.get('/api/v1/officer/dashboard/stats');
       return response.data['counts'] ?? {};
     } catch (e) {
-      // Fallback if the endpoint fails
+      if (e is DioException) {
+        print('Error fetching Stats: \${e.response?.data}');
+      }
       return {'Submitted': 0, 'InProgress': 0, 'Resolved': 0};
+    }
+  }
+
+  Future<String?> getLocationName(double lat, double lon) async {
+    try {
+      final response = await _dio.get('/api/v1/officer/location/name', queryParameters: {
+        'lat': lat,
+        'lon': lon,
+      });
+      return response.data['name'];
+    } catch (e) {
+      print('Error fetching location name: $e');
+      return null;
     }
   }
 
