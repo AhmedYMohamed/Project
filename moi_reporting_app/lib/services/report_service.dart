@@ -22,27 +22,24 @@ class ReportService {
     List<String>? fileNamesList,
   }) async {
     try {
-      Map<String, dynamic> data = {
+      FormData formData = FormData.fromMap({
         'title': title,
         'descriptionText': description,
         'categoryId': categoryId,
         'location': location,
-      };
+      });
 
       if (fileBytesList != null && fileNamesList != null) {
-        List<MultipartFile> multipartFiles = [];
         for (int i = 0; i < fileBytesList.length; i++) {
-          multipartFiles.add(
+          formData.files.add(MapEntry(
+            'files',
             MultipartFile.fromBytes(
               fileBytesList[i],
               filename: fileNamesList[i],
             ),
-          );
+          ));
         }
-        data['files'] = multipartFiles;
       }
-
-      FormData formData = FormData.fromMap(data, ListFormat.multiCompatible);
 
       return await _dio.post(
         '/api/v1/reports/',
