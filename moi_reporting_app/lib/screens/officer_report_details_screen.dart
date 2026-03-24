@@ -151,11 +151,11 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                             att['fileType'] == 'video' ? Icons.video_file : Icons.image, 
                             color: Colors.blue.shade800
                           ),
-                          title: Text('Attachment: \${att['fileType']}'),
+                          title: Text('Attachment: ${att["fileType"]}'),
                           subtitle: const Text('Tap to view externally'),
                           trailing: const Icon(Icons.download, color: Colors.blue),
                           onTap: () {
-                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Media URL: \${att['downloadUrl']}')));
+                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Media URL: ${att["downloadUrl"]}')));
                           },
                         )
                       )
