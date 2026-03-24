@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/report_service.dart';
+import '../models/models.dart';
 import 'report_form.dart';
 import 'report_history_screen.dart';
 
@@ -42,10 +44,51 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 }
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   final Function(int) onTabSelected;
   
   const DashboardScreen({super.key, required this.onTabSelected});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isLoading = true;
+  int _activeCount = 0;
+  int _resolvedCount = 0;
+  int _totalCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStats();
+  }
+
+  Future<void> _fetchStats() async {
+    setState(() => _isLoading = true);
+    try {
+      final auth = context.read<AuthProvider>();
+      final reports = await ReportService().getUserReports(auth.token!, auth.userId!);
+      if (mounted) {
+        setState(() {
+          _totalCount = reports.length;
+          _resolvedCount = reports.where((r) => r.status.toLowerCase() == 'resolved').length;
+          _activeCount = _totalCount - _resolvedCount;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _activeCount = 0;
+          _resolvedCount = 0;
+          _totalCount = 0;
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +96,12 @@ class DashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Dashboard', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _fetchStats,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -80,7 +129,7 @@ class DashboardScreen extends StatelessWidget {
               title: 'File a New Report',
               icon: Icons.add_circle,
               color: const Color(0xFF1E3A8A),
-              onTap: () => onTabSelected(1),
+              onTap: () => widget.onTabSelected(1),
             ),
             const SizedBox(height: 16),
             _buildActionCard(
@@ -111,14 +160,16 @@ class DashboardScreen extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(24),
       ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _StatItem(label: 'Active', count: '2'),
-          _StatItem(label: 'Resolved', count: '14'),
-          _StatItem(label: 'Total', count: '16'),
-        ],
-      ),
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _StatItem(label: 'Active', count: _activeCount.toString()),
+                _StatItem(label: 'Resolved', count: _resolvedCount.toString()),
+                _StatItem(label: 'Total', count: _totalCount.toString()),
+              ],
+            ),
     );
   }
 

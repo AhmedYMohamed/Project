@@ -65,7 +65,21 @@ async def create_report(
     db: Session = Depends(get_db_ops),
     current_user: User = Depends(get_current_user)
 ):
-    print(f"DEBUG: create_report received - title={title}, descriptionText={descriptionText}, location={location}, categoryId={categoryId}, files={[f.filename for f in files] if files else 'None'}")
+    print(f"\n{'='*60}")
+    print(f"DEBUG: create_report received")
+    print(f"  title={title}")
+    print(f"  descriptionText={descriptionText[:50]}...")
+    print(f"  location={location}")
+    print(f"  categoryId={categoryId}")
+    print(f"  files param type: {type(files)}")
+    print(f"  files is None: {files is None}")
+    if files:
+        print(f"  files count: {len(files)}")
+        for i, f in enumerate(files):
+            print(f"  file[{i}]: filename={f.filename}, content_type={f.content_type}, size={f.size}")
+    else:
+        print(f"  ⚠️ NO FILES RECEIVED FROM CLIENT")
+    print(f"{'='*60}\n")
     """
     Submit a new incident report with file attachments.
     Returns the report with attachments including temporary download URLs.

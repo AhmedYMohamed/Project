@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/officer_service.dart';
 import 'officer_report_details_screen.dart';
-import 'login_screen.dart';
 
 class OfficerDashboardScreen extends StatefulWidget {
   const OfficerDashboardScreen({super.key});
@@ -12,30 +12,15 @@ class OfficerDashboardScreen extends StatefulWidget {
 }
 
 class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
-  // Normally these would be fetched from the API
+  final OfficerService _officerService = OfficerService();
   bool _isLoading = false;
   Map<String, int> _stats = {
-    'Submitted': 12,
-    'InProgress': 5,
-    'Resolved': 28,
+    'Submitted': 0,
+    'InProgress': 0,
+    'Resolved': 0,
   };
   
-  List<Map<String, dynamic>> _nearbyReports = [
-    {
-      'id': 'R-A1B2C3D4',
-      'title': 'Traffic light broken',
-      'location': 'Cairo, Nasr City',
-      'status': 'Submitted',
-      'date': '2026-03-24'
-    },
-    {
-      'id': 'R-E5F6G7H8',
-      'title': 'Suspicious Activity',
-      'location': 'Cairo, Maadi',
-      'status': 'InProgress',
-      'date': '2026-03-23'
-    }
-  ];
+  List<Map<String, dynamic>> _nearbyReports = [];
 
   @override
   void initState() {
@@ -45,11 +30,29 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
 
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
-    // TODO: Wire up actual HTTP calls to:
-    // GET /api/v1/officer/stats (or admin/dashboard/hot/statuscount)
-    // GET /api/v1/officer/reports/nearby
-    await Future.delayed(const Duration(seconds: 1)); // Mock network delay
-    setState(() => _isLoading = false);
+    try {
+      final statsData = await _officerService.getDashboardStats();
+      final reportsData = await _officerService.getNearbyReports();
+      
+      if (mounted) {
+        setState(() {
+          _stats = Map<String, int>.from(statsData);
+          _nearbyReports = reportsData.map((e) => {
+            'id': e['reportId'].toString(),
+            'title': e['title'] ?? 'No Title',
+            'location': e['location'] ?? 'Unknown Location',
+            'status': e['status'] ?? 'Submitted',
+            'date': e['createdAt'] != null ? DateTime.parse(e['createdAt']).toLocal().toString().split(' ')[0] : 'N/A',
+          }).toList();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading dashboard: \$e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -85,7 +88,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Greetings, Officer', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                          Text('Service Area: ${"Cairo"}', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                          Text('Service Area: Active Zone', style: const TextStyle(color: Colors.white, fontSize: 14)),
                         ],
                       ),
                     ),
@@ -119,24 +122,40 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                       const SizedBox(height: 12),
                       _buildStatsRow(),
                       const SizedBox(height: 24),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Text('Nearby Reports', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Text('Nearby Reports', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: _fetchData,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                     ],
                   ),
           ),
           if (!_isLoading)
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final report = _nearbyReports[index];
-                  return _buildReportCard(context, report);
-                },
-                childCount: _nearbyReports.length,
-              ),
-            ),
+            _nearbyReports.isEmpty 
+              ? const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Center(child: Text('No nearby reports found in your active service area.', style: TextStyle(color: Colors.grey))),
+                  ),
+                )
+              : SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final report = _nearbyReports[index];
+                      return _buildReportCard(context, report);
+                    },
+                    childCount: _nearbyReports.length,
+                  ),
+                ),
         ],
       ),
     );
@@ -202,7 +221,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
             MaterialPageRoute(
               builder: (context) => OfficerReportDetailsScreen(reportId: report['id']),
             ),
-          );
+          ).then((_) => _fetchData()); // Refresh on return
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
@@ -228,7 +247,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                       children: [
                         const Icon(Icons.location_on, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
-                        Text(report['location'], style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        Expanded(child: Text(report['location'], style: const TextStyle(color: Colors.grey, fontSize: 12), overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ],

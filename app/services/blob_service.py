@@ -38,6 +38,7 @@ class BlobStorageService:
             with open(file_path, "wb") as f:
                 f.write(file_content)
             
+            print(f"DEBUG BLOB: ✓ File SAVED to disk: {file_path} ({len(file_content)} bytes)")
             logger.info(f"✓ Saved file locally: {blob_name} in {subfolder or 'root'} ({len(file_content)} bytes)")
             
             # Return a relative URL path that FastAPI can serve
