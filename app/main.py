@@ -8,7 +8,7 @@ import logging
 
 from app.core.config import get_settings
 from app.core.database import test_database_connections, engine_ops
-from app.api.v1 import reports, admin,users, auth, voice
+from app.api.v1 import reports, admin,users, auth, voice, officer
 
 # Import models to register with SQLAlchemy (but don't use them directly)
 from app.models import user, report, attachment
@@ -105,6 +105,12 @@ app.include_router(
     voice.router,
     prefix=f"/api/v1/voice",
     tags=["Voice"]
+)
+
+app.include_router(
+    officer.router,
+    prefix="/api/v1/officer",
+    tags=["Officer"]
 )
 
 @app.exception_handler(Exception)

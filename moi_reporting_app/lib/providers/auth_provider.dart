@@ -5,11 +5,13 @@ class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   String? _token;
   String? _userId;
+  String _selectedRole = 'citizen';
   bool _isLoading = false;
   bool _isInitialized = false;
 
   String? get token => _token;
   String? get userId => _userId;
+  String get selectedRole => _selectedRole;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _token != null;
   bool get isInitialized => _isInitialized;
@@ -21,7 +23,13 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _loadToken() async {
     _token = await _authService.getToken();
     _userId = await _authService.getUserId();
+    // In a real app we might load the last selected role here as well
     _isInitialized = true;
+    notifyListeners();
+  }
+
+  void setSelectedRole(String role) {
+    _selectedRole = role;
     notifyListeners();
   }
 

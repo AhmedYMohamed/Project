@@ -14,11 +14,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _roleSelection = 'citizen';
 
   void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
+      context.read<AuthProvider>().setSelectedRole(_roleSelection);
       await context.read<AuthProvider>().login(
         _emailController.text,
         _passwordController.text,
@@ -57,7 +59,61 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey[600]),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 32),
+                
+                // Role Toggle
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _roleSelection = 'citizen'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _roleSelection == 'citizen' ? const Color(0xFF1E3A8A) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Citizen',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: _roleSelection == 'citizen' ? Colors.white : Colors.grey[600],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _roleSelection = 'officer'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _roleSelection == 'officer' ? const Color(0xFF1E3A8A) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Officer',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: _roleSelection == 'officer' ? Colors.white : Colors.grey[600],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(

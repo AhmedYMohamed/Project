@@ -22,6 +22,8 @@ class Report(BaseOps):
     title = Column("title", Unicode(500), nullable=False)
     descriptionText = Column("descriptionText", UnicodeText, nullable=False)
     locationRaw = Column("locationRaw", Unicode(2048), nullable=True)
+    latitude = Column("latitude", Float, nullable=True)
+    longitude = Column("longitude", Float, nullable=True)
     
     status = Column("status", String(50), nullable=False, default="Submitted")
     categoryId = Column("categoryId", String(100), nullable=False)
@@ -34,6 +36,7 @@ class Report(BaseOps):
         nullable=True
     )
     transcribedVoiceText = Column("transcribedVoiceText", UnicodeText, nullable=True)
+    officerNote = Column("officerNote", UnicodeText, nullable=True)
 
     # Timestamps
     createdAt = Column(

@@ -60,6 +60,7 @@ class ReportUpdate(BaseModel):
 class ReportStatusUpdate(BaseModel):
     status: ReportStatus
     notes: Optional[str] = None # For admin notes/resolution details
+    officerNote: Optional[str] = None # For officer notes
 
 # Schema for READING a report (Output)
 class ReportResponse(ReportBase):
@@ -72,6 +73,7 @@ class ReportResponse(ReportBase):
     updatedAt: datetime
     userId: Optional[str] = None
     transcribedVoiceText: Optional[str] = None
+    officerNote: Optional[str] = None # Include officer Note
     reportUrl : Optional[str] = None
     
     # Returns full attachment objects
@@ -89,6 +91,7 @@ class ReportResponse(ReportBase):
             "user_id": "userId",
             "description_text": "descriptionText",
             "ai_confidence": "aiConfidence",
+            "officer_note": "officerNote",
             "transcribed_voice_text": "transcribedVoiceText",
             "hashed_device_id": "hashedDeviceId",
             

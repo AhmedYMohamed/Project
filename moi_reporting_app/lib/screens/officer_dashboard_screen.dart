@@ -1,0 +1,274 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import 'officer_report_details_screen.dart';
+import 'login_screen.dart';
+
+class OfficerDashboardScreen extends StatefulWidget {
+  const OfficerDashboardScreen({super.key});
+
+  @override
+  State<OfficerDashboardScreen> createState() => _OfficerDashboardScreenState();
+}
+
+class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
+  // Normally these would be fetched from the API
+  bool _isLoading = false;
+  Map<String, int> _stats = {
+    'Submitted': 12,
+    'InProgress': 5,
+    'Resolved': 28,
+  };
+  
+  List<Map<String, dynamic>> _nearbyReports = [
+    {
+      'id': 'R-A1B2C3D4',
+      'title': 'Traffic light broken',
+      'location': 'Cairo, Nasr City',
+      'status': 'Submitted',
+      'date': '2026-03-24'
+    },
+    {
+      'id': 'R-E5F6G7H8',
+      'title': 'Suspicious Activity',
+      'location': 'Cairo, Maadi',
+      'status': 'InProgress',
+      'date': '2026-03-23'
+    }
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() => _isLoading = true);
+    // TODO: Wire up actual HTTP calls to:
+    // GET /api/v1/officer/stats (or admin/dashboard/hot/statuscount)
+    // GET /api/v1/officer/reports/nearby
+    await Future.delayed(const Duration(seconds: 1)); // Mock network delay
+    setState(() => _isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 180.0,
+            floating: false,
+            pinned: true,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+                ),
+              ),
+              child: FlexibleSpaceBar(
+                title: const Text('Officer Dashboard', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                background: Stack(
+                  children: [
+                    Positioned(
+                      right: -30,
+                      top: -20,
+                      child: Icon(Icons.shield, size: 150, color: Colors.white.withOpacity(0.1)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, bottom: 60.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Greetings, Officer', style: TextStyle(color: Colors.white70, fontSize: 16)),
+                          Text('Service Area: ${"Cairo"}', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white),
+                onPressed: () {
+                  context.read<AuthProvider>().logout();
+                },
+              )
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: _isLoading 
+                ? const Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text('Live Statistics', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildStatsRow(),
+                      const SizedBox(height: 24),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text('Nearby Reports', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+          ),
+          if (!_isLoading)
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final report = _nearbyReports[index];
+                  return _buildReportCard(context, report);
+                },
+                childCount: _nearbyReports.length,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsRow() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _buildStatCard('Total\nSubmitted', _stats['Submitted'] ?? 0, [const Color(0xFF4b6cb7), const Color(0xFF182848)], Icons.assignment),
+          _buildStatCard('Under\nExecution', _stats['InProgress'] ?? 0, [const Color(0xFFF2994A), const Color(0xFFF2C94C)], Icons.pending_actions),
+          _buildStatCard('Total\nResolved', _stats['Resolved'] ?? 0, [const Color(0xFF11998e), const Color(0xFF38ef7d)], Icons.check_circle_outline),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, int value, List<Color> gradientColors, IconData icon) {
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradientColors,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: gradientColors[0].withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.white, size: 28),
+          const SizedBox(height: 12),
+          Text(value.toString(), style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(title, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportCard(BuildContext context, Map<String, dynamic> report) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      shadowColor: Colors.black12,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OfficerReportDetailsScreen(reportId: report['id']),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.report_problem, color: Colors.blueGrey),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(report['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(report['location'], style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(report['status']).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      report['status'],
+                      style: TextStyle(color: _getStatusColor(report['status']), fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(report['date'], style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'submitted':
+        return Colors.blue;
+      case 'inprogress':
+        return Colors.orange;
+      case 'resolved':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+}

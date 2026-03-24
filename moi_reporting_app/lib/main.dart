@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
+import 'screens/officer_dashboard_screen.dart';
 
 void main() {
   runApp(
@@ -56,6 +57,9 @@ class MoiReportingApp extends StatelessWidget {
             );
           }
           if (auth.isAuthenticated) {
+            if (auth.selectedRole == 'officer') {
+              return const OfficerDashboardScreen();
+            }
             return const MainNavigationScreen();
           }
           return const LoginScreen();

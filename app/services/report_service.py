@@ -432,6 +432,9 @@ class ReportService:
         
         # Update status and timestamp
         report.status = status_update.status.value
+        if getattr(status_update, 'officerNote', None) is not None:
+            report.officerNote = status_update.officerNote
+            
         report.updatedAt = utcnow()
         
         try:
@@ -494,6 +497,96 @@ class ReportService:
                 detail=f"Failed to delete report: {str(e)}"
             )
     
+    @staticmethod
+    def get_nearby_reports(
+        db: Session, 
+        user_id: str,
+        skip: int = 0, 
+        limit: int = 20,
+        radius_deg: float = 0.1
+    ) -> ReportListResponse:
+        from sqlalchemy import or_
+        from app.models.service_area import OfficerServiceArea
+        
+        now = utcnow()
+        # Find active service area
+        active_area = db.query(OfficerServiceArea).filter(
+            OfficerServiceArea.userId == user_id,
+            OfficerServiceArea.startDate <= now,
+            or_(OfficerServiceArea.endDate == None, OfficerServiceArea.endDate >= now)
+        ).first()
+        
+        if not active_area:
+            raise HTTPException(
+                status_code=404,
+                detail="No active service area found for this officer."
+            )
+            
+        lat = active_area.latitude
+        lon = active_area.longitude
+        
+        # Build query with eager loading
+        query = db.query(Report).options(selectinload(Report.attachments))
+        
+        # Apply bounding box filter
+        query = query.filter(
+            Report.latitude >= lat - radius_deg,
+            Report.latitude <= lat + radius_deg,
+            Report.longitude >= lon - radius_deg,
+            Report.longitude <= lon + radius_deg
+        )
+        
+        # Get total count before pagination
+        total = query.count()
+        
+        # Apply pagination and ordering
+        reports = query.order_by(Report.createdAt.desc()).offset(skip).limit(limit).all()
+        
+        # Generate download URLs for all attachments
+        blob_service = BlobStorageService()
+        report_responses = []
+        
+        for r in reports:
+            attachment_responses = []
+            for att in r.attachments:
+                download_url = blob_service.generate_download_url(att.blobStorageUri)
+                attachment_responses.append({
+                    "attachmentId": att.attachmentId,
+                    "reportId": att.reportId,
+                    "blobStorageUri": att.blobStorageUri,
+                    "downloadUrl": download_url,
+                    "mimeType": att.mimeType,
+                    "fileType": att.fileType,
+                    "fileSizeBytes": att.fileSizeBytes,
+                    "createdAt": utcnow()
+                })
+            
+            report_responses.append(
+                ReportResponse(
+                    reportId=r.reportId,
+                    title=r.title,
+                    descriptionText=r.descriptionText,
+                    categoryId=r.categoryId,
+                    status=r.status,
+                    location=r.locationRaw,
+                    aiConfidence=r.aiConfidence,
+                    createdAt=r.createdAt,
+                    updatedAt=r.updatedAt,
+                    userId=r.userId,
+                    transcribedVoiceText=r.transcribedVoiceText,
+                    officerNote=getattr(r, 'officerNote', None),
+                    attachments=attachment_responses
+                )
+            )
+        
+        return ReportListResponse(
+            reports=report_responses,
+            total=total,
+            page=(skip // limit) + 1 if limit > 0 else 1,
+            pageSize=limit,
+            totalPages=(total + limit - 1) // limit if limit > 0 else 1
+        )
+        
     @staticmethod
     def get_report_statistics(db: Session) -> dict:
         """
