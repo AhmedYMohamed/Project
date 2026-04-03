@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../services/officer_service.dart';
 import 'officer_report_details_screen.dart';
 import 'officer_map_screen.dart';
+import '../services/location_service.dart';
 
 class OfficerDashboardScreen extends StatefulWidget {
   const OfficerDashboardScreen({super.key});
@@ -73,9 +74,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       }
 
       // Get current position
-      final Position position = await Geolocator.getCurrentPosition(
-        timeLimit: const Duration(seconds: 30),
-      );
+      final Position position = await LocationService.getCurrentLocation();
 
       String addressName = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
       

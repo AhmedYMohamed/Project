@@ -15,30 +15,35 @@ class AuthService {
 
   Future<Map<String, dynamic>> register({
     required String email,
+    required String nationalId,
     required String password,
     String? phoneNumber,
   }) async {
     try {
       final response = await _dio.post('/api/v1/auth/register', data: {
         'email': email,
+        'nationalId': nationalId,
         'password': password,
         'phoneNumber': phoneNumber,
         'role': 'citizen',
       });
       return response.data;
     } catch (e) {
+      if (e is DioException && e.response?.statusCode == 400) {
+        throw e.response?.data['detail'] ?? 'Registration failed';
+      }
       rethrow;
     }
   }
 
   Future<Map<String, String>> login({
-    required String email,
+    required String nationalId,
     required String password,
   }) async {
     try {
       // Create form data for OAuth2 login
       FormData formData = FormData.fromMap({
-        'username': email,
+        'username': nationalId,
         'password': password,
       });
 

@@ -22,6 +22,10 @@ class UserService:
         return db.query(User).filter(User.email == email).first()
 
     @staticmethod
+    def get_by_national_id(db: Session, hashed_id: str) -> Optional[User]:
+        return db.query(User).filter(User.hashedNationalId == hashed_id).first()
+
+    @staticmethod
     def get_by_id(db: Session, user_id: str) -> Optional[User]:
         return db.query(User).filter(User.userId == user_id).first()
 
@@ -29,7 +33,17 @@ class UserService:
     def create_user(db: Session, user_in: UserCreate) -> User:
         """Register a new user with a hashed password."""
         
-        # 1. Check if email exists
+        # 1. Check if national ID exists
+        import hashlib
+        hashed_nid = hashlib.sha256(user_in.nationalId.encode()).hexdigest()
+        
+        if UserService.get_by_national_id(db, hashed_nid):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="National ID already registered"
+            )
+        
+        # 2. Check if email exists
         if user_in.email:
             existing_user = UserService.get_by_email(db, user_in.email)
             if existing_user:
@@ -45,9 +59,10 @@ class UserService:
         db_user = User(
             userId=f"user-{uuid.uuid4()}",
             email=user_in.email,
+            hashedNationalId=hashed_nid,
             phoneNumber=user_in.phoneNumber,
             passwordHash=hashed_pwd,
-            role=user_in.role.value,  # Default is usually citizen
+            role=user_in.role.value,
             isAnonymous=False
         )
         
@@ -57,9 +72,11 @@ class UserService:
         return db_user
 
     @staticmethod
-    def authenticate(db: Session, email: str, password: str) -> Optional[User]:
-        """Verify email and password."""
-        user = UserService.get_by_email(db, email)
+    def authenticate(db: Session, login_id: str, password: str) -> Optional[User]:
+        """Verify national ID and password."""
+        import hashlib
+        hashed_nid = hashlib.sha256(login_id.encode()).hexdigest()
+        user = UserService.get_by_national_id(db, hashed_nid)
         if not user:
             return None
         if not user.passwordHash:

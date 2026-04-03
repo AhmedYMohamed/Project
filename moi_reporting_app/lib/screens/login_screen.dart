@@ -129,12 +129,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 TextFormField(
                   controller: _emailController,
+                  keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
+                    labelText: 'National ID Number',
+                    prefixIcon: Icon(Icons.badge_outlined),
                   ),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'Please enter email'
+                      ? 'Please enter National ID'
                       : null,
                 ),
                 const SizedBox(height: 16),

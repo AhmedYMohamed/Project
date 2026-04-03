@@ -44,6 +44,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "csslib",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/csslib-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "cupertino_icons",
       "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.9",
       "packageUri": "lib/",
@@ -198,6 +204,12 @@
       "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/hooks-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
+    },
+    {
+      "name": "html",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "http",
@@ -566,6 +578,54 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "url_launcher",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher-6.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "url_launcher_android",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_android-6.3.29",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "url_launcher_ios",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_ios-6.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
+      "name": "url_launcher_linux",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_linux-3.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "url_launcher_macos",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_macos-3.2.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "url_launcher_platform_interface",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_platform_interface-2.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "url_launcher_web",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_web-2.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
+      "name": "url_launcher_windows",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher_windows-3.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
       "name": "uuid",
       "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.3",
       "packageUri": "lib/",
@@ -576,6 +636,36 @@
       "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.1"
+    },
+    {
+      "name": "video_player",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/video_player-2.11.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
+      "name": "video_player_android",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_android-2.9.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "video_player_avfoundation",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_avfoundation-2.9.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
+      "name": "video_player_platform_interface",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_platform_interface-6.6.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "video_player_web",
+      "rootUri": "file:///C:/Users/Ahmed%20Yasser/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_web-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
     },
     {
       "name": "vm_service",

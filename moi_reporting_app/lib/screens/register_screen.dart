@@ -12,6 +12,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  final _nationalIdController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
 
@@ -21,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       await context.read<AuthProvider>().register(
         _emailController.text,
+        _nationalIdController.text,
         _passwordController.text,
         phoneNumber: _phoneController.text.isNotEmpty ? _phoneController.text : null,
       );
@@ -67,6 +69,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   prefixIcon: Icon(Icons.email_outlined),
                 ),
                 validator: (value) => value == null || value.isEmpty ? 'Please enter email' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nationalIdController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'National ID Number',
+                  prefixIcon: Icon(Icons.badge_outlined),
+                ),
+                validator: (value) => value == null || value.isEmpty ? 'Please enter National ID' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(

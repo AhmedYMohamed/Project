@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
 import '../services/officer_service.dart';
+import '../services/location_service.dart';
 
 class OfficerReportDetailsScreen extends StatefulWidget {
   final String reportId;
@@ -110,9 +113,14 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                         ),
                         IconButton(
                           icon: const Icon(Icons.map, color: Colors.blue),
-                          onPressed: () {
-                            // Navigate via maps intent or local map view
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Opening map view...')));
+                          onPressed: () async {
+                            final location = _report!['location'] ?? '';
+                            final Uri url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$location");
+                            if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open maps')));
+                              }
+                            }
                           },
                         ),
                       ],
@@ -139,26 +147,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                   const SizedBox(height: 8),
                   if (_report!['attachments'] != null && (_report!['attachments'] as List).isNotEmpty)
                     ...(_report!['attachments'] as List).map((att) => 
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.shade100)
-                        ),
-                        child: ListTile(
-                          leading: Icon(
-                            att['fileType'] == 'video' ? Icons.video_file : Icons.image, 
-                            color: Colors.blue.shade800
-                          ),
-                          title: Text('Attachment: ${att["fileType"]}'),
-                          subtitle: const Text('Tap to view externally'),
-                          trailing: const Icon(Icons.download, color: Colors.blue),
-                          onTap: () {
-                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Media URL: ${att["downloadUrl"]}')));
-                          },
-                        )
-                      )
+                      _buildMediaTile(att)
                     ).toList()
                   else
                     const Padding(
@@ -215,5 +204,85 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
               ),
             ),
     );
+  }
+
+  Widget _buildMediaTile(Map<String, dynamic> att) {
+    bool isVideo = att['fileType'] == 'video';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade100),
+      ),
+      child: ListTile(
+        leading: Icon(
+          isVideo ? Icons.video_library : Icons.image,
+          color: Colors.blue.shade800,
+        ),
+        title: Text('Attachment: ${att["fileType"]}'),
+        subtitle: const Text('Tap to view evidence'),
+        trailing: const Icon(Icons.play_circle_fill, color: Colors.blue),
+        onTap: () => _showMediaDialog(att['downloadUrl'], isVideo),
+      ),
+    );
+  }
+
+  void _showMediaDialog(String url, bool isVideo) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: isVideo ? _VideoPlayerWidget(url: url) : Image.network(url),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+}
+
+class _VideoPlayerWidget extends StatefulWidget {
+  final String url;
+  const _VideoPlayerWidget({required this.url});
+
+  @override
+  State<_VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..initialize().then((_) => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                VideoPlayer(_controller),
+                VideoProgressIndicator(_controller, allowScrubbing: true),
+                IconButton(
+                  icon: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
+                  onPressed: () => setState(() => _controller.value.isPlaying ? _controller.pause() : _controller.play()),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
   }
 }

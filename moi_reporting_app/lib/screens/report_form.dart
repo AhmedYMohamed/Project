@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import '../services/report_service.dart';
 import '../providers/auth_provider.dart';
+import '../services/location_service.dart';
 
 class ReportFormScreen extends StatefulWidget {
   const ReportFormScreen({super.key});
@@ -50,6 +51,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       withData: true,
       allowMultiple: true,
+      type: FileType.media, // Restrict to Photos and Videos
     );
     if (result != null) {
       setState(() {
@@ -91,24 +93,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   Future<void> _getCurrentLocation() async {
     setState(() => _isLoading = true);
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw 'Location services are disabled.';
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw 'Location permissions are denied';
-        }
-      }
-      
-      if (permission == LocationPermission.deniedForever) {
-        throw 'Location permissions are permanently denied';
-      }
-
-      Position position = await Geolocator.getCurrentPosition();
+      Position position = await LocationService.getCurrentLocation();
       setState(() {
         _currentLocationText = "${position.latitude}, ${position.longitude}";
         _isLoading = false;

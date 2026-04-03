@@ -43,11 +43,12 @@ class UserBase(BaseModel):
 
 # Registration Input (For creating new registered users)
 class UserCreate(UserBase):
+    nationalId: str = Field(..., min_length=5, description="Citizen National ID Number")
     password: str = Field(..., min_length=8, description="Required for Officers/Admins")
 
 # Login Input
 class UserLogin(BaseModel):
-    email: EmailStr
+    nationalId: str
     password: str
 
 # Role Update Input (For Admin dashboard)

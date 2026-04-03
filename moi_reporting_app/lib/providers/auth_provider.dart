@@ -33,24 +33,24 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(String email, String password,
+  Future<void> register(String email, String nationalId, String password,
       {String? phoneNumber}) async {
     _isLoading = true;
     notifyListeners();
     try {
       await _authService.register(
-          email: email, password: password, phoneNumber: phoneNumber);
+          email: email, nationalId: nationalId, password: password, phoneNumber: phoneNumber);
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String nationalId, String password) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final result = await _authService.login(email: email, password: password);
+      final result = await _authService.login(nationalId: nationalId, password: password);
       _token = result['token'];
       _userId = result['userId'];
     } finally {
