@@ -7,6 +7,7 @@ from app.api.v1.auth import get_current_user
 from app.models.user import User
 from app.schemas.report import ReportListResponse
 from app.services.report_service import ReportService
+from functools import lru_cache
 
 router = APIRouter()
 
@@ -82,18 +83,17 @@ def get_officer_dashboard_stats(
     "/location/name",
     summary="Reverse Geocoding without CORS limits"
 )
-def get_location_name(
-    lat: float = Query(..., description="Latitude"),
-    lon: float = Query(..., description="Longitude"),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Reverse geocodes using OpenStreetMap on the server side to bypass Client-side CORS issues.
-    """
+@lru_cache(max_size=1000)
+def _fetch_reverse_geocode(lat: float, lon: float):
+    """Internal cached helper for Nominatim"""
     import urllib.request
     import json
     
-    url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10&addressdetails=1"
+    # Rounding coordinates slightly to increase cache hit rate for proximity
+    lat_r = round(lat, 4)
+    lon_r = round(lon, 4)
+    
+    url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat_r}&lon={lon_r}&zoom=14&addressdetails=1"
     req = urllib.request.Request(url, headers={'User-Agent': 'MoI_Reporting_Server/1.0'})
     
     try:
@@ -105,9 +105,26 @@ def get_location_name(
             
             parts = [p for p in [suburb, city] if p]
             if parts:
-                return {"name": ", ".join(parts)}
+                return ", ".join(parts)
             else:
-                return {"name": data.get('display_name', "Unknown Region")}
-    except Exception as e:
-        return {"name": f"{lat:.4f}, {lon:.4f}"}
+                return data.get('display_name', "Unknown Region")
+    except Exception:
+        return None
+
+@router.get(
+    "/location/name",
+    summary="Reverse Geocoding without CORS limits"
+)
+def get_location_name(
+    lat: float = Query(..., description="Latitude"),
+    lon: float = Query(..., description="Longitude"),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Reverse geocodes using OpenStreetMap on the server side with LRU caching.
+    """
+    location_name = _fetch_reverse_geocode(lat, lon)
+    if location_name:
+        return {"name": location_name}
+    return {"name": f"{lat:.4f}, {lon:.4f}"}
 

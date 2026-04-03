@@ -68,13 +68,15 @@ class ReportResponse(ReportBase):
     reportId: str
     status: ReportStatus
     location: str  # Matches [locationRaw] in DB
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     aiConfidence: Optional[float] = None
     createdAt: datetime
     updatedAt: datetime
     userId: Optional[str] = None
     transcribedVoiceText: Optional[str] = None
     officerNote: Optional[str] = None # Include officer Note
-    reportUrl : Optional[str] = None
+    reportUrl: Optional[str] = None
     
     # Returns full attachment objects
     attachments: List[AttachmentResponse] = []

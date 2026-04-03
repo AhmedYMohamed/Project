@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import '../providers/auth_provider.dart';
 import '../services/officer_service.dart';
 import 'officer_report_details_screen.dart';
+import 'officer_map_screen.dart';
 
 class OfficerDashboardScreen extends StatefulWidget {
   const OfficerDashboardScreen({super.key});
@@ -126,6 +127,8 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
             'title': e['title'] ?? 'No Title',
             'location': e['location'] ?? 'Unknown Location',
             'status': e['status'] ?? 'Submitted',
+            'latitude': e['latitude'],
+            'longitude': e['longitude'],
             'date': e['createdAt'] != null ? DateTime.parse(e['createdAt']).toLocal().toString().split(' ')[0] : 'N/A',
           }).toList();
         });
@@ -185,6 +188,28 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 onPressed: _fetchLocationAndData,
                 tooltip: 'Refresh location and reports',
+              ),
+              IconButton(
+                icon: const Icon(Icons.map_outlined, color: Colors.white),
+                onPressed: () {
+                  if (_currentLat != null && _currentLon != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OfficerMapScreen(
+                          reports: _nearbyReports,
+                          initialLat: _currentLat!,
+                          initialLon: _currentLon!,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Wait for location to be fetched...'))
+                    );
+                  }
+                },
+                tooltip: 'View Reports on Map',
               ),
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white),
