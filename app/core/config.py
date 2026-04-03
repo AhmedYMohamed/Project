@@ -47,7 +47,10 @@ class Settings(BaseSettings):
     # =========================================================
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    ALLOWED_ORIGINS: list = ["https://cuddly-dollop-97654ww7wvr6cg9q-8080.app.github.dev"]
+    ALLOWED_ORIGINS: list = [
+        "https://cuddly-dollop-97654ww7wvr6cg9q-8080.app.github.dev",
+        "https://cuddly-dollop-97654ww7wvr6cg9q-8000.app.github.dev"
+    ]
     RATE_LIMIT_PER_MINUTE: int = 60
 
     class Config:
