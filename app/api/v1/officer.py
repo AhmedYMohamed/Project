@@ -79,11 +79,8 @@ def get_officer_dashboard_stats(
             
     return {"counts": counts_dict}
 
-@router.get(
-    "/location/name",
-    summary="Reverse Geocoding without CORS limits"
-)
-@lru_cache(max_size=1000)
+
+@lru_cache(maxsize=1000)
 def _fetch_reverse_geocode(lat: float, lon: float):
     """Internal cached helper for Nominatim"""
     import urllib.request
