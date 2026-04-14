@@ -29,8 +29,37 @@ async def lifespan(app: FastAPI):
     try:
         test_database_connections()
         logger.info("✓ All database connections verified")
+        
+        # Auto-apply schema migrations
+        with engine_ops.connect() as conn:
+            from sqlalchemy import text
+            # Add hashedNationalId to User
+            conn.execute(text("""
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[User]') AND name = N'hashedNationalId')
+            BEGIN ALTER TABLE dbo.[User] ADD [hashedNationalId] NVARCHAR(256) NULL; END
+            """))
+            conn.execute(text("""
+            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'dbo.[User]') AND name = N'IX_User_HashedNationalId')
+            BEGIN CREATE UNIQUE NONCLUSTERED INDEX [IX_User_HashedNationalId] ON dbo.[User] ([hashedNationalId]) WHERE [hashedNationalId] IS NOT NULL; END
+            """))
+            # Add missing Report columns
+            conn.execute(text("""
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[Report]') AND name = N'latitude')
+            BEGIN ALTER TABLE dbo.[Report] ADD [latitude] FLOAT NULL; END
+            """))
+            conn.execute(text("""
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[Report]') AND name = N'longitude')
+            BEGIN ALTER TABLE dbo.[Report] ADD [longitude] FLOAT NULL; END
+            """))
+            conn.execute(text("""
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[Report]') AND name = N'officerNote')
+            BEGIN ALTER TABLE dbo.[Report] ADD [officerNote] NVARCHAR(MAX) NULL; END
+            """))
+            conn.commit()
+            logger.info("✓ Schema migrations verified and applied")
+            
     except Exception as e:
-        logger.critical(f"✗ Database connection failed: {e}", exc_info=True)
+        logger.critical(f"✗ Database connection or migration failed: {e}", exc_info=True)
         raise SystemExit("Database connection failed")
     
     yield
