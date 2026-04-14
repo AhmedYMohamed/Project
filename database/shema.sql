@@ -33,6 +33,7 @@ CREATE TABLE [dbo].[User] (
     [role] NVARCHAR(50) NOT NULL CHECK ([role] IN ('citizen', 'officer', 'admin')),
     [email] NVARCHAR(256) NULL,
     [phoneNumber] NVARCHAR(20) NULL,
+    [hashedNationalId] NVARCHAR(256) NULL,
     [hashedDeviceId] NVARCHAR(256) NULL,
     [passwordHash] NVARCHAR(256) NULL,
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([userId]),
@@ -73,6 +74,7 @@ GO
 
 -- Operational indexes 
 CREATE NONCLUSTERED INDEX [IX_User_Role] ON [dbo].[User] ([role]) INCLUDE ([userId], [isAnonymous]);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_User_HashedNationalId] ON [dbo].[User] ([hashedNationalId]) WHERE [hashedNationalId] IS NOT NULL;
 CREATE NONCLUSTERED INDEX [IX_User_HashedDeviceId] ON [dbo].[User] ([hashedDeviceId]) WHERE [hashedDeviceId] IS NOT NULL;
 CREATE NONCLUSTERED INDEX [IX_Report_Status] ON [dbo].[Report] ([status]) INCLUDE ([reportId], [title], [createdAt]);
 CREATE NONCLUSTERED INDEX [IX_Report_CategoryId] ON [dbo].[Report] ([categoryId]) INCLUDE ([reportId], [title], [status]);
