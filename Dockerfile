@@ -29,6 +29,8 @@ WORKDIR /app
 
 # Copy requirements
 COPY requirements.txt .
+# Install CPU-only torch FIRST to prevent whisper from pulling the full CUDA build (~2GB)
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
