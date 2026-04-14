@@ -47,7 +47,11 @@ class Settings(BaseSettings):
     # =========================================================
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    ALLOWED_ORIGINS: list = ["*","https://special-trout-q7v4g6676g5vc6794-8080.app.github.dev"]
+    ALLOWED_ORIGINS: list = [
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "https://special-trout-q7v4g6676g5vc6794-8080.app.github.dev",
+    ]
     RATE_LIMIT_PER_MINUTE: int = 60
 
     class Config:
