@@ -1,3 +1,3 @@
 cd moi_reporting_app
-flutter build web --release --no-wasm-dry-run
+flutter build web --release
 cd ..
