@@ -46,6 +46,8 @@ CREATE TABLE [dbo].[Report] (
     [title] NVARCHAR(500) NOT NULL,
     [descriptionText] NVARCHAR(MAX) NOT NULL,
     [locationRaw] NVARCHAR(2048) NULL,
+    [latitude] FLOAT NULL,
+    [longitude] FLOAT NULL,
     [status] NVARCHAR(50) NOT NULL DEFAULT 'Submitted'
         CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected')),
     [categoryId] NVARCHAR(100) NOT NULL,
@@ -54,6 +56,7 @@ CREATE TABLE [dbo].[Report] (
     [updatedAt] DATETIME2(7) NOT NULL DEFAULT GETUTCDATE(),
     [userId] NVARCHAR(450) NULL,
     [transcribedVoiceText] NVARCHAR(MAX) NULL,
+    [officerNote] NVARCHAR(MAX) NULL,
     CONSTRAINT [PK_Report] PRIMARY KEY CLUSTERED ([reportId]),
     CONSTRAINT [FK_Report_User] FOREIGN KEY ([userId]) REFERENCES [dbo].[User]([userId]) ON DELETE SET NULL
 );
