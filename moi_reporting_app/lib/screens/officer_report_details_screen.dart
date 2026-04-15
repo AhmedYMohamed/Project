@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import '../services/officer_service.dart';
 import '../services/location_service.dart';
+import '../services/auth_service.dart';
 
 class OfficerReportDetailsScreen extends StatefulWidget {
   final String reportId;
@@ -229,6 +230,14 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
   }
 
   void _showMediaDialog(String url, bool isVideo) {
+    if (!url.startsWith('http')) {
+      final baseUrl = AuthService.baseUrl.endsWith('/') 
+          ? AuthService.baseUrl.substring(0, AuthService.baseUrl.length - 1) 
+          : AuthService.baseUrl;
+      final path = url.startsWith('/') ? url : '/$url';
+      url = '$baseUrl$path';
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -252,12 +261,22 @@ class _VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   late VideoPlayerController _controller;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..initialize().then((_) => setState(() {}));
+      ..initialize().then((_) {
+        if (mounted) setState(() {});
+      }).catchError((error) {
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+          });
+        }
+        print('Video Player Error: $error');
+      });
   }
 
   @override
@@ -268,6 +287,15 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (_hasError) {
+      return const SizedBox(
+        height: 200, 
+        child: Center(
+          child: Text('Failed to load video.', style: TextStyle(color: Colors.red)),
+        ),
+      );
+    }
+    
     return _controller.value.isInitialized
         ? AspectRatio(
             aspectRatio: _controller.value.aspectRatio,

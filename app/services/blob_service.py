@@ -43,7 +43,7 @@ class BlobStorageService:
             
             # Return a relative URL path that FastAPI can serve
             prefix = f"{subfolder}/" if subfolder else ""
-            return f"/app/attachments/{prefix}{blob_name}"
+            return f"/local_storage/{prefix}{blob_name}"
         
         except Exception as e:
             logger.error(f"Error saving file '{filename}': {e}")
@@ -53,7 +53,7 @@ class BlobStorageService:
         """Delete local file"""
         try:
             # Extract relative path from URL (remove /local_storage/ prefix)
-            relative_path = blob_url.replace("/app/attachments", "").split('?')[0]
+            relative_path = blob_url.replace("/local_storage/", "").split('?')[0]
             file_path = os.path.join(self.storage_path, relative_path)
             
             if os.path.exists(file_path):
@@ -114,4 +114,4 @@ class BlobStorageService:
 
     def get_blob_url(self, blob_name: str) -> str:
         """Return relative serving URL for the blob"""
-        return f"/app/attachments/{blob_name}"
+        return f"/local_storage/{blob_name}"
