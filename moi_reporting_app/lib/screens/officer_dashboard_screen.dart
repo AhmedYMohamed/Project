@@ -94,7 +94,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       if (mounted) {
         setState(() => _locationStatus = 'Error fetching location');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error fetching location: \$e'), backgroundColor: Colors.red),
+          const SnackBar(content: Text('Error fetching location: \$e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -134,7 +134,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading dashboard: \$e')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error loading dashboard: \$e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -165,7 +165,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                     Positioned(
                       right: -30,
                       top: -20,
-                      child: Icon(Icons.shield, size: 150, color: Colors.white.withOpacity(0.1)),
+                      child: Icon(Icons.shield, size: 150, color: Colors.white.withValues(alpha: 0.1)),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 20.0, bottom: 60.0),
@@ -303,7 +303,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: gradientColors[0].withOpacity(0.3),
+            color: gradientColors[0].withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )
@@ -373,7 +373,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(report['status']).withOpacity(0.1),
+                      color: _getStatusColor(report['status']).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

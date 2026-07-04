@@ -269,7 +269,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: const InputDecoration(labelText: 'Category', prefixIcon: Icon(Icons.category)),
                 items: _categories.entries.map((e) {
                   return DropdownMenuItem(value: e.key, child: Text(e.value));

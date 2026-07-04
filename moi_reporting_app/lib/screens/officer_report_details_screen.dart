@@ -43,7 +43,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load report: \$e')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to load report: \$e')));
         setState(() => _isLoading = false);
       }
     }
@@ -59,7 +59,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Update failed: \$e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update failed: \$e'), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -70,7 +70,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Report \${widget.reportId}', style: const TextStyle(color: Colors.white)),
+        title: const Text('Report \${widget.reportId}', style: TextStyle(color: Colors.white)),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -137,7 +137,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
                     ),
                     child: Text(_report!['descriptionText'] ?? 'No Description provided.', style: const TextStyle(fontSize: 16)),
                   ),
@@ -162,7 +162,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                   const Text('Update Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: ['Submitted', 'InProgress', 'Resolved', 'Rejected'].contains(_selectedStatus) ? _selectedStatus : 'Submitted',
+                    initialValue: ['Submitted', 'InProgress', 'Resolved', 'Rejected'].contains(_selectedStatus) ? _selectedStatus : 'Submitted',
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
