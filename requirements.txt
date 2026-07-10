@@ -12,3 +12,6 @@ argon2-cffi
 gunicorn
 slowapi
 openai-whisper
+azure-identity
+azure-keyvault-secrets
+azure-storage-blob

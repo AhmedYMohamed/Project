@@ -29,6 +29,13 @@ class Settings(BaseSettings):
         if os.path.isabs(self.LOCAL_STORAGE_PATH):
             return self.LOCAL_STORAGE_PATH
         return os.path.abspath(self.LOCAL_STORAGE_PATH)
+        
+    BLOB_STORAGE_CONNECTION_STRING: Optional[str] = None
+    BLOB_CONTAINER_NAME: str = "report-attachments"
+    
+    # Azure Configuration (Key Vault Access)
+    AZURE_KEY_VAULT_NAME: Optional[str] = None
+    AZURE_CLIENT_ID: Optional[str] = None
     
     # 3. Security
     SECRET_KEY: Optional[str] = None
@@ -65,6 +72,46 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     settings = Settings()
     
+    # Resolve all secrets from Azure Key Vault if configured
+    if settings.AZURE_KEY_VAULT_NAME:
+        logger.info(f"Connecting to Azure Key Vault: {settings.AZURE_KEY_VAULT_NAME}")
+        try:
+            from azure.identity import DefaultAzureCredential
+            from azure.keyvault.secrets import SecretClient
+            
+            # Setup credential with user-assigned identity Client ID if provided
+            if settings.AZURE_CLIENT_ID:
+                credential = DefaultAzureCredential(managed_identity_client_id=settings.AZURE_CLIENT_ID)
+            else:
+                credential = DefaultAzureCredential()
+                
+            vault_url = f"https://{settings.AZURE_KEY_VAULT_NAME}.vault.azure.net"
+            kv_client = SecretClient(vault_url=vault_url, credential=credential)
+            
+            # Key Vault Secret mapping: (Secret name in Key Vault, Setting name in Settings)
+            secret_mapping = {
+                "sql-hot-connection-string": "SQLALCHEMY_DATABASE_URI_OPS",
+                "sql-cold-connection-string": "SQLALCHEMY_DATABASE_URI_ANALYTICS",
+                "blob-storage-connection-string": "BLOB_STORAGE_CONNECTION_STRING",
+                "azure-service-bus-connection-string": "AZURE_SERVICE_BUS_CONNECTION_STRING",
+                "azure-speech-key": "AZURE_SPEECH_KEY",
+                "azure-ml-api-key": "AZURE_ML_API_KEY",
+                "secret-key": "SECRET_KEY"
+            }
+            
+            for secret_name, setting_name in secret_mapping.items():
+                try:
+                    secret_val = kv_client.get_secret(secret_name).value
+                    if secret_val:
+                        setattr(settings, setting_name, secret_val)
+                        logger.info(f"✓ Resolved {setting_name} from Key Vault")
+                except Exception as e:
+                    # Log warning but do not crash on non-mandatory parameters
+                    logger.warning(f"⚠ Could not resolve secret '{secret_name}' from Key Vault: {e}")
+                    
+        except Exception as e:
+            logger.error(f"✗ Failed to load secrets from Key Vault: {e}")
+            
     # Ensure local directory exists
     os.makedirs(settings.LOCAL_STORAGE_PATH, exist_ok=True)
             
