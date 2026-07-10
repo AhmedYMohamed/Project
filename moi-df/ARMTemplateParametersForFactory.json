@@ -3,43 +3,43 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"factoryName": {
-			"value": "moi-df"
+			"value": "moi-data-factory-v2"
 		},
 		"moi_analytics_password": {
-			"value": ""
+			"value": "{Z}93,z$,xd_(J@JE+}8K}LyoGuo3(i<Dhbg$p3kL2[<}"
 		},
 		"moi_operation_password": {
-			"value": ""
+			"value": "{Z}93,z$,xd_(J@JE+}8K}LyoGuo3(i<Dhbg$p3kL2[<}"
 		},
 		"moi_operations_password": {
-			"value": ""
+			"value": "{Z}93,z$,xd_(J@JE+}8K}LyoGuo3(i<Dhbg$p3kL2[<}"
 		},
 		"moi_analytics_properties_typeProperties_server": {
-			"value": "moi-sql-server.database.windows.net"
+			"value": "moii-sql-server.database.windows.net"
 		},
 		"moi_analytics_properties_typeProperties_database": {
-			"value": "moi-al"
+			"value": "moi-sql-cold"
 		},
 		"moi_analytics_properties_typeProperties_userName": {
-			"value": "moi-server-admin"
+			"value": "moii-sql-server"
 		},
 		"moi_operation_properties_typeProperties_server": {
-			"value": "moi-sql-server.database.windows.net"
+			"value": "moii-sql-server.database.windows.net"
 		},
 		"moi_operation_properties_typeProperties_database": {
-			"value": "moi-ops"
+			"value": "moi-sql-hot"
 		},
 		"moi_operation_properties_typeProperties_userName": {
-			"value": "moi-server-admin"
+			"value": "moii-sql-server"
 		},
 		"moi_operations_properties_typeProperties_server": {
-			"value": "moi-server.database.windows.net"
+			"value": "moii-sql-server.database.windows.net"
 		},
 		"moi_operations_properties_typeProperties_database": {
-			"value": "moi-database"
+			"value": "moi-sql-hot"
 		},
 		"moi_operations_properties_typeProperties_userName": {
-			"value": "moi-server-admin"
+			"value": "moii-sql-server"
 		}
 	}
 }
