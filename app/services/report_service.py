@@ -251,6 +251,7 @@ class ReportService:
             updatedAt=report.updatedAt,
             userId=report.userId,
             transcribedVoiceText=report.transcribedVoiceText,
+            officerNote=getattr(report, 'officerNote', None),
             attachments=attachment_responses
         )
     @staticmethod
@@ -322,6 +323,7 @@ class ReportService:
                     updatedAt=r.updatedAt,
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
+                    officerNote=getattr(r, 'officerNote', None),
                     attachments=attachment_responses
                 )
             )
@@ -406,6 +408,7 @@ class ReportService:
                     updatedAt=r.updatedAt,
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
+                    officerNote=getattr(r, 'officerNote', None),
                     attachments=attachment_responses
                 )
             )
@@ -450,8 +453,9 @@ class ReportService:
         
         # Update status and timestamp
         report.status = status_update.status.value
-        if getattr(status_update, 'officerNote', None) is not None:
-            report.officerNote = status_update.officerNote
+        note_val = getattr(status_update, 'officerNote', None) or getattr(status_update, 'notes', None)
+        if note_val is not None:
+            report.officerNote = note_val
             
         report.updatedAt = utcnow()
         

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
 
   void _register() async {
+    final loc = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     try {
@@ -28,14 +31,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful! Please login.'), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(loc?.translate('registrationSuccess') ?? 'Registration successful! Please login.'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
+        final errorMsg = loc?.translate('registrationFailed', params: {'error': e.toString()}) ??
+            'Registration failed: ${e.toString()}';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
         );
       }
     }
@@ -43,8 +51,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
+      appBar: AppBar(
+        title: Text(loc?.translate('register') ?? 'Register'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
+            onPressed: () => localeProvider.toggleLanguage(),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(32.0),
         child: Form(
@@ -52,51 +72,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Create Account',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              Text(
+                loc?.translate('createAccount') ?? 'Create Account',
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Join the community reporting system',
+                loc?.translate('joinCommunity') ?? 'Join the community reporting system',
                 style: TextStyle(color: Colors.grey[600]),
               ),
               const SizedBox(height: 48),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email_outlined),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('email') ?? 'Email',
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter email' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? loc?.translate('pleaseEnterEmail') ?? 'Please enter email'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nationalIdController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'National ID Number',
-                  prefixIcon: Icon(Icons.badge_outlined),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('nationalId') ?? 'National ID Number',
+                  prefixIcon: const Icon(Icons.badge_outlined),
                 ),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter National ID' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? loc?.translate('pleaseEnterNationalId') ?? 'Please enter National ID'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number (Optional)',
-                  prefixIcon: Icon(Icons.phone_outlined),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('phoneOptional') ?? 'Phone Number (Optional)',
+                  prefixIcon: const Icon(Icons.phone_outlined),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock_outline),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('password') ?? 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
                 ),
-                validator: (value) => value != null && value.length < 6 ? 'Password too short' : null,
+                validator: (value) => value != null && value.length < 6
+                    ? loc?.translate('passwordTooShort') ?? 'Password too short'
+                    : null,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
@@ -107,7 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: context.watch<AuthProvider>().isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Register', style: TextStyle(fontSize: 16)),
+                    : Text(loc?.translate('register') ?? 'Register', style: const TextStyle(fontSize: 16)),
               ),
             ],
           ),

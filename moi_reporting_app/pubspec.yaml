@@ -10,13 +10,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.2
   dio: ^5.3.3
   file_picker: ^6.1.1
   path_provider: ^2.1.1
   provider: ^6.1.1
   shared_preferences: ^2.2.2
-  intl: ^0.18.1
+  intl: ^0.20.2
   geolocator: ^10.1.0
   flutter_map: ^6.0.0
   latlong2: ^0.9.1

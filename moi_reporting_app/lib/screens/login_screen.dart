@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String _roleSelection = 'citizen';
 
   void _login() async {
+    final loc = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     try {
@@ -27,10 +30,13 @@ class _LoginScreenState extends State<LoginScreen> {
           );
     } catch (e) {
       if (mounted) {
+        final errorMsg = loc?.translate('loginFailed', params: {'error': e.toString()}) ??
+            'Login failed: ${e.toString()}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Login failed: ${e.toString()}'),
-              backgroundColor: Colors.red),
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -38,7 +44,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          TextButton.icon(
+            onPressed: () => localeProvider.toggleLanguage(),
+            icon: const Icon(Icons.language, color: Color(0xFF1E3A8A)),
+            label: Text(
+              localeProvider.isArabic ? 'English' : 'العربية',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32.0),
@@ -51,14 +78,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Icon(Icons.shield_outlined,
                     size: 80, color: Color(0xFF1E3A8A)),
                 const SizedBox(height: 24),
-                const Text(
-                  'Welcome Back',
+                Text(
+                  loc?.translate('welcomeBack') ?? 'Welcome Back',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to your MoI account',
+                  loc?.translate('signInSub') ?? 'Sign in to your MoI account',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey[600]),
                 ),
@@ -85,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              'Citizen',
+                              loc?.translate('citizen') ?? 'Citizen',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: _roleSelection == 'citizen'
@@ -110,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              'Officer',
+                              loc?.translate('officer') ?? 'Officer',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: _roleSelection == 'officer'
@@ -130,24 +157,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'National ID Number',
-                    prefixIcon: Icon(Icons.badge_outlined),
+                  decoration: InputDecoration(
+                    labelText: loc?.translate('nationalId') ?? 'National ID Number',
+                    prefixIcon: const Icon(Icons.badge_outlined),
                   ),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'Please enter National ID'
+                      ? loc?.translate('pleaseEnterNationalId') ?? 'Please enter National ID'
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock_outline),
+                  decoration: InputDecoration(
+                    labelText: loc?.translate('password') ?? 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
                   ),
                   validator: (value) =>
-                      value == null ? 'Please enter password' : null,
+                      value == null || value.isEmpty
+                          ? loc?.translate('pleaseEnterPassword') ?? 'Please enter password'
+                          : null,
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -159,7 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: context.watch<AuthProvider>().isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Login', style: TextStyle(fontSize: 16)),
+                      : Text(
+                          loc?.translate('login') ?? 'Login',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
@@ -168,7 +200,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     MaterialPageRoute(
                         builder: (context) => const RegisterScreen()),
                   ),
-                  child: const Text('Don\'t have an account? Register here'),
+                  child: Text(
+                    loc?.translate('noAccountRegister') ?? "Don't have an account? Register here",
+                  ),
                 ),
               ],
             ),

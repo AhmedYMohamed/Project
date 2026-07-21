@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import '../services/report_service.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../services/location_service.dart';
 
 class ReportFormScreen extends StatefulWidget {
@@ -37,17 +39,18 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   bool _isRecording = false;
   bool _isTranscribing = false;
 
-  final Map<String, String> _categories = const {
-    'environmental': 'Environmental',
-    'infrastructure': 'Infrastructure',
-    'utilities': 'Utilities',
-    'crime': 'Crime',
-    'traffic': 'Traffic',
-    'public_nuisance': 'Public Nuisance',
-    'other': 'Other',
-  };
+  final List<String> _categoryKeys = const [
+    'environmental',
+    'infrastructure',
+    'utilities',
+    'crime',
+    'traffic',
+    'public_nuisance',
+    'other',
+  ];
 
   Future<void> _pickFile() async {
+    final loc = AppLocalizations.of(context);
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       withData: true,
       allowMultiple: true,
@@ -61,8 +64,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             if (_selectedFileNames.length >= 5) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Maximum 5 files allowed'),
+                  SnackBar(
+                    content: Text(loc?.translate('maxFilesAllowed') ?? 'Maximum 5 files allowed'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -75,7 +78,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${file.name} is too large. Max size: 10MB'),
+                    content: Text(loc?.translate('fileTooLarge') ?? 'File is too large. Max size: 10MB'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -109,6 +112,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   }
 
   Future<void> _submitReport() async {
+    final loc = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     final auth = context.read<AuthProvider>();
@@ -122,7 +126,10 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
     if (_useCurrentLocation && _currentLocationText == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fetch current location first'), backgroundColor: Colors.orange),
+        SnackBar(
+          content: Text(loc?.translate('fetchLocationFirst') ?? 'Please fetch current location first'),
+          backgroundColor: Colors.orange,
+        ),
       );
       setState(() => _isLoading = false);
       return;
@@ -141,7 +148,10 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report submitted successfully!'), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(loc?.translate('reportSubmittedSuccess') ?? 'Report submitted successfully!'),
+            backgroundColor: Colors.green,
+          ),
         );
         _formKey.currentState!.reset();
         _manualLocationController.clear();
@@ -193,6 +203,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   }
 
   Future<void> _stopRecording() async {
+    final loc = AppLocalizations.of(context);
     try {
       final path = await _audioRecorder.stop();
       setState(() {
@@ -222,7 +233,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Voice transcribed successfully')),
+          SnackBar(
+            content: Text(loc?.translate('voiceTranscribedSuccess') ?? 'Voice transcribed successfully'),
+          ),
         );
       }
     } catch (e) {
@@ -235,11 +248,21 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Report', style: TextStyle(color: Colors.white)),
+        title: Text(loc?.translate('newReport') ?? 'New Report', style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.white),
+            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
+            onPressed: () => localeProvider.toggleLanguage(),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -248,31 +271,42 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Submit an Incident',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                loc?.translate('submitIncident') ?? 'Submit an Incident',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Enter details below to report an issue to the MoI.',
+                loc?.translate('enterDetailsSub') ?? 'Enter details below to report an issue to the MoI.',
                 style: TextStyle(color: Colors.grey[600]),
               ),
               const SizedBox(height: 32),
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title', prefixIcon: Icon(Icons.title)),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('title') ?? 'Title',
+                  prefixIcon: const Icon(Icons.title),
+                ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter a title';
-                  if (value.length < 3) return 'Title must be at least 3 characters';
+                  if (value == null || value.isEmpty) {
+                    return loc?.translate('pleaseEnterTitle') ?? 'Please enter a title';
+                  }
+                  if (value.length < 3) {
+                    return loc?.translate('titleMinChars') ?? 'Title must be at least 3 characters';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _selectedCategory,
-                decoration: const InputDecoration(labelText: 'Category', prefixIcon: Icon(Icons.category)),
-                items: _categories.entries.map((e) {
-                  return DropdownMenuItem(value: e.key, child: Text(e.value));
+                decoration: InputDecoration(
+                  labelText: loc?.translate('category') ?? 'Category',
+                  prefixIcon: const Icon(Icons.category),
+                ),
+                items: _categoryKeys.map((catKey) {
+                  final label = loc?.translate('cat_$catKey') ?? catKey;
+                  return DropdownMenuItem(value: catKey, child: Text(label));
                 }).toList(),
                 onChanged: (String? newValue) => setState(() => _selectedCategory = newValue!),
               ),
@@ -280,24 +314,31 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Description', prefixIcon: Icon(Icons.description)),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('description') ?? 'Description',
+                  prefixIcon: const Icon(Icons.description),
+                ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter a description';
-                  if (value.length < 10) return 'Description must be at least 10 characters';
+                  if (value == null || value.isEmpty) {
+                    return loc?.translate('pleaseEnterDesc') ?? 'Please enter a description';
+                  }
+                  if (value.length < 10) {
+                    return loc?.translate('descMinChars') ?? 'Description must be at least 10 characters';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 8),
-              _buildVoiceRecordButton(),
+              _buildVoiceRecordButton(loc),
               const SizedBox(height: 16),
               
-              // NEW: Mock Location Picker
-              _buildLocationPicker(),
+              // Location Picker
+              _buildLocationPicker(loc),
               
               const SizedBox(height: 24),
               
               // File Picker Section
-              _buildFilePicker(),
+              _buildFilePicker(loc),
 
               const SizedBox(height: 40),
               ElevatedButton(
@@ -307,7 +348,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 56),
                 ),
-                child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Submit Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        loc?.translate('submitReport') ?? 'Submit Report',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
               ),
             ],
           ),
@@ -316,14 +362,17 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     );
   }
 
-  Widget _buildLocationPicker() {
+  Widget _buildLocationPicker(AppLocalizations? loc) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Use Current Location', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              loc?.translate('useCurrentLocation') ?? 'Use Current Location',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             Switch(
               value: _useCurrentLocation,
               onChanged: (val) {
@@ -351,7 +400,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    _currentLocationText ?? 'Press button to fetch location',
+                    _currentLocationText ??
+                        (loc?.translate('pressToFetchLocation') ?? 'Press button to fetch location'),
                     style: const TextStyle(fontSize: 14),
                   ),
                 ),
@@ -365,17 +415,17 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         else
           TextFormField(
             controller: _manualLocationController,
-            decoration: const InputDecoration(
-              labelText: 'Manual Location',
-              hintText: 'Enter city or address',
-              prefixIcon: Icon(Icons.edit_location),
+            decoration: InputDecoration(
+              labelText: loc?.translate('manualLocation') ?? 'Manual Location',
+              hintText: loc?.translate('enterCityOrAddress') ?? 'Enter city or address',
+              prefixIcon: const Icon(Icons.edit_location),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildFilePicker() {
+  Widget _buildFilePicker(AppLocalizations? loc) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -411,14 +461,14 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ElevatedButton.icon(
             onPressed: _pickFile,
             icon: const Icon(Icons.add_to_photos),
-            label: const Text('Add More Files'),
+            label: Text(loc?.translate('addMoreFiles') ?? 'Add More Files'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildVoiceRecordButton() {
+  Widget _buildVoiceRecordButton(AppLocalizations? loc) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -449,10 +499,15 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 ),
               const SizedBox(width: 8),
               if (_isTranscribing)
-                const Text('Transcribing voice...', style: TextStyle(color: Colors.blue, fontSize: 13))
+                Text(
+                  loc?.translate('transcribing') ?? 'Transcribing voice...',
+                  style: const TextStyle(color: Colors.blue, fontSize: 13),
+                )
               else
                 Text(
-                  _isRecording ? 'Stop Recording' : 'Record Description',
+                  _isRecording
+                      ? (loc?.translate('stopRecording') ?? 'Stop Recording')
+                      : (loc?.translate('recordDescription') ?? 'Record Description'),
                   style: TextStyle(
                     color: _isRecording ? Colors.red : Colors.blue,
                     fontWeight: FontWeight.bold,

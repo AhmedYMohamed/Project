@@ -30,6 +30,8 @@ class ReportModel {
   final String descriptionText;
   final String status;
   final String categoryId;
+  final String? location;
+  final String? officerNote;
   final DateTime createdAt;
   final List<AttachmentModel> attachments;
 
@@ -39,6 +41,8 @@ class ReportModel {
     required this.descriptionText,
     required this.status,
     required this.categoryId,
+    this.location,
+    this.officerNote,
     required this.createdAt,
     required this.attachments,
   });
@@ -50,6 +54,8 @@ class ReportModel {
       descriptionText: json['descriptionText'] ?? '',
       status: json['status'] ?? 'Submitted',
       categoryId: json['categoryId'] ?? '',
+      location: json['location'] as String?,
+      officerNote: json['officerNote'] as String?,
       createdAt: DateTime.parse(json['createdAt']),
       attachments: (json['attachments'] as List? ?? [])
           .map((a) => AttachmentModel.fromJson(a))
@@ -61,18 +67,27 @@ class ReportModel {
 class AttachmentModel {
   final String attachmentId;
   final String blobStorageUri;
+  final String? downloadUrl;
   final String fileType;
 
   AttachmentModel({
     required this.attachmentId,
     required this.blobStorageUri,
+    this.downloadUrl,
     required this.fileType,
   });
+
+  /// Primary URL to use for rendering/downloading attachments.
+  /// Prefers SAS token URL (downloadUrl) if available, falling back to blobStorageUri.
+  String get displayUrl => (downloadUrl != null && downloadUrl!.trim().isNotEmpty)
+      ? downloadUrl!
+      : blobStorageUri;
 
   factory AttachmentModel.fromJson(Map<String, dynamic> json) {
     return AttachmentModel(
       attachmentId: json['attachmentId'] ?? '',
       blobStorageUri: json['blobStorageUri'] ?? '',
+      downloadUrl: json['downloadUrl'] as String?,
       fileType: json['fileType'] ?? 'document',
     );
   }

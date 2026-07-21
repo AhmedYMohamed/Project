@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../services/report_service.dart';
 import 'report_form.dart';
 import 'report_history_screen.dart';
@@ -17,6 +19,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final List<Widget> pages = [
       DashboardScreen(
         onTabSelected: (index) => setState(() => _selectedIndex = index),
@@ -32,15 +35,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onTap: (index) => setState(() => _selectedIndex = index),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF1E3A8A),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined), label: 'Home'),
+              icon: const Icon(Icons.home_outlined),
+              label: loc?.translate('home') ?? 'Home'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline), label: 'Report'),
+              icon: const Icon(Icons.add_circle_outline),
+              label: loc?.translate('report') ?? 'Report'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.history_outlined), label: 'History'),
+              icon: const Icon(Icons.history_outlined),
+              label: loc?.translate('history') ?? 'History'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline), label: 'Profile'),
+              icon: const Icon(Icons.person_outline),
+              label: loc?.translate('profile') ?? 'Profile'),
         ],
       ),
     );
@@ -97,13 +104,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard', style: TextStyle(color: Colors.white)),
+        title: Text(loc?.translate('dashboard') ?? 'Dashboard',
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
         actions: [
           IconButton(
+            icon: const Icon(Icons.language, color: Colors.white),
+            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
+            onPressed: () => localeProvider.toggleLanguage(),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
+            tooltip: loc?.translate('refresh') ?? 'Refresh',
             onPressed: _fetchStats,
           ),
         ],
@@ -113,25 +130,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Welcome back,',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+            Text(
+              loc?.translate('welcomeBackUser') ?? 'Welcome back,',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            const Text(
-              'Citizen',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            Text(
+              loc?.translate('citizen') ?? 'Citizen',
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
-            _buildQuickStats(context),
+            _buildQuickStats(context, loc),
             const SizedBox(height: 32),
-            const Text(
-              'Quick Actions',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              loc?.translate('quickActions') ?? 'Quick Actions',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildActionCard(
               context,
-              title: 'File a New Report',
+              title: loc?.translate('fileNewReport') ?? 'File a New Report',
               icon: Icons.add_circle,
               color: const Color(0xFF1E3A8A),
               onTap: () => widget.onTabSelected(1),
@@ -139,12 +156,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
             _buildActionCard(
               context,
-              title: 'View Guidelines',
+              title: loc?.translate('viewGuidelines') ?? 'View Guidelines',
               icon: Icons.info_outline,
               color: Colors.orange,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Guidelines coming soon!')),
+                  SnackBar(
+                    content: Text(loc?.translate('guidelinesSoon') ?? 'Guidelines coming soon!'),
+                  ),
                 );
               },
             ),
@@ -154,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildQuickStats(BuildContext context) {
+  Widget _buildQuickStats(BuildContext context, AppLocalizations? loc) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -170,9 +189,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _StatItem(label: 'Active', count: _activeCount.toString()),
-                _StatItem(label: 'Resolved', count: _resolvedCount.toString()),
-                _StatItem(label: 'Total', count: _totalCount.toString()),
+                _StatItem(
+                    label: loc?.translate('active') ?? 'Active',
+                    count: _activeCount.toString()),
+                _StatItem(
+                    label: loc?.translate('resolved') ?? 'Resolved',
+                    count: _resolvedCount.toString()),
+                _StatItem(
+                    label: loc?.translate('total') ?? 'Total',
+                    count: _totalCount.toString()),
               ],
             ),
     );
@@ -236,11 +261,21 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
+    final loc = AppLocalizations.of(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(color: Colors.white)),
+        title: Text(loc?.translate('profile') ?? 'Profile',
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.white),
+            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
+            onPressed: () => localeProvider.toggleLanguage(),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -253,38 +288,47 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Center(
+          Center(
             child: Text(
-              'Citizen Account',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              loc?.translate('citizenAccount') ?? 'Citizen Account',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 48),
           ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(loc?.translate('language') ?? 'Language'),
+            subtitle: Text(localeProvider.isArabic ? 'العربية' : 'English'),
+            trailing: const Icon(Icons.swap_horiz),
+            onTap: () => localeProvider.toggleLanguage(),
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.settings_outlined),
-            title: const Text('Account Settings'),
+            title: Text(loc?.translate('accountSettings') ?? 'Account Settings'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings coming soon!')),
+                SnackBar(content: Text(loc?.translate('settingsSoon') ?? 'Settings coming soon!')),
               );
             },
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.help_outline),
-            title: const Text('Help & Support'),
+            title: Text(loc?.translate('helpSupport') ?? 'Help & Support'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Help & Support coming soon!')),
+                SnackBar(content: Text(loc?.translate('helpSoon') ?? 'Help & Support coming soon!')),
               );
             },
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text(loc?.translate('logout') ?? 'Logout',
+                style: const TextStyle(color: Colors.red)),
             onTap: () => auth.logout(),
           ),
         ],

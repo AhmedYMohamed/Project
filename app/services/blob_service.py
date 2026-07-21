@@ -213,7 +213,7 @@ class BlobStorageService:
     def generate_download_url(
         self, 
         blob_url: str,
-        expiry_hours: int = 1
+        expiry_hours: int = 2
     ) -> Optional[str]:
         """Generate download URL with SAS token for Azure, or direct URL for local"""
         if self.use_azure:

@@ -77,6 +77,23 @@ class ReportService {
     }
   }
 
+  Future<ReportModel> getReportById(String token, String reportId) async {
+    try {
+      final response = await _dio.get(
+        '/api/v1/reports/$reportId',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return ReportModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> transcribeVoice(
       Uint8List audioBytes, String fileName, String token) async {
     try {

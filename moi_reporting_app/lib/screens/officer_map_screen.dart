@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../screens/app_colors.dart';
 import 'officer_report_details_screen.dart';
 
 class OfficerMapScreen extends StatelessWidget {
@@ -18,13 +21,24 @@ class OfficerMapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Incident Map', style: TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(loc?.translate('incidentMap') ?? 'Incident Map',
+            style: const TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.onDark,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.white),
+            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
+            onPressed: () => localeProvider.toggleLanguage(),
+          ),
+        ],
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: AppColors.headerGradient),
         ),
@@ -36,14 +50,13 @@ class OfficerMapScreen extends StatelessWidget {
         ),
         children: [
           TileLayer(
-            urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+            urlTemplate:
+                'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
             subdomains: const ['a', 'b', 'c', 'd'],
             userAgentPackageName: 'com.moi.reporting.app',
           ),
           MarkerLayer(
             markers: reports.map((report) {
-              // Note: Backend might need to provide raw lat/lon in the nearby reports list
-              // For now we assume they are parsed into the map or we use the report's location string
               final double lat = report['latitude']?.toDouble() ?? initialLat;
               final double lon = report['longitude']?.toDouble() ?? initialLon;
               final Color statusColor = AppColors.statusColor(report['status']);
@@ -85,7 +98,11 @@ class OfficerMapScreen extends StatelessWidget {
   }
 
   void _showReportSummary(BuildContext context, Map<String, dynamic> report) {
+    final loc = AppLocalizations.of(context);
     final Color statusColor = AppColors.statusColor(report['status']);
+    final rawStatus = report['status'] ?? 'Submitted';
+    final translatedStatus = loc?.translate('status_${rawStatus.toString().toLowerCase()}') ?? rawStatus;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -124,13 +141,14 @@ class OfficerMapScreen extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    report['status'] ?? 'Submitted',
+                    translatedStatus,
                     style: TextStyle(
                       color: statusColor,
                       fontWeight: FontWeight.bold,
@@ -143,11 +161,12 @@ class OfficerMapScreen extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 16, color: AppColors.textSecondary),
+                const Icon(Icons.location_on,
+                    size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    report['location'] ?? 'Unknown Location',
+                    report['location'] ?? (loc?.translate('locationUnknown') ?? 'Unknown Location'),
                     style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
@@ -174,18 +193,21 @@ class OfficerMapScreen extends StatelessWidget {
                     shadowColor: Colors.transparent,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => OfficerReportDetailsScreen(reportId: report['id']),
+                        builder: (context) =>
+                            OfficerReportDetailsScreen(reportId: report['id']),
                       ),
                     );
                   },
-                  child: const Text('View Full Details', style: TextStyle(fontWeight: FontWeight.w600)),
+                  child: Text(loc?.translate('viewFullDetails') ?? 'View Full Details',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ),
             ),
