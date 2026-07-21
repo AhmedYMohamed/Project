@@ -145,6 +145,20 @@ class BlobStorageService:
                 logger.error(f"Unexpected error deleting local file: {e}")
                 return False
 
+    def _get_account_key(self) -> Optional[str]:
+        """Retrieve account key from credential object or parse from connection string"""
+        if hasattr(self, 'blob_service_client') and self.blob_service_client.credential:
+            key = getattr(self.blob_service_client.credential, 'account_key', None)
+            if key:
+                return key
+        
+        conn_str = settings.BLOB_STORAGE_CONNECTION_STRING
+        if conn_str:
+            for part in conn_str.split(';'):
+                if part.strip().startswith('AccountKey='):
+                    return part.strip().split('AccountKey=', 1)[1]
+        return None
+
     def generate_download_url(
         self, 
         blob_url: str,
@@ -159,7 +173,7 @@ class BlobStorageService:
                 else:
                     blob_name = blob_url.split('/')[-1].split('?')[0]
                 
-                account_key = getattr(self.blob_service_client.credential, 'account_key', None)
+                account_key = self._get_account_key()
                 user_delegation_key = None
                 if not account_key and hasattr(self.blob_service_client, 'get_user_delegation_key'):
                     user_delegation_key = self.blob_service_client.get_user_delegation_key(
