@@ -6,13 +6,13 @@
 			"value": "moi-data-factory-v2"
 		},
 		"moi_analytics_password": {
-			"value": "{Z}93,z$,xd_(J@JE+}8K}LyoGuo3(i<Dhbg$p3kL2[<}"
+			"value": "MoiReportingDbPass2026Prod"
 		},
 		"moi_operation_password": {
-			"value": "{Z}93,z$,xd_(J@JE+}8K}LyoGuo3(i<Dhbg$p3kL2[<}"
+			"value": "MoiReportingDbPass2026Prod"
 		},
 		"moi_operations_password": {
-			"value": "{Z}93,z$,xd_(J@JE+}8K}LyoGuo3(i<Dhbg$p3kL2[<}"
+			"value": "MoiReportingDbPass2026Prod"
 		},
 		"moi_analytics_properties_typeProperties_server": {
 			"value": "moii-sql-server.database.windows.net"
