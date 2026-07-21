@@ -49,14 +49,14 @@ class ReportModel {
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
     return ReportModel(
-      reportId: json['reportId'] ?? '',
+      reportId: json['reportId'] ?? json['report_id'] ?? '',
       title: json['title'] ?? '',
-      descriptionText: json['descriptionText'] ?? '',
+      descriptionText: json['descriptionText'] ?? json['description_text'] ?? '',
       status: json['status'] ?? 'Submitted',
-      categoryId: json['categoryId'] ?? '',
-      location: json['location'] as String?,
-      officerNote: json['officerNote'] as String?,
-      createdAt: DateTime.parse(json['createdAt']),
+      categoryId: json['categoryId'] ?? json['category_id'] ?? '',
+      location: (json['location'] ?? json['locationRaw']) as String?,
+      officerNote: (json['officerNote'] ?? json['officer_note'] ?? json['notes']) as String?,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       attachments: (json['attachments'] as List? ?? [])
           .map((a) => AttachmentModel.fromJson(a))
           .toList(),

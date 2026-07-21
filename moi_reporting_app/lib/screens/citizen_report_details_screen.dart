@@ -60,8 +60,8 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.black.withValues(alpha: 0.9),
-        insetPadding: const EdgeInsets.all(10),
+        backgroundColor: Colors.black.withValues(alpha: 0.95),
+        insetPadding: const EdgeInsets.all(12),
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -84,7 +84,7 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
               top: 16,
               right: 16,
               child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                icon: const Icon(Icons.close, color: Colors.white, size: 32),
                 onPressed: () => Navigator.of(ctx).pop(),
               ),
             ),
@@ -100,15 +100,17 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
     final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Dark slate theme
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
           loc?.translate('reportDetailsTitle') ?? 'تفاصيل البلاغ',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF1E293B),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: AppColors.headerGradient),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
+        elevation: 2,
         actions: [
           IconButton(
             icon: const Icon(Icons.language, color: Colors.white),
@@ -123,11 +125,10 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
       ),
       body: FutureBuilder<ReportModel>(
         future: _reportFuture,
-        initialData: widget.initialReport,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
             return const Center(
-              child: CircularProgressIndicator(color: AppColors.skyAqua),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           } else if (snapshot.hasError && !snapshot.hasData) {
             return Center(
@@ -136,17 +137,17 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 54, color: Colors.redAccent),
+                    const Icon(Icons.error_outline, size: 54, color: AppColors.statusRejected),
                     const SizedBox(height: 16),
                     Text(
                       '${loc?.translate('failedToLoadReport') ?? 'فشل في تحميل البلاغ'}: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.white70),
+                      style: const TextStyle(color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.frenchBlue,
+                        backgroundColor: AppColors.primary,
                       ),
                       icon: const Icon(Icons.refresh, color: Colors.white),
                       label: Text(loc?.translate('refresh') ?? 'تحديث', style: const TextStyle(color: Colors.white)),
@@ -158,7 +159,7 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
             );
           }
 
-          final report = snapshot.data!;
+          final report = snapshot.data ?? widget.initialReport!;
           return RefreshIndicator(
             onRefresh: () async {
               setState(() => _loadReport());
@@ -172,22 +173,22 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
                   // --- Header Status Card ---
                   _buildHeaderCard(report, loc),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // --- Officer Notes Section (High Priority) ---
                   _buildOfficerNotesSection(report, loc),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // --- Report Description & Category Section ---
                   _buildDetailsSection(report, loc),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // --- Attachments / Evidence Section ---
                   if (report.attachments.isNotEmpty) _buildEvidenceSection(report, loc),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -200,73 +201,61 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
   Widget _buildHeaderCard(ReportModel report, AppLocalizations? loc) {
     final dateStr = DateFormat('MMM dd, yyyy • hh:mm a').format(report.createdAt);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF1E293B),
-            const Color(0xFF0F172A).withValues(alpha: 0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.skyAqua.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.skyAqua.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  '#${report.reportId}',
-                  style: const TextStyle(
-                    color: AppColors.skyAqua,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.brightTealBlue.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '#${report.reportId}',
+                    style: const TextStyle(
+                      color: AppColors.brightTealBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-              ),
-              _buildStatusChip(report.status, loc),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            report.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+                _buildStatusChip(report.status, loc),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.access_time, size: 14, color: Colors.white54),
-              const SizedBox(width: 6),
-              Text(
-                dateStr,
-                style: const TextStyle(color: Colors.white54, fontSize: 13),
+            const SizedBox(height: 14),
+            Text(
+              report.title,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.access_time, size: 15, color: AppColors.textSecondary),
+                const SizedBox(width: 6),
+                Text(
+                  dateStr,
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -275,118 +264,122 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
     final hasNote = report.officerNote != null && report.officerNote!.trim().isNotEmpty;
     final officerNotesTitle = loc?.translate('officerNotes') ?? 'ملاحظات الضابط';
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: hasNote ? const Color(0xFF1E3A8A).withValues(alpha: 0.25) : const Color(0xFF1E293B),
+    return Card(
+      elevation: hasNote ? 4 : 1,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: hasNote ? AppColors.skyAqua.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.08),
-          width: hasNote ? 1.5 : 1.0,
+        side: BorderSide(
+          color: hasNote ? AppColors.brightTealBlue : Colors.black12,
+          width: hasNote ? 1.5 : 0.8,
         ),
-        boxShadow: hasNote
-            ? [
-                BoxShadow(
-                  color: AppColors.skyAqua.withValues(alpha: 0.1),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                ),
-              ]
-            : [],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: hasNote ? AppColors.skyAqua.withValues(alpha: 0.2) : Colors.white10,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.shield,
-                  color: hasNote ? AppColors.skyAqua : Colors.white38,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  officerNotesTitle,
-                  style: TextStyle(
-                    color: hasNote ? Colors.white : Colors.white70,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              if (hasNote)
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: hasNote ? AppColors.lightCyan : AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green.shade400, width: 0.8),
+                    color: hasNote ? AppColors.frenchBlue.withValues(alpha: 0.15) : Colors.grey.shade100,
+                    shape: BoxShape.circle,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle, size: 12, color: Colors.green.shade400),
-                      const SizedBox(width: 4),
-                      Text(
-                        loc?.translate('updated') ?? 'تم التحديث',
-                        style: TextStyle(color: Colors.green.shade400, fontSize: 11, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  child: Icon(
+                    Icons.shield,
+                    color: hasNote ? AppColors.frenchBlue : Colors.grey,
+                    size: 22,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          if (hasNote) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A).withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.skyAqua.withValues(alpha: 0.2)),
-              ),
-              child: SelectableText(
-                report.officerNote!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ] else ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: Colors.white38, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      loc?.translate('noOfficerNotesYet') ?? 'لم يقم الضابط بإضافة ملاحظات بعد.',
-                      style: const TextStyle(color: Colors.white54, fontSize: 14),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    officerNotesTitle,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
-              ),
+                ),
+                if (hasNote)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.shade400, width: 0.8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, size: 12, color: Colors.green.shade800),
+                        const SizedBox(width: 4),
+                        Text(
+                          loc?.translate('updated') ?? 'تم التحديث',
+                          style: TextStyle(color: Colors.green.shade800, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
+            const SizedBox(height: 14),
+            if (hasNote) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.frostedBlue),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.brightTealBlue.withValues(alpha: 0.06),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: SelectableText(
+                  report.officerNote!,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ] else ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: AppColors.textSecondary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        loc?.translate('noOfficerNotesYet') ?? 'لم يقم الضابط بإضافة ملاحظات بعد.',
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -395,182 +388,186 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
     final catKey = 'cat_${report.categoryId.toLowerCase()}';
     final categoryText = loc?.translate(catKey) ?? report.categoryId;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Category Tag
-          Row(
-            children: [
-              const Icon(Icons.category_outlined, color: AppColors.skyAqua, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                '${loc?.translate('category') ?? 'الفئة'}: ',
-                style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.frenchBlue.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.skyAqua.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  categoryText,
-                  style: const TextStyle(color: AppColors.skyAqua, fontSize: 13, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-
-          if (report.location != null && report.location!.isNotEmpty) ...[
-            const SizedBox(height: 12),
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Category Tag
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on_outlined, color: Colors.redAccent, size: 18),
+                const Icon(Icons.category_outlined, color: AppColors.brightTealBlue, size: 20),
                 const SizedBox(width: 8),
-                Expanded(
+                Text(
+                  '${loc?.translate('category') ?? 'الفئة'}: ',
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.frostedBlue.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Text(
-                    report.location!,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    categoryText,
+                    style: const TextStyle(color: AppColors.deepTwilight, fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
+
+            if (report.location != null && report.location!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.location_on_outlined, color: AppColors.statusRejected, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      report.location!,
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            const Divider(height: 28, color: Colors.black12),
+
+            Text(
+              loc?.translate('description') ?? 'الوصف',
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            SelectableText(
+              report.descriptionText,
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.5),
+            ),
           ],
-
-          const Divider(height: 28, color: Colors.white10),
-
-          Text(
-            loc?.translate('description') ?? 'الوصف',
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          SelectableText(
-            report.descriptionText,
-            style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildEvidenceSection(ReportModel report, AppLocalizations? loc) {
-    final currentAttachment = report.attachments[_selectedAttachmentIndex];
+    final safeIndex = _selectedAttachmentIndex < report.attachments.length ? _selectedAttachmentIndex : 0;
+    final currentAttachment = report.attachments[safeIndex];
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.photo_library_outlined, color: AppColors.skyAqua, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                loc?.translate('evidence') ?? 'الأدلة والمرفقات',
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              Text(
-                '${_selectedAttachmentIndex + 1} ${loc?.translate('of') ?? 'من'} ${report.attachments.length}',
-                style: const TextStyle(color: Colors.white54, fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Main Preview Box
-          Container(
-            height: 260,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.black45,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white12),
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.photo_library_outlined, color: AppColors.brightTealBlue, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  loc?.translate('evidence') ?? 'الأدلة والمرفقات',
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Text(
+                  '${safeIndex + 1} ${loc?.translate('of') ?? 'من'} ${report.attachments.length}',
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: _buildAttachmentPreview(currentAttachment),
+            const SizedBox(height: 16),
+
+            // Main Preview Container
+            Container(
+              constraints: const BoxConstraints(maxHeight: 340),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: _buildAttachmentPreview(currentAttachment),
+              ),
             ),
-          ),
 
-          if (report.attachments.length > 1) ...[
-            const SizedBox(height: 14),
-            SizedBox(
-              height: 64,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: report.attachments.length,
-                itemBuilder: (context, index) {
-                  final att = report.attachments[index];
-                  final isSelected = index == _selectedAttachmentIndex;
-                  final isVideo = _isVideoAttachment(att);
+            if (report.attachments.length > 1) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 72,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: report.attachments.length,
+                  itemBuilder: (context, index) {
+                    final att = report.attachments[index];
+                    final isSelected = index == safeIndex;
+                    final isVideo = _isVideoAttachment(att);
 
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedAttachmentIndex = index),
-                    child: Container(
-                      width: 64,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelected ? AppColors.skyAqua : Colors.white24,
-                          width: isSelected ? 2.5 : 1.0,
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        setState(() => _selectedAttachmentIndex = index);
+                      },
+                      child: Container(
+                        width: 72,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected ? AppColors.brightTealBlue : Colors.grey.shade300,
+                            width: isSelected ? 3.0 : 1.0,
+                          ),
+                        ),
+                        child: IgnorePointer(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: isVideo
+                                    ? Container(
+                                        color: Colors.black87,
+                                        child: const Center(
+                                          child: Icon(Icons.videocam, color: Colors.white, size: 28),
+                                        ),
+                                      )
+                                    : SmartNetworkImage(
+                                        url: att.displayUrl,
+                                        fit: BoxFit.cover,
+                                        width: 72,
+                                        height: 72,
+                                        errorBuilder: (ctx, err, stack) => Container(
+                                          color: Colors.grey.shade200,
+                                          child: const Icon(Icons.broken_image, color: Colors.grey, size: 22),
+                                        ),
+                                      ),
+                              ),
+                              if (isVideo)
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: const Icon(Icons.play_arrow, color: AppColors.skyAqua, size: 20),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: isVideo
-                                ? Container(
-                                    color: Colors.black54,
-                                    child: const Center(
-                                      child: Icon(Icons.videocam, color: Colors.white70, size: 24),
-                                    ),
-                                  )
-                                : SmartNetworkImage(
-                                    url: att.displayUrl,
-                                    fit: BoxFit.cover,
-                                    width: 64,
-                                    height: 64,
-                                    errorBuilder: (ctx, err, stack) => const Center(
-                                      child: Icon(Icons.broken_image, color: Colors.white38, size: 20),
-                                    ),
-                                  ),
-                          ),
-                          if (isVideo)
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black45,
-                                shape: BoxShape.circle,
-                              ),
-                              padding: const EdgeInsets.all(4),
-                              child: const Icon(Icons.play_arrow, color: AppColors.skyAqua, size: 18),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -595,15 +592,15 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
             height: double.infinity,
             headers: const {'Accept': 'image/*'},
             loadingBuilder: (context) => const Center(
-              child: CircularProgressIndicator(color: AppColors.skyAqua),
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
             errorBuilder: (context, error, stackTrace) => Container(
               padding: const EdgeInsets.all(16),
-              color: Colors.black26,
+              color: Colors.grey.shade900,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.broken_image_outlined, color: Colors.white54, size: 40),
+                  const Icon(Icons.broken_image_outlined, color: Colors.white54, size: 44),
                   const SizedBox(height: 8),
                   Text(
                     error.toString(),
@@ -616,24 +613,19 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.all(10),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white30),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.zoom_in, color: Colors.white, size: 14),
-                SizedBox(width: 4),
-                Text(
-                  'تكبير',
-                  style: TextStyle(color: Colors.white, fontSize: 11),
-                ),
-              ],
+          Positioned(
+            bottom: 12,
+            right: 12,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black.withValues(alpha: 0.75),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              icon: const Icon(Icons.zoom_in, size: 16, color: AppColors.skyAqua),
+              label: const Text('تكبير الصورة', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              onPressed: () => _openImageLightbox(context, url),
             ),
           ),
         ],
@@ -642,34 +634,20 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
   }
 
   Widget _buildStatusChip(String status, AppLocalizations? loc) {
-    Color color;
+    final color = AppColors.statusColor(status);
     final lowerStatus = status.toLowerCase();
-    switch (lowerStatus) {
-      case 'resolved':
-        color = Colors.green;
-        break;
-      case 'inprogress':
-        color = Colors.orange;
-        break;
-      case 'rejected':
-        color = Colors.redAccent;
-        break;
-      default:
-        color = AppColors.skyAqua;
-    }
-
     final statusText = loc?.translate('status_$lowerStatus') ?? status;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color, width: 1.2),
       ),
       child: Text(
         statusText,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+        style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -716,7 +694,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.videocam_off, color: Colors.white54, size: 40),
+            Icon(Icons.videocam_off, color: Colors.white54, size: 44),
             SizedBox(height: 8),
             Text(
               'تعذر تشغيل الفيديو.',
@@ -729,7 +707,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
 
     if (!_controller.value.isInitialized) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.skyAqua),
+        child: CircularProgressIndicator(color: AppColors.primary),
       );
     }
 
@@ -755,7 +733,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                     ? Icons.pause_circle_filled
                     : Icons.play_circle_fill,
                 color: Colors.white,
-                size: 54,
+                size: 56,
               ),
               onPressed: () => setState(() => _controller.value.isPlaying
                   ? _controller.pause()
