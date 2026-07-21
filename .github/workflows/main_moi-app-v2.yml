@@ -87,4 +87,4 @@ jobs:
           inlineScript: |
             az webapp restart \
               --name moi-app-v2 \
-              --resource-group rg-moi-reporting-prod`
+              --resource-group rg-moi-reporting-prod
