@@ -90,6 +90,8 @@ class OfficerService {
       await _dio.put('/api/v1/reports/$reportId/status', data: {
         'status': status,
         'officerNote': note,
+        'officer_note': note,
+        'notes': note,
       });
     } catch (e) {
       rethrow;

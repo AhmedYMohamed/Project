@@ -61,6 +61,7 @@ class ReportStatusUpdate(BaseModel):
     status: ReportStatus
     notes: Optional[str] = None # For admin notes/resolution details
     officerNote: Optional[str] = None # For officer notes
+    officer_note: Optional[str] = None # Fallback field
 
 # Schema for READING a report (Output)
 class ReportResponse(ReportBase):

@@ -453,7 +453,7 @@ class ReportService:
         
         # Update status and timestamp
         report.status = status_update.status.value
-        note_val = getattr(status_update, 'officerNote', None) or getattr(status_update, 'notes', None)
+        note_val = getattr(status_update, 'officerNote', None) or getattr(status_update, 'officer_note', None) or getattr(status_update, 'notes', None)
         if note_val is not None:
             report.officerNote = note_val
             
