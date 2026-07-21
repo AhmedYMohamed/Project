@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class UserModel {
   final String userId;
   final String? email;
@@ -48,6 +50,8 @@ class ReportModel {
   });
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
+    final note = (json['officerNote'] ?? json['officer_note'] ?? json['notes']) as String?;
+    debugPrint('=== ReportModel.fromJson === officerNote extracted: "$note" (raw officerNote=${json['officerNote']}, officer_note=${json['officer_note']}, notes=${json['notes']})');
     return ReportModel(
       reportId: json['reportId'] ?? json['report_id'] ?? '',
       title: json['title'] ?? '',
@@ -55,7 +59,7 @@ class ReportModel {
       status: json['status'] ?? 'Submitted',
       categoryId: json['categoryId'] ?? json['category_id'] ?? '',
       location: (json['location'] ?? json['locationRaw']) as String?,
-      officerNote: (json['officerNote'] ?? json['officer_note'] ?? json['notes']) as String?,
+      officerNote: note,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       attachments: (json['attachments'] as List? ?? [])
           .map((a) => AttachmentModel.fromJson(a))

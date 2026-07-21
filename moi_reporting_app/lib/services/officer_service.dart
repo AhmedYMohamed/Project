@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'auth_service.dart';
 
 class OfficerService {
@@ -87,13 +88,20 @@ class OfficerService {
 
   Future<void> updateReportStatus(String reportId, String status, String note) async {
     try {
-      await _dio.put('/api/v1/reports/$reportId/status', data: {
+      final payload = {
         'status': status,
         'officerNote': note,
         'officer_note': note,
         'notes': note,
-      });
+      };
+      debugPrint('=== OFFICER API REQUEST PAYLOAD ===');
+      debugPrint('Endpoint: PUT /api/v1/reports/$reportId/status');
+      debugPrint('Payload: $payload');
+      final response = await _dio.put('/api/v1/reports/$reportId/status', data: payload);
+      debugPrint('=== OFFICER API RESPONSE ===');
+      debugPrint('Response Data: ${response.data}');
     } catch (e) {
+      debugPrint('Officer update report status error: $e');
       rethrow;
     }
   }

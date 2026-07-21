@@ -72,13 +72,18 @@ class _OfficerReportDetailsScreenState
     final loc = AppLocalizations.of(context);
     setState(() => _isSubmitting = true);
     try {
+      final noteText = _noteController.text;
+      debugPrint('=== OFFICER UPDATE SUBMISSION ===');
+      debugPrint('Report ID: ${widget.reportId}');
+      debugPrint('Status: $_selectedStatus');
+      debugPrint('Officer Note Text: "$noteText"');
       await _officerService.updateReportStatus(
-          widget.reportId, _selectedStatus, _noteController.text);
+          widget.reportId, _selectedStatus, noteText);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(loc?.translate('statusUpdatedSuccess') ?? 'Status updated successfully!'),
             backgroundColor: AppColors.statusResolved));
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {

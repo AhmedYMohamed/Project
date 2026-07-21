@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 
 class ReportService {
@@ -87,9 +88,11 @@ class ReportService {
           },
         ),
       );
-
+      debugPrint('=== CITIZEN GET REPORT RESPONSE ===');
+      debugPrint('Report JSON response: ${response.data}');
       return ReportModel.fromJson(response.data);
     } catch (e) {
+      debugPrint('Citizen getReportById error: $e');
       rethrow;
     }
   }
