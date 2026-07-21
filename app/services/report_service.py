@@ -318,6 +318,8 @@ class ReportService:
                     categoryId=r.categoryId,
                     status=r.status,
                     location=r.locationRaw,
+                    latitude=r.latitude,
+                    longitude=r.longitude,
                     aiConfidence=r.aiConfidence,
                     createdAt=r.createdAt,
                     updatedAt=r.updatedAt,
@@ -403,6 +405,8 @@ class ReportService:
                     categoryId=r.categoryId,
                     status=r.status,
                     location=r.locationRaw,
+                    latitude=r.latitude,
+                    longitude=r.longitude,
                     aiConfidence=r.aiConfidence,
                     createdAt=r.createdAt,
                     updatedAt=r.updatedAt,
@@ -453,7 +457,15 @@ class ReportService:
         
         # Update status and timestamp
         report.status = status_update.status.value
-        note_val = getattr(status_update, 'officerNote', None) or getattr(status_update, 'officer_note', None) or getattr(status_update, 'notes', None)
+        
+        note_val = None
+        for key in ['officerNote', 'officer_note', 'notes']:
+            val = getattr(status_update, key, None)
+            if val is not None:
+                note_val = val
+                break
+                
+        print(f"[DEBUG update_report_status] Resolved note_val to update: {repr(note_val)}")
         if note_val is not None:
             report.officerNote = note_val
             

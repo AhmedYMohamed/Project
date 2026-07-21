@@ -170,14 +170,22 @@ def get_my_reports(
 @router.get(
     "/{report_id}",
     response_model=ReportResponse,
-    summary="Get report by ID"
+    summary="Get report details by reportId"
 )
 def get_report(
-    report_id: Optional[str] = None,
+    report_id: str,
     db: Session = Depends(get_db_ops),
     current_user: User = Depends(get_current_user)
 ):
     """Get a single report by its ID with all attachments"""
+    print(f"\n[DEBUG GET_REPORT] report_id={report_id}")
+    try:
+        from sqlalchemy import text
+        raw_note = db.execute(text("SELECT officerNote FROM dbo.Report WHERE reportId = :rid"), {"rid": report_id}).scalar()
+        print(f"[DEBUG GET_REPORT] Raw SQL officerNote value from DB: {repr(raw_note)}")
+    except Exception as db_err:
+        print(f"[DEBUG GET_REPORT] Error querying raw SQL: {db_err}")
+
     report = ReportService.get_report(db, report_id)
     
     if not report:
@@ -186,6 +194,7 @@ def get_report(
             detail=f"Report with ID {report_id} not found"
         )
     
+    print(f"[DEBUG GET_REPORT] Returned ReportResponse.officerNote: {repr(report.officerNote)}")
     return report
 
 @router.get(
@@ -203,6 +212,7 @@ def get_report_by_user(
     current_user: User = Depends(get_current_user),
 ):
     """Get a single report by its ID with all attachments"""
+    print(f"\n[DEBUG GET_REPORT_BY_USER] user_id={user_id}")
     reports = ReportService.get_report_by_user(db, user_id, skip, limit, status, category)
     
     if not reports:
@@ -210,6 +220,9 @@ def get_report_by_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Report with ID {user_id} not found"
         )
+    
+    for r in reports.reports:
+        print(f"[DEBUG GET_REPORT_BY_USER] Report {r.reportId} officerNote={repr(r.officerNote)}")
     
     return reports
 
@@ -225,6 +238,9 @@ def update_report_status(
     current_user: User = Depends(get_current_user)
 ):
     """Update the status of a report"""
+    print(f"\n[DEBUG UPDATE_REPORT_STATUS] report_id={report_id}")
+    print(f"[DEBUG UPDATE_REPORT_STATUS] Received status_update: {status_update.model_dump()}")
+    
     report = ReportService.update_report_status(db, report_id, status_update)
     
     if not report:
@@ -233,6 +249,7 @@ def update_report_status(
             detail=f"Report with ID {report_id} not found"
         )
     
+    print(f"[DEBUG UPDATE_REPORT_STATUS] Returned ReportResponse.officerNote after update: {repr(report.officerNote)}")
     return report
 
 
