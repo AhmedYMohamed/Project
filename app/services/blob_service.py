@@ -159,10 +159,20 @@ class BlobStorageService:
                 else:
                     blob_name = blob_url.split('/')[-1].split('?')[0]
                 
+                account_key = getattr(self.blob_service_client.credential, 'account_key', None)
+                user_delegation_key = None
+                if not account_key and hasattr(self.blob_service_client, 'get_user_delegation_key'):
+                    user_delegation_key = self.blob_service_client.get_user_delegation_key(
+                        key_start_time=datetime.now(timezone.utc),
+                        key_expiry_time=datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
+                    )
+
                 sas_token = generate_blob_sas(
                     account_name=self.blob_service_client.account_name,
                     container_name=self.container_name,
                     blob_name=blob_name,
+                    account_key=account_key,
+                    user_delegation_key=user_delegation_key,
                     permission=BlobSasPermissions(read=True),
                     expiry=datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
                 )
