@@ -251,7 +251,7 @@ class ReportService:
             updatedAt=report.updatedAt,
             userId=report.userId,
             transcribedVoiceText=report.transcribedVoiceText,
-            officerNote=getattr(report, 'officerNote', None),
+            officerNote=report.officerNote,
             attachments=attachment_responses
         )
     @staticmethod
@@ -323,7 +323,7 @@ class ReportService:
                     updatedAt=r.updatedAt,
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
-                    officerNote=getattr(r, 'officerNote', None),
+                    officerNote=r.officerNote,
                     attachments=attachment_responses
                 )
             )
@@ -408,7 +408,7 @@ class ReportService:
                     updatedAt=r.updatedAt,
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
-                    officerNote=getattr(r, 'officerNote', None),
+                    officerNote=r.officerNote,
                     attachments=attachment_responses
                 )
             )
