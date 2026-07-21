@@ -1,26 +1,21 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
-
 name: Build and deploy Python app to Azure Web App - moi-app-v2
-
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-
       # ⚡ Cache python dependencies based on requirements.txt hash
       - name: Cache Pip packages
         uses: actions/cache@v4
@@ -29,12 +24,10 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       # Install packages into target directory only if requirements changed
       - name: Install dependencies
         run: |
           pip install --target=".python_packages/lib/site-packages" --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
-
       # Upload the pre-built packages directly
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
@@ -48,30 +41,50 @@ jobs:
             !dataset/
             !.git/
             !.github/
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
-
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: python-app
-
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9E6E9E5F81E34D15807EBF313A25736B }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_72A50180415343C0B3E9050CB6082F9D }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BCC21564E1634952A05BCE65D13FC2AA }}
-
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'moi-app-v2'
           slot-name: 'Production'
+      # Explicitly tell App Service where the pre-built dependencies live and
+      # confirm Oryx build is skipped, since we already install packages above.
+      # Without this, App Service's Python container may not reliably pick up
+      # .python_packages/lib/site-packages when SCM_DO_BUILD_DURING_DEPLOYMENT
+      # is left at its default rather than explicitly set to false.
+      - name: Configure app settings for pre-built package (no Oryx build)
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az webapp config appsettings set \
+              --name moi-app-v2 \
+              --resource-group rg-moi-reporting-prod \
+              --settings \
+                SCM_DO_BUILD_DURING_DEPLOYMENT=false \
+                PYTHONPATH="/home/site/wwwroot/.python_packages/lib/site-packages"
+      # Force a real restart so the worker process reloads the new files
+      # from disk instead of continuing to run whatever was already warm.
+      - name: Restart Azure Web App
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az webapp restart \
+              --name moi-app-v2 \
+              --resource-group rg-moi-reporting-prod
