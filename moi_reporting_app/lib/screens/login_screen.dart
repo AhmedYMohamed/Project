@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      context.read<AuthProvider>().setSelectedRole(_roleSelection);
+      await context.read<AuthProvider>().setSelectedRole(_roleSelection);
       await context.read<AuthProvider>().login(
             _emailController.text,
             _passwordController.text,

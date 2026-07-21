@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -23,13 +24,18 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _loadToken() async {
     _token = await _authService.getToken();
     _userId = await _authService.getUserId();
-    // In a real app we might load the last selected role here as well
+    final role = await _authService.getUserRole();
+    if (role != null) {
+      _selectedRole = role;
+    }
     _isInitialized = true;
     notifyListeners();
   }
 
-  void setSelectedRole(String role) {
+  Future<void> setSelectedRole(String role) async {
     _selectedRole = role;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_role', role);
     notifyListeners();
   }
 
@@ -53,6 +59,9 @@ class AuthProvider extends ChangeNotifier {
       final result = await _authService.login(nationalId: nationalId, password: password);
       _token = result['token'];
       _userId = result['userId'];
+      if (result['role'] != null) {
+        _selectedRole = result['role']!;
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

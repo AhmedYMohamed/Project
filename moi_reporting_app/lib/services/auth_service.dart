@@ -56,15 +56,20 @@ class AuthService {
 
       final token = response.data['access_token'];
       final userId = response.data['user_id'];
+      final role = response.data['role'];
 
-      // Save token and userId locally
+      // Save token, userId, and role locally
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('jwt_token', token);
       await prefs.setString('user_id', userId);
+      if (role != null) {
+        await prefs.setString('user_role', role);
+      }
 
       return {
         'token': token,
         'userId': userId,
+        'role': role ?? 'citizen',
       };
     } catch (e) {
       rethrow;
@@ -74,6 +79,8 @@ class AuthService {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
+    await prefs.remove('user_id');
+    await prefs.remove('user_role');
   }
 
   Future<String?> getToken() async {
@@ -84,5 +91,10 @@ class AuthService {
   Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_id');
+  }
+
+  Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_role');
   }
 }
