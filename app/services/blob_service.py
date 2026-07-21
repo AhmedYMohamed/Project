@@ -36,7 +36,8 @@ class BlobStorageService:
                         logger.info(f"✓ Created Azure Blob Storage container: {self.container_name}")
                     
                     self.use_azure = True
-                    logger.info("✓ Azure Blob Storage initialized successfully")
+                    cred_type = type(self.blob_service_client.credential).__name__ if self.blob_service_client.credential else "None (auth embedded in URL, e.g. SAS)"
+                    logger.info(f"✓ Azure Blob Storage initialized successfully (credential type: {cred_type})")
                 except Exception as e:
                     logger.warning(f"⚠ Failed to initialize Azure Blob Storage client: {e}. Falling back to local storage.")
             else:
@@ -175,6 +176,40 @@ class BlobStorageService:
                         return v.strip()
         return None
 
+    def _get_existing_sas_token(self) -> Optional[str]:
+        """
+        If BLOB_STORAGE_CONNECTION_STRING is SAS-based (contains
+        'SharedAccessSignature=' instead of 'AccountKey='), there is no account
+        key available to sign a *new* SAS token, and get_user_delegation_key()
+        will also fail because that requires an Azure AD token credential, not
+        a SAS. In that case, reuse the SAS token that's already authenticating
+        every request this client makes.
+
+        Note: this returns the *same* token embedded in the connection string.
+        It will carry whatever scope/permissions/expiry that token was issued
+        with (commonly container-level, read-capable) rather than a token
+        scoped tightly to a single blob or a custom expiry_hours value.
+        """
+        conn_strings = [
+            getattr(settings, 'BLOB_STORAGE_CONNECTION_STRING', None),
+            os.getenv('BLOB_STORAGE_CONNECTION_STRING'),
+        ]
+        for conn_str in conn_strings:
+            if not conn_str:
+                continue
+            conn_str = conn_str.strip('"\'')
+            for part in conn_str.split(';'):
+                part_clean = part.strip()
+                if '=' in part_clean:
+                    k, v = part_clean.split('=', 1)
+                    if k.strip().lower() == 'sharedaccesssignature':
+                        token = v.strip()
+                        # Connection-string SAS values are sometimes stored
+                        # with a leading '?'; normalize so callers can always
+                        # do f"{blob_url}?{token}"
+                        return token[1:] if token.startswith('?') else token
+        return None
+
     def generate_download_url(
         self, 
         blob_url: str,
@@ -198,26 +233,49 @@ class BlobStorageService:
                             key_expiry_time=datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
                         )
                     except Exception as dk_err:
+                        # Common cause: the client is authenticated with a SAS
+                        # token (not an Azure AD token credential), so this
+                        # call is not supported at all. Another common cause:
+                        # an AAD identity that's missing the "Storage Blob
+                        # Delegator" RBAC role on the storage account.
                         logger.warning(f"Could not get user delegation key: {dk_err}")
 
-                kwargs = {
-                    "account_name": self.blob_service_client.account_name,
-                    "container_name": self.container_name,
-                    "blob_name": blob_name,
-                    "permission": BlobSasPermissions(read=True),
-                    "expiry": datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
-                }
+                if account_key or user_delegation_key:
+                    kwargs = {
+                        "account_name": self.blob_service_client.account_name,
+                        "container_name": self.container_name,
+                        "blob_name": blob_name,
+                        "permission": BlobSasPermissions(read=True),
+                        "expiry": datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
+                    }
+                    if account_key:
+                        kwargs["account_key"] = account_key
+                    else:
+                        kwargs["user_delegation_key"] = user_delegation_key
 
-                if account_key:
-                    kwargs["account_key"] = account_key
-                elif user_delegation_key:
-                    kwargs["user_delegation_key"] = user_delegation_key
-                else:
-                    logger.error("No account_key or user_delegation_key available to generate SAS token")
-                    return None
+                    sas_token = generate_blob_sas(**kwargs)
+                    return f"{blob_url}?{sas_token}"
 
-                sas_token = generate_blob_sas(**kwargs)
-                return f"{blob_url}?{sas_token}"
+                # Neither an account key nor a delegation key is available.
+                # If the client itself is authenticated via a SAS token
+                # (embedded in BLOB_STORAGE_CONNECTION_STRING), reuse that
+                # token rather than failing outright.
+                existing_sas = self._get_existing_sas_token()
+                if existing_sas:
+                    logger.warning(
+                        "No account_key or user_delegation_key available; falling back to the "
+                        "SAS token embedded in BLOB_STORAGE_CONNECTION_STRING. This token's "
+                        "scope/expiry is whatever it was issued with, not expiry_hours."
+                    )
+                    return f"{blob_url}?{existing_sas}"
+
+                logger.error(
+                    "Cannot generate a download URL: no account_key, no user_delegation_key, "
+                    "and no SAS token found in BLOB_STORAGE_CONNECTION_STRING. If this client is "
+                    "authenticating via Managed Identity/Azure AD, grant it the 'Storage Blob "
+                    "Delegator' role on the storage account so get_user_delegation_key() can succeed."
+                )
+                return None
             except Exception as e:
                 logger.error(f"Error generating Azure SAS token: {e}")
                 return None
