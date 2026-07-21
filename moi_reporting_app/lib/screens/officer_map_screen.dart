@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../theme/app_colors.dart';
 import 'officer_report_details_screen.dart';
 
 class OfficerMapScreen extends StatelessWidget {
@@ -18,10 +19,15 @@ class OfficerMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Incident Map'),
-        backgroundColor: const Color(0xFF0F2027),
-        foregroundColor: Colors.white,
+        title: const Text('Incident Map', style: TextStyle(fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: AppColors.onDark,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: AppColors.headerGradient),
+        ),
       ),
       body: FlutterMap(
         options: MapOptions(
@@ -40,19 +46,34 @@ class OfficerMapScreen extends StatelessWidget {
               // For now we assume they are parsed into the map or we use the report's location string
               final double lat = report['latitude']?.toDouble() ?? initialLat;
               final double lon = report['longitude']?.toDouble() ?? initialLon;
-              
+              final Color statusColor = AppColors.statusColor(report['status']);
+
               return Marker(
                 point: LatLng(lat, lon),
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 child: GestureDetector(
                   onTap: () {
                     _showReportSummary(context, report);
                   },
-                  child: Icon(
-                    Icons.location_on,
-                    color: _getStatusColor(report['status']),
-                    size: 40,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: statusColor.withValues(alpha: 0.45),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                      border: Border.all(color: statusColor, width: 2.5),
+                    ),
+                    child: Icon(
+                      Icons.location_on,
+                      color: statusColor,
+                      size: 26,
+                    ),
                   ),
                 ),
               );
@@ -64,36 +85,54 @@ class OfficerMapScreen extends StatelessWidget {
   }
 
   void _showReportSummary(BuildContext context, Map<String, dynamic> report) {
+    final Color statusColor = AppColors.statusColor(report['status']);
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.frostedBlue,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     report['title'] ?? 'No Title',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(report['status']).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     report['status'] ?? 'Submitted',
                     style: TextStyle(
-                      color: _getStatusColor(report['status']),
+                      color: statusColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -102,44 +141,57 @@ class OfficerMapScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Text(report['location'] ?? 'Unknown Location', style: const TextStyle(color: Colors.grey)),
+            Row(
+              children: [
+                const Icon(Icons.location_on, size: 16, color: AppColors.textSecondary),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    report['location'] ?? 'Unknown Location',
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF203A43),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OfficerReportDetailsScreen(reportId: report['id']),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: AppColors.accentGradient,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.brightTealBlue.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  );
-                },
-                child: const Text('View Full Details'),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OfficerReportDetailsScreen(reportId: report['id']),
+                      ),
+                    );
+                  },
+                  child: const Text('View Full Details', style: TextStyle(fontWeight: FontWeight.w600)),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'submitted':
-        return Colors.blue;
-      case 'inprogress':
-        return Colors.orange;
-      case 'resolved':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
   }
 }

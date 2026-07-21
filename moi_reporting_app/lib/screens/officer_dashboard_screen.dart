@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import '../providers/auth_provider.dart';
 import '../services/officer_service.dart';
+import '../theme/app_colors.dart';
 import 'officer_report_details_screen.dart';
 import 'officer_map_screen.dart';
 import '../services/location_service.dart';
@@ -22,7 +23,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
     'InProgress': 0,
     'Resolved': 0,
   };
-  
+
   List<Map<String, dynamic>> _nearbyReports = [];
   double? _currentLat;
   double? _currentLon;
@@ -62,7 +63,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
           return;
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           setState(() => _locationStatus = 'Location permission permanently denied');
@@ -77,7 +78,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       final Position position = await LocationService.getCurrentLocation();
 
       String addressName = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
-      
+
       final fetchedName = await _officerService.getLocationName(position.latitude, position.longitude);
       if (fetchedName != null && fetchedName.isNotEmpty) {
         addressName = fetchedName;
@@ -102,10 +103,10 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
 
   Future<void> _fetchLocationAndData() async {
     setState(() => _isLoading = true);
-    
+
     // First, fetch the officer's current location
     await _getCurrentLocation();
-    
+
     // Then fetch data using the location
     await _fetchData();
   }
@@ -117,7 +118,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         latitude: _currentLat,
         longitude: _currentLon,
       );
-      
+
       if (mounted) {
         setState(() {
           _stats = Map<String, int>.from(statsData);
@@ -144,19 +145,17 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 180.0,
+            expandedHeight: 190.0,
             floating: false,
             pinned: true,
+            backgroundColor: AppColors.deepTwilight,
             flexibleSpace: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-                ),
+                gradient: AppColors.headerGradient,
               ),
               child: FlexibleSpaceBar(
                 title: const Text('Officer Dashboard', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
@@ -165,7 +164,12 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                     Positioned(
                       right: -30,
                       top: -20,
-                      child: Icon(Icons.shield, size: 150, color: Colors.white.withValues(alpha: 0.1)),
+                      child: Icon(Icons.shield, size: 150, color: Colors.white.withValues(alpha: 0.08)),
+                    ),
+                    Positioned(
+                      left: -20,
+                      bottom: -30,
+                      child: Icon(Icons.water_drop, size: 110, color: AppColors.skyAqua.withValues(alpha: 0.18)),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 20.0, bottom: 60.0),
@@ -173,7 +177,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Greetings, Officer', style: TextStyle(color: Colors.white70, fontSize: 16)),
+                          Text('Greetings, Officer', style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 16)),
                           Text(_locationStatus, style: const TextStyle(color: Colors.white, fontSize: 14)),
                         ],
                       ),
@@ -219,18 +223,18 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
             ],
           ),
           SliverToBoxAdapter(
-            child: _isLoading 
+            child: _isLoading
                 ? const Padding(
                     padding: EdgeInsets.all(40.0),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: CircularProgressIndicator(color: AppColors.brightTealBlue)),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Text('Live Statistics', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        child: Text('Live Statistics', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       ),
                       const SizedBox(height: 12),
                       _buildStatsRow(),
@@ -240,10 +244,10 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                         children: [
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Text('Nearby Reports', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            child: Text('Nearby Reports', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.refresh),
+                            icon: const Icon(Icons.refresh, color: AppColors.brightTealBlue),
                             onPressed: _fetchLocationAndData,
                             tooltip: 'Refresh location and reports',
                           ),
@@ -254,11 +258,11 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                   ),
           ),
           if (!_isLoading)
-            _nearbyReports.isEmpty 
+            _nearbyReports.isEmpty
               ? const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(40.0),
-                    child: Center(child: Text('No nearby reports found in your active service area.', style: TextStyle(color: Colors.grey))),
+                    child: Center(child: Text('No nearby reports found in your active service area.', style: TextStyle(color: AppColors.textSecondary))),
                   ),
                 )
               : SliverList(
@@ -270,6 +274,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                     childCount: _nearbyReports.length,
                   ),
                 ),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
         ],
       ),
     );
@@ -281,11 +286,11 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(child: _buildStatCard('Submitted', _stats['Submitted'] ?? 0, [const Color(0xFF4b6cb7), const Color(0xFF182848)], Icons.assignment)),
+          Expanded(child: _buildStatCard('Submitted', _stats['Submitted'] ?? 0, [AppColors.frenchBlue, AppColors.deepTwilight], Icons.assignment)),
           const SizedBox(width: 8),
-          Expanded(child: _buildStatCard('Execution', _stats['InProgress'] ?? 0, [const Color(0xFFF2994A), const Color(0xFFF2C94C)], Icons.pending_actions)),
+          Expanded(child: _buildStatCard('Execution', _stats['InProgress'] ?? 0, [AppColors.turquoiseSurf, AppColors.blueGreen], Icons.pending_actions)),
           const SizedBox(width: 8),
-          Expanded(child: _buildStatCard('Resolved', _stats['Resolved'] ?? 0, [const Color(0xFF11998e), const Color(0xFF38ef7d)], Icons.check_circle_outline)),
+          Expanded(child: _buildStatCard('Resolved', _stats['Resolved'] ?? 0, [AppColors.statusResolved, AppColors.blueGreen], Icons.check_circle_outline)),
         ],
       ),
     );
@@ -303,9 +308,9 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: gradientColors[0].withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: gradientColors[0].withValues(alpha: 0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           )
         ],
       ),
@@ -316,18 +321,23 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
           const SizedBox(height: 8),
           Text(value.toString(), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(title, textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
         ],
       ),
     );
   }
 
   Widget _buildReportCard(BuildContext context, Map<String, dynamic> report) {
+    final Color statusColor = AppColors.statusColor(report['status']);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 3,
-      shadowColor: Colors.black12,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: AppColors.frostedBlue.withValues(alpha: 0.6)),
+      ),
+      elevation: 2,
+      shadowColor: AppColors.brightTealBlue.withValues(alpha: 0.15),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -337,31 +347,31 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
             ),
           ).then((_) => _fetchData()); // Refresh on return
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                decoration: const BoxDecoration(
+                  color: AppColors.lightCyan,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.report_problem, color: Colors.blueGrey),
+                child: const Icon(Icons.report_problem, color: AppColors.brightTealBlue),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(report['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(report['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const Icon(Icons.location_on, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
-                        Expanded(child: Text(report['location'], style: const TextStyle(color: Colors.grey, fontSize: 12), overflow: TextOverflow.ellipsis)),
+                        Expanded(child: Text(report['location'], style: const TextStyle(color: AppColors.textSecondary, fontSize: 12), overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ],
@@ -373,16 +383,16 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(report['status']).withValues(alpha: 0.1),
+                      color: statusColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       report['status'],
-                      style: TextStyle(color: _getStatusColor(report['status']), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(report['date'], style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(report['date'], style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                 ],
               )
             ],
@@ -390,18 +400,5 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'submitted':
-        return Colors.blue;
-      case 'inprogress':
-        return Colors.orange;
-      case 'resolved':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
   }
 }

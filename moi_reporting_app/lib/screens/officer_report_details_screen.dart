@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import '../services/officer_service.dart';
 import '../services/location_service.dart';
 import '../services/auth_service.dart';
+import '../theme/app_colors.dart';
 
 class OfficerReportDetailsScreen extends StatefulWidget {
   final String reportId;
@@ -17,17 +18,26 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
   final OfficerService _officerService = OfficerService();
   String _selectedStatus = 'InProgress';
   final _noteController = TextEditingController();
-  
+
   bool _isLoading = true;
   bool _isSubmitting = false;
   Map<String, dynamic>? _report;
+
+  // Tracks which attachment is shown in the inline preview panel.
+  int _selectedAttachmentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchReportDetails();
   }
-  
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchReportDetails() async {
     try {
       final reportData = await _officerService.getReportDetails(widget.reportId);
@@ -38,6 +48,7 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
           if (reportData['officerNote'] != null) {
             _noteController.text = reportData['officerNote'];
           }
+          _selectedAttachmentIndex = 0;
           _isLoading = false;
         });
       }
@@ -54,38 +65,44 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
     try {
       await _officerService.updateReportStatus(widget.reportId, _selectedStatus, _noteController.text);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status updated successfully!'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status updated successfully!'), backgroundColor: AppColors.statusResolved));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update failed: \$e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Update failed: \$e'), backgroundColor: AppColors.statusRejected));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
+  /// Resolves a possibly-relative attachment path into a full URL,
+  /// mirroring the logic previously used only inside the dialog.
+  String _resolveUrl(String url) {
+    if (url.startsWith('http')) return url;
+    final baseUrl = AuthService.baseUrl.endsWith('/')
+        ? AuthService.baseUrl.substring(0, AuthService.baseUrl.length - 1)
+        : AuthService.baseUrl;
+    final path = url.startsWith('/') ? url : '/$url';
+    return '$baseUrl$path';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Report \${widget.reportId}', style: TextStyle(color: Colors.white)),
+        title: Text('Report \${widget.reportId}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0F2027), Color(0xFF203A43)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: const BoxDecoration(gradient: AppColors.headerGradient),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator()) 
-        : _report == null 
-          ? const Center(child: Text('Report not found.'))
+      body: _isLoading
+        ? const Center(child: CircularProgressIndicator(color: AppColors.brightTealBlue))
+        : _report == null
+          ? const Center(child: Text('Report not found.', style: TextStyle(color: AppColors.textSecondary)))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -95,25 +112,25 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blueGrey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blueGrey.shade200),
+                      color: AppColors.lightCyan,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.frostedBlue),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.location_on, color: Colors.blueGrey, size: 30),
+                        const Icon(Icons.location_on, color: AppColors.brightTealBlue, size: 30),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Location', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey)),
-                              Text(_report!['location'] ?? 'Location unknown'),
+                              const Text('Location', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.frenchBlue)),
+                              Text(_report!['location'] ?? 'Location unknown', style: const TextStyle(color: AppColors.textPrimary)),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.map, color: Colors.blue),
+                          icon: const Icon(Icons.map, color: AppColors.brightTealBlue),
                           onPressed: () async {
                             final location = _report!['location'] ?? '';
                             final Uri url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$location");
@@ -128,48 +145,55 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Description
-                  const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: AppColors.brightTealBlue.withValues(alpha: 0.08), blurRadius: 10)],
                     ),
-                    child: Text(_report!['descriptionText'] ?? 'No Description provided.', style: const TextStyle(fontSize: 16)),
+                    child: Text(_report!['descriptionText'] ?? 'No Description provided.', style: const TextStyle(fontSize: 16, color: AppColors.textPrimary)),
                   ),
                   const SizedBox(height: 24),
 
-                  // Evidence Player
-                  const Text('Evidence', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  // Evidence - now previewed inline on this page instead of a dialog
+                  const Text('Evidence', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   const SizedBox(height: 8),
-                  if (_report!['attachments'] != null && (_report!['attachments'] as List).isNotEmpty)
-                    ...(_report!['attachments'] as List).map((att) => 
-                      _buildMediaTile(att)
-                    ).toList()
-                  else
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('No evidence attached to this report.', style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
-                    ),
-                    
+                  _buildEvidenceSection(),
+
                   const SizedBox(height: 32),
 
                   // Status Update Section
-                  const Text('Update Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text('Update Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: ['Submitted', 'InProgress', 'Resolved', 'Rejected'].contains(_selectedStatus) ? _selectedStatus : 'Submitted',
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.frostedBlue)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.frostedBlue)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.brightTealBlue, width: 2)),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.surface,
                     ),
                     items: ['Submitted', 'InProgress', 'Resolved', 'Rejected']
-                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .map((s) => DropdownMenuItem(
+                              value: s,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    margin: const EdgeInsets.only(right: 8),
+                                    decoration: BoxDecoration(color: AppColors.statusColor(s), shape: BoxShape.circle),
+                                  ),
+                                  Text(s),
+                                ],
+                              ),
+                            ))
                         .toList(),
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedStatus = val);
@@ -180,26 +204,43 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
                     controller: _noteController,
                     maxLines: 4,
                     textDirection: TextDirection.rtl, // Support Arabic natively
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'اكتب ملاحظاتك هنا...', // Arabic Instruction
                       hintTextDirection: TextDirection.rtl,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.frostedBlue)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.frostedBlue)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.brightTealBlue, width: 2)),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.surface,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitUpdate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2C5364),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.headerGradient,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.deepTwilight.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: _isSubmitting 
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Submit Update', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submitUpdate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : const Text('Submit Update', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
                   )
                 ],
               ),
@@ -207,59 +248,126 @@ class _OfficerReportDetailsScreenState extends State<OfficerReportDetailsScreen>
     );
   }
 
-  Widget _buildMediaTile(Map<String, dynamic> att) {
-    bool isVideo = att['fileType'] == 'video';
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade100),
-      ),
-      child: ListTile(
-        leading: Icon(
-          isVideo ? Icons.video_library : Icons.image,
-          color: Colors.blue.shade800,
-        ),
-        title: Text('Attachment: ${att["fileType"]}'),
-        subtitle: const Text('Tap to view evidence'),
-        trailing: const Icon(Icons.play_circle_fill, color: Colors.blue),
-        onTap: () => _showMediaDialog(att['downloadUrl'], isVideo),
-      ),
-    );
-  }
+  Widget _buildEvidenceSection() {
+    final attachments = (_report!['attachments'] as List?) ?? [];
 
-  void _showMediaDialog(String url, bool isVideo) {
-    if (!url.startsWith('http')) {
-      final baseUrl = AuthService.baseUrl.endsWith('/') 
-          ? AuthService.baseUrl.substring(0, AuthService.baseUrl.length - 1) 
-          : AuthService.baseUrl;
-      final path = url.startsWith('/') ? url : '/$url';
-      url = '$baseUrl$path';
+    if (attachments.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.frostedBlue),
+        ),
+        child: const Text(
+          'No evidence attached to this report.',
+          style: TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+        ),
+      );
     }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: EdgeInsets.zero,
-        content: isVideo ? _VideoPlayerWidget(url: url) : Image.network(url),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-        ],
+    final safeIndex = _selectedAttachmentIndex.clamp(0, attachments.length - 1);
+    final selected = attachments[safeIndex] as Map<String, dynamic>;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Large inline preview of the currently selected attachment.
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            color: AppColors.deepTwilight,
+            constraints: const BoxConstraints(minHeight: 220, maxHeight: 340),
+            child: _buildPreview(selected),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Thumbnail strip to switch between attachments, all without leaving the page.
+        if (attachments.length > 1)
+          SizedBox(
+            height: 64,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: attachments.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                final att = attachments[index] as Map<String, dynamic>;
+                final bool isSelected = index == safeIndex;
+                final bool isVideo = att['fileType'] == 'video';
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedAttachmentIndex = index),
+                  child: Container(
+                    width: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? AppColors.brightTealBlue : AppColors.frostedBlue,
+                        width: isSelected ? 2.5 : 1.5,
+                      ),
+                      color: AppColors.lightCyan,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        isVideo ? Icons.videocam : Icons.image,
+                        color: isSelected ? AppColors.brightTealBlue : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 4),
+        Text(
+          'Attachment ${safeIndex + 1} of ${attachments.length} · ${selected['fileType'] ?? 'file'}',
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPreview(Map<String, dynamic> attachment) {
+    final bool isVideo = attachment['fileType'] == 'video';
+    final rawUrl = attachment['downloadUrl'] as String?;
+
+    if (rawUrl == null || rawUrl.isEmpty) {
+      return const Center(
+        child: Text('Attachment URL unavailable.', style: TextStyle(color: Colors.white70)),
+      );
+    }
+
+    final url = _resolveUrl(rawUrl);
+
+    if (isVideo) {
+      // Keyed by url so switching attachments creates/disposes the
+      // right controller instead of reusing stale state.
+      return _InlineVideoPlayer(key: ValueKey(url), url: url);
+    }
+
+    return Image.network(
+      url,
+      fit: BoxFit.contain,
+      width: double.infinity,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return const Center(child: CircularProgressIndicator(color: AppColors.skyAqua));
+      },
+      errorBuilder: (context, error, stackTrace) => const Center(
+        child: Text('Failed to load image.', style: TextStyle(color: Colors.white70)),
       ),
     );
   }
 }
 
-class _VideoPlayerWidget extends StatefulWidget {
+class _InlineVideoPlayer extends StatefulWidget {
   final String url;
-  const _VideoPlayerWidget({required this.url});
+  const _InlineVideoPlayer({super.key, required this.url});
 
   @override
-  State<_VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+  State<_InlineVideoPlayer> createState() => _InlineVideoPlayerState();
 }
 
-class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
+class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
   late VideoPlayerController _controller;
   bool _hasError = false;
 
@@ -275,7 +383,7 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
             _hasError = true;
           });
         }
-        print('Video Player Error: $error');
+        debugPrint('Video Player Error: $error');
       });
   }
 
@@ -288,29 +396,36 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
-      return const SizedBox(
-        height: 200, 
-        child: Center(
-          child: Text('Failed to load video.', style: TextStyle(color: Colors.red)),
-        ),
+      return const Center(
+        child: Text('Failed to load video.', style: TextStyle(color: Colors.white70)),
       );
     }
-    
-    return _controller.value.isInitialized
-        ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                VideoPlayer(_controller),
-                VideoProgressIndicator(_controller, allowScrubbing: true),
-                IconButton(
-                  icon: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
-                  onPressed: () => setState(() => _controller.value.isPlaying ? _controller.pause() : _controller.play()),
-                ),
-              ],
+
+    if (!_controller.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator(color: AppColors.skyAqua));
+    }
+
+    return AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          VideoPlayer(_controller),
+          VideoProgressIndicator(
+            _controller,
+            allowScrubbing: true,
+            colors: const VideoProgressColors(
+              playedColor: AppColors.turquoiseSurf,
+              bufferedColor: Colors.white30,
+              backgroundColor: Colors.white12,
             ),
-          )
-        : const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+          ),
+          IconButton(
+            icon: Icon(_controller.value.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill, color: Colors.white, size: 44),
+            onPressed: () => setState(() => _controller.value.isPlaying ? _controller.pause() : _controller.play()),
+          ),
+        ],
+      ),
+    );
   }
 }
