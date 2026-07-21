@@ -146,17 +146,33 @@ class BlobStorageService:
                 return False
 
     def _get_account_key(self) -> Optional[str]:
-        """Retrieve account key from credential object or parse from connection string"""
-        if hasattr(self, 'blob_service_client') and self.blob_service_client.credential:
-            key = getattr(self.blob_service_client.credential, 'account_key', None)
-            if key:
-                return key
+        """Retrieve account key from credential object, settings, or environment variable"""
+        # 1. Try credential object attributes
+        if hasattr(self, 'blob_service_client') and self.blob_service_client and self.blob_service_client.credential:
+            cred = self.blob_service_client.credential
+            for attr in ('account_key', 'key', 'secret_key'):
+                key = getattr(cred, attr, None)
+                if key:
+                    if isinstance(key, bytes):
+                        return key.decode('utf-8')
+                    return str(key)
+
+        # 2. Try parsing connection strings from settings or os.environ
+        conn_strings = [
+            getattr(settings, 'BLOB_STORAGE_CONNECTION_STRING', None),
+            os.getenv('BLOB_STORAGE_CONNECTION_STRING'),
+        ]
         
-        conn_str = settings.BLOB_STORAGE_CONNECTION_STRING
-        if conn_str:
+        for conn_str in conn_strings:
+            if not conn_str:
+                continue
+            conn_str = conn_str.strip('"\'')
             for part in conn_str.split(';'):
-                if part.strip().startswith('AccountKey='):
-                    return part.strip().split('AccountKey=', 1)[1]
+                part_clean = part.strip()
+                if '=' in part_clean:
+                    k, v = part_clean.split('=', 1)
+                    if k.strip().lower() == 'accountkey':
+                        return v.strip()
         return None
 
     def generate_download_url(
@@ -176,20 +192,31 @@ class BlobStorageService:
                 account_key = self._get_account_key()
                 user_delegation_key = None
                 if not account_key and hasattr(self.blob_service_client, 'get_user_delegation_key'):
-                    user_delegation_key = self.blob_service_client.get_user_delegation_key(
-                        key_start_time=datetime.now(timezone.utc),
-                        key_expiry_time=datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
-                    )
+                    try:
+                        user_delegation_key = self.blob_service_client.get_user_delegation_key(
+                            key_start_time=datetime.now(timezone.utc),
+                            key_expiry_time=datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
+                        )
+                    except Exception as dk_err:
+                        logger.warning(f"Could not get user delegation key: {dk_err}")
 
-                sas_token = generate_blob_sas(
-                    account_name=self.blob_service_client.account_name,
-                    container_name=self.container_name,
-                    blob_name=blob_name,
-                    account_key=account_key,
-                    user_delegation_key=user_delegation_key,
-                    permission=BlobSasPermissions(read=True),
-                    expiry=datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
-                )
+                kwargs = {
+                    "account_name": self.blob_service_client.account_name,
+                    "container_name": self.container_name,
+                    "blob_name": blob_name,
+                    "permission": BlobSasPermissions(read=True),
+                    "expiry": datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
+                }
+
+                if account_key:
+                    kwargs["account_key"] = account_key
+                elif user_delegation_key:
+                    kwargs["user_delegation_key"] = user_delegation_key
+                else:
+                    logger.error("No account_key or user_delegation_key available to generate SAS token")
+                    return None
+
+                sas_token = generate_blob_sas(**kwargs)
                 return f"{blob_url}?{sas_token}"
             except Exception as e:
                 logger.error(f"Error generating Azure SAS token: {e}")
