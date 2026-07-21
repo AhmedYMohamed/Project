@@ -7,6 +7,9 @@ import '../services/report_service.dart';
 import 'report_form.dart';
 import 'report_history_screen.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'citizen_report_details_screen.dart';
+
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -18,11 +21,52 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    _loadTabAndRestoreRoute();
+  }
+
+  Future<void> _loadTabAndRestoreRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _selectedIndex = prefs.getInt('citizen_tab_index') ?? 0;
+      });
+
+      await prefs.setString('last_route', 'citizen_dashboard');
+
+      final lastRoute = prefs.getString('last_route_citizen');
+      if (lastRoute == 'citizen_report_details') {
+        final reportId = prefs.getString('last_report_id_citizen');
+        if (reportId != null && mounted) {
+          await prefs.setString('last_route_citizen', 'citizen_dashboard');
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CitizenReportDetailsScreen(reportId: reportId),
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _saveTabPreference(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('citizen_tab_index', index);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final List<Widget> pages = [
       DashboardScreen(
-        onTabSelected: (index) => setState(() => _selectedIndex = index),
+        onTabSelected: (index) {
+          setState(() => _selectedIndex = index);
+          _saveTabPreference(index);
+        },
       ),
       const ReportFormScreen(),
       const ReportHistoryScreen(),
@@ -32,7 +76,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+          _saveTabPreference(index);
+        },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF1E3A8A),
         items: [

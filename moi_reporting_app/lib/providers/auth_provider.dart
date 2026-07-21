@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 
+import '../utils/web_helper.dart';
+
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   String? _token;
@@ -22,6 +24,16 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _loadToken() async {
+    // If this is a fresh launch (not a reload), force redirect to login
+    if (!isReloadNavigation()) {
+      await _authService.logout();
+      _token = null;
+      _userId = null;
+      _isInitialized = true;
+      notifyListeners();
+      return;
+    }
+
     _token = await _authService.getToken();
     _userId = await _authService.getUserId();
     final role = await _authService.getUserRole();

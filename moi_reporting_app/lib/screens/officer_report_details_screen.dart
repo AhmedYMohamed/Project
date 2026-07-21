@@ -9,6 +9,8 @@ import '../l10n/app_localizations.dart';
 import '../screens/app_colors.dart';
 import '../widgets/smart_network_image/smart_network_image.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class OfficerReportDetailsScreen extends StatefulWidget {
   final String reportId;
   const OfficerReportDetailsScreen({super.key, required this.reportId});
@@ -35,12 +37,27 @@ class _OfficerReportDetailsScreenState
   void initState() {
     super.initState();
     _fetchReportDetails();
+    _saveRouteState();
   }
 
   @override
   void dispose() {
     _noteController.dispose();
+    _resetRouteState();
     super.dispose();
+  }
+
+  Future<void> _saveRouteState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_route', 'officer_report_details');
+    await prefs.setString('last_report_id', widget.reportId);
+  }
+
+  Future<void> _resetRouteState() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('last_route') == 'officer_report_details') {
+      await prefs.setString('last_route', 'officer_dashboard');
+    }
   }
 
   Future<void> _fetchReportDetails() async {

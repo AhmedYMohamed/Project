@@ -10,6 +10,8 @@ import 'officer_report_details_screen.dart';
 import 'officer_map_screen.dart';
 import '../services/location_service.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class OfficerDashboardScreen extends StatefulWidget {
   const OfficerDashboardScreen({super.key});
 
@@ -35,6 +37,28 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   void initState() {
     super.initState();
     _fetchLocationAndData();
+    _restoreLastRoute();
+  }
+
+  Future<void> _restoreLastRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastRoute = prefs.getString('last_route');
+    await prefs.setString('last_route', 'officer_dashboard');
+
+    if (lastRoute == 'officer_report_details') {
+      final reportId = prefs.getString('last_report_id');
+      if (reportId != null && mounted) {
+        await prefs.setString('last_route', 'officer_dashboard');
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OfficerReportDetailsScreen(reportId: reportId),
+            ),
+          ).then((_) => _fetchData());
+        }
+      }
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -119,13 +143,34 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
     }
   }
 
-  Future<void> _fetchLocationAndData() async {
-    setState(() => _isLoading = true);
-    await _getCurrentLocation();
-    await _fetchData();
+  List<Map<String, dynamic>> _parseReports(List<dynamic> reportsData) {
+    return reportsData
+        .map((e) => {
+              'id': e['reportId'].toString(),
+              'title': e['title'] ?? 'No Title',
+              'location': e['location'] ?? 'Unknown Location',
+              'status': e['status'] ?? 'Submitted',
+              'latitude': e['latitude'],
+              'longitude': e['longitude'],
+              'date': e['createdAt'] != null
+                  ? DateTime.parse(e['createdAt'])
+                      .toLocal()
+                      .toString()
+                      .split(' ')[0]
+                  : 'N/A',
+            })
+        .toList();
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _fetchLocationAndData() async {
+    setState(() {
+      _isLoading = true;
+      final loc = AppLocalizations.of(context);
+      _locationStatus = loc?.translate('fetchingLocation') ?? 'Fetching location...';
+    });
+
+    // 1. Fetch dashboard stats and reports without location first (or with cached coordinates)
+    // so the page loads and renders instantly without blocking on GPS.
     try {
       final statsData = await _officerService.getDashboardStats();
       final reportsData = await _officerService.getNearbyReports(
@@ -136,32 +181,42 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       if (mounted) {
         setState(() {
           _stats = Map<String, int>.from(statsData);
-          _nearbyReports = reportsData
-              .map((e) => {
-                    'id': e['reportId'].toString(),
-                    'title': e['title'] ?? 'No Title',
-                    'location': e['location'] ?? 'Unknown Location',
-                    'status': e['status'] ?? 'Submitted',
-                    'latitude': e['latitude'],
-                    'longitude': e['longitude'],
-                    'date': e['createdAt'] != null
-                        ? DateTime.parse(e['createdAt'])
-                            .toLocal()
-                            .toString()
-                            .split(' ')[0]
-                        : 'N/A',
-                  })
-              .toList();
+          _nearbyReports = _parseReports(reportsData);
+          _isLoading = false; // Stop loading spinner so user sees stats and reports immediately!
         });
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error loading dashboard: $e')));
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
+
+    // 2. Fetch/update current location asynchronously in the background.
+    // Once fetched, update the location label and refresh reports by proximity.
+    _getCurrentLocation().then((_) async {
+      if (_currentLat != null && _currentLon != null) {
+        try {
+          final reportsData = await _officerService.getNearbyReports(
+            latitude: _currentLat,
+            longitude: _currentLon,
+          );
+          if (mounted) {
+            setState(() {
+              _nearbyReports = _parseReports(reportsData);
+            });
+          }
+        } catch (e) {
+          debugPrint('Background location reports refresh failed: $e');
+        }
+      }
+    });
+  }
+
+  Future<void> _fetchData() async {
+    // Retained for compatibility or other callers, but forwards to _fetchLocationAndData
+    await _fetchLocationAndData();
   }
 
   @override

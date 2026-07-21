@@ -19,9 +19,17 @@ class LocationService {
       throw 'Location permissions are permanently denied';
     }
 
-    // Use best accuracy as requested for both sides
-    return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
-    );
+    try {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 4),
+      );
+    } catch (e) {
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        return lastKnown;
+      }
+      rethrow;
+    }
   }
 }
