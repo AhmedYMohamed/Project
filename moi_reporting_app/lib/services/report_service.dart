@@ -5,7 +5,7 @@ import '../models/models.dart';
 class ReportService {
   // IMPORTANT: Replace this with your computer's IP address if testing on a real device
   static const String baseUrl =
-      'https://cautious-garbanzo-69v57ww9wxr43574r-8000.app.github.dev/';
+      'https://moi-app-v2-c0bxdabgf7eteaab.israelcentral-01.azurewebsites.net/';
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
