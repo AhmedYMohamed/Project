@@ -17,18 +17,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nationalIdController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _syndicateIdController = TextEditingController();
+  final _digitalSignatureController = TextEditingController();
+  bool _isLawyer = false;
 
   void _register() async {
     final loc = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await context.read<AuthProvider>().register(
-        _emailController.text,
-        _nationalIdController.text,
-        _passwordController.text,
-        phoneNumber: _phoneController.text.isNotEmpty ? _phoneController.text : null,
-      );
+      if (_isLawyer) {
+        await context.read<AuthProvider>().registerLawyer(
+          email: _emailController.text,
+          nationalId: _nationalIdController.text,
+          password: _passwordController.text,
+          syndicateId: _syndicateIdController.text,
+          phoneNumber: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+          digitalSignatureUrl: _digitalSignatureController.text.isNotEmpty ? _digitalSignatureController.text : null,
+        );
+      } else {
+        await context.read<AuthProvider>().register(
+          _emailController.text,
+          _nationalIdController.text,
+          _passwordController.text,
+          phoneNumber: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+        );
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -81,7 +95,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 loc?.translate('joinCommunity') ?? 'Join the community reporting system',
                 style: TextStyle(color: Colors.grey[600]),
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ChoiceChip(
+                    label: Text(loc?.translate('citizen') ?? 'Citizen'),
+                    selected: !_isLawyer,
+                    onSelected: (selected) {
+                      if (selected) setState(() => _isLawyer = false);
+                    },
+                  ),
+                  const SizedBox(width: 16),
+                  ChoiceChip(
+                    label: Text(loc?.translate('lawyer') ?? 'Lawyer'),
+                    selected: _isLawyer,
+                    onSelected: (selected) {
+                      if (selected) setState(() => _isLawyer = true);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -112,6 +147,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   prefixIcon: const Icon(Icons.phone_outlined),
                 ),
               ),
+              if (_isLawyer) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _syndicateIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'Syndicate ID / Bar ID',
+                    prefixIcon: Icon(Icons.gavel),
+                  ),
+                  validator: (value) => value == null || value.isEmpty ? 'Please enter Syndicate ID' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _digitalSignatureController,
+                  decoration: const InputDecoration(
+                    labelText: 'Digital Signature URL (Optional)',
+                    prefixIcon: Icon(Icons.edit_note),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,

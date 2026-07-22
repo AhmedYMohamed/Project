@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
@@ -305,6 +306,80 @@ class _StatItem extends StatelessWidget {
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  void _showLinkLawyerDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Link Primary Lawyer'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Enter your lawyer\'s Syndicate ID or Bar ID to establish the link:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Syndicate ID',
+                  prefixIcon: Icon(Icons.gavel),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final syndicateId = controller.text.trim();
+                if (syndicateId.isEmpty) return;
+
+                Navigator.pop(ctx);
+                _linkLawyer(context, syndicateId);
+              },
+              child: const Text('Link'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _linkLawyer(BuildContext context, String syndicateId) async {
+    final auth = context.read<AuthProvider>();
+    try {
+      final dio = Dio(BaseOptions(baseUrl: ReportService.baseUrl));
+      await dio.post(
+        '/api/v1/users/link-lawyer',
+        data: {'syndicateId': syndicateId},
+        options: Options(
+          headers: {'Authorization': 'Bearer ${auth.token}'},
+        ),
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lawyer linked successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to link lawyer: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
@@ -348,6 +423,14 @@ class ProfileScreen extends StatelessWidget {
             subtitle: Text(localeProvider.isArabic ? 'العربية' : 'English'),
             trailing: const Icon(Icons.swap_horiz),
             onTap: () => localeProvider.toggleLanguage(),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.gavel),
+            title: const Text('Associated Lawyer'),
+            subtitle: const Text('Link your primary lawyer using their Syndicate ID'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => _showLinkLawyerDialog(context),
           ),
           const Divider(),
           ListTile(

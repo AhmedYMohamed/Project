@@ -127,6 +127,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () =>
+                              setState(() => _roleSelection = 'lawyer'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _roleSelection == 'lawyer'
+                                  ? const Color(0xFF1E3A8A)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Lawyer',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: _roleSelection == 'lawyer'
+                                    ? Colors.white
+                                    : Colors.grey[600],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () =>
                               setState(() => _roleSelection = 'officer'),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),

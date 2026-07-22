@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/smart_network_image/smart_network_image.dart';
+import '../widgets/report_chat_widget.dart';
 import 'app_colors.dart';
 
 class CitizenReportDetailsScreen extends StatefulWidget {
@@ -206,6 +207,12 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
 
                   const SizedBox(height: 16),
 
+                  // --- Lawyer Feedback Section (If any) ---
+                  if (report.lawyerFeedback != null && report.lawyerFeedback!.trim().isNotEmpty) ...[
+                    _buildLawyerFeedbackSection(report),
+                    const SizedBox(height: 16),
+                  ],
+
                   // --- Report Description & Category Section ---
                   _buildDetailsSection(report, loc),
 
@@ -215,11 +222,71 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
                   if (report.attachments.isNotEmpty) _buildEvidenceSection(report, loc),
 
                   const SizedBox(height: 24),
+
+                  // --- Lawyer Message Counsel (If citizen is linked to a lawyer) ---
+                  if (report.lawyerId != null) ...[
+                    const Text(
+                      'Legal Counsel Chat',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E3A8A),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 350,
+                      child: ReportChatWidget(
+                        reportId: report.reportId,
+                        token: context.read<AuthProvider>().token!,
+                        currentUserId: context.read<AuthProvider>().userId!,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildLawyerFeedbackSection(ReportModel report) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Colors.orangeAccent, width: 1.5),
+      ),
+      color: Colors.orange.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.feedback_outlined, color: Colors.orange),
+                SizedBox(width: 8),
+                Text(
+                  'Advocate Feedback',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              report.lawyerFeedback!,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'l10n/app_localizations.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
 import 'screens/officer_dashboard_screen.dart';
+import 'screens/lawyer_dashboard_screen.dart';
 
 void main() {
   runApp(
@@ -76,6 +77,8 @@ class MoiReportingApp extends StatelessWidget {
           if (auth.isAuthenticated) {
             if (auth.selectedRole == 'officer') {
               return const OfficerDashboardScreen();
+            } else if (auth.selectedRole == 'lawyer') {
+              return const LawyerDashboardScreen();
             }
             return const MainNavigationScreen();
           }

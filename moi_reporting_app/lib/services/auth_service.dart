@@ -5,7 +5,6 @@ class AuthService {
   // IMPORTANT: Replace with your computer's IP address if testing on a real device
   static const String baseUrl =
       'https://moi-app-v2-c0bxdabgf7eteaab.israelcentral-01.azurewebsites.net/';
-
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     headers: {
@@ -27,6 +26,33 @@ class AuthService {
         'password': password,
         'phoneNumber': phoneNumber,
         'role': 'citizen',
+      });
+      return response.data;
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 400) {
+        throw e.response?.data['detail'] ?? 'Registration failed';
+      }
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> registerLawyer({
+    required String email,
+    required String nationalId,
+    required String password,
+    required String syndicateId,
+    String? phoneNumber,
+    String? digitalSignatureUrl,
+  }) async {
+    try {
+      final response = await _dio.post('/api/v1/auth/register/lawyer', data: {
+        'email': email,
+        'nationalId': nationalId,
+        'password': password,
+        'phoneNumber': phoneNumber,
+        'role': 'lawyer',
+        'syndicateId': syndicateId,
+        'digitalSignatureUrl': digitalSignatureUrl,
       });
       return response.data;
     } catch (e) {

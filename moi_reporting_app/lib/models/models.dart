@@ -6,6 +6,10 @@ class UserModel {
   final String? phoneNumber;
   final String role;
   final bool isAnonymous;
+  final String? lawyerId;
+  final String? lawyerQrCode;
+  final String? syndicateId;
+  final String? digitalSignatureUrl;
 
   UserModel({
     required this.userId,
@@ -13,6 +17,10 @@ class UserModel {
     this.phoneNumber,
     required this.role,
     this.isAnonymous = false,
+    this.lawyerId,
+    this.lawyerQrCode,
+    this.syndicateId,
+    this.digitalSignatureUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +30,10 @@ class UserModel {
       phoneNumber: json['phoneNumber'],
       role: json['role'] ?? 'citizen',
       isAnonymous: json['isAnonymous'] ?? false,
+      lawyerId: json['lawyerId'] ?? json['lawyer_id'],
+      lawyerQrCode: json['lawyerQrCode'] ?? json['lawyer_qr_code'],
+      syndicateId: json['syndicateId'] ?? json['syndicate_id'],
+      digitalSignatureUrl: json['digitalSignatureUrl'] ?? json['digital_signature_url'],
     );
   }
 }
@@ -36,6 +48,10 @@ class ReportModel {
   final String? officerNote;
   final DateTime createdAt;
   final List<AttachmentModel> attachments;
+  final String? lawyerId;
+  final String? lawyerSignature;
+  final String? lawyerFeedback;
+  final bool isUrgentEscalation;
 
   ReportModel({
     required this.reportId,
@@ -47,6 +63,10 @@ class ReportModel {
     this.officerNote,
     required this.createdAt,
     required this.attachments,
+    this.lawyerId,
+    this.lawyerSignature,
+    this.lawyerFeedback,
+    this.isUrgentEscalation = false,
   });
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
@@ -64,6 +84,10 @@ class ReportModel {
       attachments: (json['attachments'] as List? ?? [])
           .map((a) => AttachmentModel.fromJson(a))
           .toList(),
+      lawyerId: json['lawyerId'] ?? json['lawyer_id'],
+      lawyerSignature: json['lawyerSignature'] ?? json['lawyer_signature'],
+      lawyerFeedback: json['lawyerFeedback'] ?? json['lawyer_feedback'],
+      isUrgentEscalation: json['isUrgentEscalation'] ?? json['is_urgent_escalation'] ?? false,
     );
   }
 }
@@ -93,6 +117,37 @@ class AttachmentModel {
       blobStorageUri: json['blobStorageUri'] ?? '',
       downloadUrl: json['downloadUrl'] as String?,
       fileType: json['fileType'] ?? 'document',
+    );
+  }
+}
+
+class ReportMessageModel {
+  final String messageId;
+  final String reportId;
+  final String senderId;
+  final String senderRole;
+  final String messageText;
+  final DateTime createdAt;
+
+  ReportMessageModel({
+    required this.messageId,
+    required this.reportId,
+    required this.senderId,
+    required this.senderRole,
+    required this.messageText,
+    required this.createdAt,
+  });
+
+  factory ReportMessageModel.fromJson(Map<String, dynamic> json) {
+    return ReportMessageModel(
+      messageId: json['messageId'] ?? '',
+      reportId: json['reportId'] ?? '',
+      senderId: json['senderId'] ?? '',
+      senderRole: json['senderRole'] ?? '',
+      messageText: json['messageText'] ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
     );
   }
 }

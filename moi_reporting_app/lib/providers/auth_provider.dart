@@ -64,6 +64,31 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> registerLawyer({
+    required String email,
+    required String nationalId,
+    required String password,
+    required String syndicateId,
+    String? phoneNumber,
+    String? digitalSignatureUrl,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _authService.registerLawyer(
+        email: email,
+        nationalId: nationalId,
+        password: password,
+        syndicateId: syndicateId,
+        phoneNumber: phoneNumber,
+        digitalSignatureUrl: digitalSignatureUrl,
+      );
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> login(String nationalId, String password) async {
     _isLoading = true;
     notifyListeners();
