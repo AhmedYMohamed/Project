@@ -34,7 +34,7 @@ class User(BaseOps):
     lawyerQrCode = Column("lawyerQrCode", String(256), nullable=True, unique=True, index=True)
 
     # Relationships
-    reports = relationship("Report", back_populates="user")
+    reports = relationship("Report", foreign_keys="[Report.userId]", back_populates="user")
     citizens = relationship("User", foreign_keys=[lawyerId], backref=backref("lawyer", remote_side=[userId]))
 
     def __repr__(self):
