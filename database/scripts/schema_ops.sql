@@ -15,7 +15,7 @@ CREATE TABLE [dbo].[User] (
     [userId] NVARCHAR(450) NOT NULL,
     [isAnonymous] BIT NOT NULL DEFAULT 0,
     [createdAt] DATETIME2(7) NOT NULL DEFAULT GETUTCDATE(),
-    [role] NVARCHAR(50) NOT NULL CHECK ([role] IN ('citizen', 'officer', 'admin')),
+    [role] NVARCHAR(50) NOT NULL CHECK ([role] IN ('citizen', 'officer', 'admin', 'lawyer')),
     [email] NVARCHAR(256) NULL,
     [phoneNumber] NVARCHAR(20) NULL,
     [hashedDeviceId] NVARCHAR(256) NULL,

@@ -12,6 +12,26 @@ def alter_columns_lawyer():
     print("Starting database alteration for Lawyer module...")
     
     queries = [
+        # Update check constraint on User.role to include 'lawyer'
+        """
+        DECLARE @chkName NVARCHAR(256);
+        DECLARE @definition NVARCHAR(MAX);
+
+        SELECT TOP 1 @chkName = cc.name, @definition = cc.definition
+        FROM sys.check_constraints cc
+        JOIN sys.columns c ON cc.parent_object_id = c.object_id AND cc.parent_column_id = c.column_id
+        WHERE cc.parent_object_id = OBJECT_ID(N'dbo.[User]') AND c.name = N'role';
+
+        IF @chkName IS NOT NULL AND @definition NOT LIKE '%lawyer%'
+        BEGIN
+            EXEC('ALTER TABLE dbo.[User] DROP CONSTRAINT [' + @chkName + '];');
+            ALTER TABLE dbo.[User] ADD CONSTRAINT [CK_User_Role] CHECK ([role] IN ('citizen', 'officer', 'admin', 'lawyer'));
+        END
+        ELSE IF @chkName IS NULL
+        BEGIN
+            ALTER TABLE dbo.[User] ADD CONSTRAINT [CK_User_Role] CHECK ([role] IN ('citizen', 'officer', 'admin', 'lawyer'));
+        END
+        """,
         # Add columns to User
         """
         IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[User]') AND name = N'lawyerId')
