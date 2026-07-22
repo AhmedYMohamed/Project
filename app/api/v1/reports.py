@@ -253,6 +253,35 @@ def update_report_status(
     return report
 
 
+@router.put(
+    "/{report_id}",
+    response_model=ReportResponse,
+    summary="Edit report by citizen owner"
+)
+async def update_report_by_citizen(
+    report_id: str,
+    title: Optional[str] = Form(None),
+    descriptionText: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    categoryId: Optional[ReportCategory] = Form(None),
+    files: Optional[List[UploadFile]] = File(None, description="Select new files to append"),
+    db: Session = Depends(get_db_ops),
+    current_user: User = Depends(get_current_user)
+):
+    """Allows the citizen owner of a report to edit their report after lawyer return or officer rejection."""
+    category_val = categoryId.value if categoryId else None
+    return await ReportService.update_report_by_user(
+        db=db,
+        report_id=report_id,
+        user_id=current_user.userId,
+        title=title,
+        descriptionText=descriptionText,
+        location=location,
+        categoryId=category_val,
+        files=files
+    )
+
+
 @router.delete(
     "/{report_id}",
     status_code=status.HTTP_204_NO_CONTENT,

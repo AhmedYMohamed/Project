@@ -202,6 +202,11 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
 
                   const SizedBox(height: 16),
 
+                  // --- Edit Action Card (When Lawyer Returns or Officer Rejects) ---
+                  _buildEditActionCard(report, loc),
+
+                  const SizedBox(height: 16),
+
                   // --- Officer Notes Section (High Priority) ---
                   _buildOfficerNotesSection(report, loc),
 
@@ -741,6 +746,225 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
       child: Text(
         statusText,
         style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildEditActionCard(ReportModel report, AppLocalizations? loc) {
+    final isReturnedByLawyer = report.status == 'ReturnedToCitizen';
+    final isRejectedByOfficer = report.status == 'Rejected';
+
+    if (!isReturnedByLawyer && !isRejectedByOfficer) return const SizedBox.shrink();
+
+    final titleText = isReturnedByLawyer
+        ? (loc?.translate('returnedByLawyerTitle') ?? 'مطلوب تعديلات من المحامي')
+        : (loc?.translate('rejectedByOfficerTitle') ?? 'تم رفض البلاغ ومطلوب تعديل');
+
+    final feedbackText = isReturnedByLawyer
+        ? (report.lawyerFeedback ?? 'قام المحامي بطلب تعديل أو استكمال بيانات البلاغ.')
+        : (report.officerNote ?? 'قام الضابط برفض البلاغ وطلب تعديل البيانات.');
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: isReturnedByLawyer ? Colors.orange : AppColors.statusRejected, width: 1.5),
+      ),
+      color: isReturnedByLawyer ? Colors.orange.shade50 : Colors.red.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  isReturnedByLawyer ? Icons.edit_note : Icons.gavel,
+                  color: isReturnedByLawyer ? Colors.orange.shade800 : AppColors.statusRejected,
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    titleText,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isReturnedByLawyer ? Colors.orange.shade900 : Colors.red.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              feedbackText,
+              style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isReturnedByLawyer ? Colors.orange.shade800 : AppColors.statusRejected,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.edit, size: 18),
+                label: Text(
+                  loc?.translate('editReportButton') ?? 'تعديل البلاغ وإعادة الإرسال',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                onPressed: () => _showEditReportDialog(report),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditReportDialog(ReportModel report) {
+    final titleController = TextEditingController(text: report.title);
+    final descriptionController = TextEditingController(text: report.descriptionText);
+    final locationController = TextEditingController(text: report.location ?? '');
+    String selectedCategory = report.categoryId.isNotEmpty ? report.categoryId : 'infrastructure';
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Row(
+              children: [
+                Icon(Icons.edit, color: AppColors.brightTealBlue),
+                SizedBox(width: 8),
+                Text('تعديل البلاغ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('عنوان البلاغ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('الفئة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedCategory,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'infrastructure', child: Text('بنية تحتية')),
+                      DropdownMenuItem(value: 'utilities', child: Text('مرافق عامة')),
+                      DropdownMenuItem(value: 'crime', child: Text('جريمة / أمن')),
+                      DropdownMenuItem(value: 'traffic', child: Text('مرور')),
+                      DropdownMenuItem(value: 'public_nuisance', child: Text('إزعاج عام')),
+                      DropdownMenuItem(value: 'environmental', child: Text('بيئة')),
+                      DropdownMenuItem(value: 'other', child: Text('أخرى')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setDialogState(() => selectedCategory = val);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('الموقع', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: locationController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('تفاصيل البلاغ المعدلة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
+                child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.brightTealBlue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: isSubmitting
+                    ? null
+                    : () async {
+                        final auth = context.read<AuthProvider>();
+                        final token = auth.token;
+                        if (token == null) return;
+                        setDialogState(() => isSubmitting = true);
+                        try {
+                          await ReportService().updateReport(
+                            reportId: report.reportId,
+                            token: token,
+                            title: titleController.text.trim(),
+                            description: descriptionController.text.trim(),
+                            location: locationController.text.trim(),
+                            categoryId: selectedCategory,
+                          );
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('تم تعديل البلاغ وإعادة إرساله بنجاح'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            setState(() => _loadReport());
+                          }
+                        } catch (e) {
+                          setDialogState(() => isSubmitting = false);
+                          if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              SnackBar(
+                                content: Text('فشل في تعديل البلاغ: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                child: isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text('حفظ وإرسال', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -64,6 +64,10 @@ class AppColors {
         return statusResolved;
       case 'rejected':
         return statusRejected;
+      case 'returnedtocitizen':
+        return Colors.orange;
+      case 'pendinglawyerreview':
+        return Colors.purple;
       default:
         return statusDefault;
     }

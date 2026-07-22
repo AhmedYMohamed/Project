@@ -58,6 +58,52 @@ class ReportService {
     }
   }
 
+  Future<Response> updateReport({
+    required String reportId,
+    required String token,
+    String? title,
+    String? description,
+    String? categoryId,
+    String? location,
+    List<Uint8List>? fileBytesList,
+    List<String>? fileNamesList,
+  }) async {
+    try {
+      Map<String, dynamic> formMap = {};
+      if (title != null && title.isNotEmpty) formMap['title'] = title;
+      if (description != null && description.isNotEmpty) formMap['descriptionText'] = description;
+      if (categoryId != null && categoryId.isNotEmpty) formMap['categoryId'] = categoryId;
+      if (location != null && location.isNotEmpty) formMap['location'] = location;
+
+      FormData formData = FormData.fromMap(formMap);
+
+      if (fileBytesList != null && fileNamesList != null) {
+        for (int i = 0; i < fileBytesList.length; i++) {
+          formData.files.add(MapEntry(
+            'files',
+            MultipartFile.fromBytes(
+              fileBytesList[i],
+              filename: fileNamesList[i],
+            ),
+          ));
+        }
+      }
+
+      return await _dio.put(
+        '/api/v1/reports/$reportId',
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<ReportModel>> getUserReports(String token, String userId) async {
     try {
       final response = await _dio.get(

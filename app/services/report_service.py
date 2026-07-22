@@ -512,7 +512,85 @@ class ReportService:
                 status_code=500, 
                 detail=f"Failed to update report status: {str(e)}"
             )
-    
+
+    @staticmethod
+    async def update_report_by_user(
+        db: Session,
+        report_id: str,
+        user_id: str,
+        title: Optional[str] = None,
+        descriptionText: Optional[str] = None,
+        location: Optional[str] = None,
+        categoryId: Optional[str] = None,
+        files: Optional[List[UploadFile]] = None
+    ) -> ReportResponse:
+        """
+        Allow citizen owner to update report content after lawyer return or officer rejection.
+        """
+        report = db.query(Report).options(
+            selectinload(Report.attachments)
+        ).filter(Report.reportId == report_id).first()
+
+        if not report:
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        if report.userId != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to edit this report")
+
+        if report.status not in ["ReturnedToCitizen", "Rejected", "Submitted"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Report can only be edited when returned by lawyer or rejected by officer."
+            )
+
+        if title:
+            report.title = title
+        if descriptionText:
+            report.descriptionText = descriptionText
+        if location:
+            report.locationRaw = location
+            try:
+                parts = [p.strip() for p in location.split(',')]
+                if len(parts) == 2:
+                    report.latitude = float(parts[0])
+                    report.longitude = float(parts[1])
+            except (ValueError, TypeError):
+                pass
+        if categoryId:
+            report.categoryId = categoryId.value if hasattr(categoryId, 'value') else str(categoryId)
+
+        if files:
+            blob_service = BlobStorageService()
+            for file_entry in files:
+                if file_entry.filename:
+                    storage_uri, mime_type, file_type = await blob_service.upload_file(file_entry, report_id)
+                    attachment = Attachment(
+                        attachmentId=f"att-{uuid.uuid4()}",
+                        reportId=report_id,
+                        blobStorageUri=storage_uri,
+                        mimeType=mime_type,
+                        fileType=file_type,
+                        fileSizeBytes=file_entry.size or 0,
+                        createdAt=utcnow()
+                    )
+                    db.add(attachment)
+
+        # Transition status back for re-review
+        if report.lawyerId or report.status == "ReturnedToCitizen":
+            report.status = "PendingLawyerReview"
+        else:
+            report.status = "Submitted"
+
+        report.updatedAt = utcnow()
+
+        try:
+            db.commit()
+            db.refresh(report)
+            return ReportService.get_report(db, report_id)
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Failed to update report: {str(e)}")
+
     @staticmethod
     def delete_report(db: Session, report_id: str) -> bool:
         """
