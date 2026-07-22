@@ -30,7 +30,7 @@ CREATE TABLE [dbo].[Report] (
     [descriptionText] NVARCHAR(MAX) NOT NULL,
     [locationRaw] NVARCHAR(2048) NULL,
     [status] NVARCHAR(50) NOT NULL DEFAULT 'Submitted'
-        CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected')),
+        CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected', 'PendingLawyerReview', 'ReturnedToCitizen')),
     [categoryId] NVARCHAR(100) NOT NULL,
     [aiConfidence] FLOAT NULL CHECK ([aiConfidence] >= 0 AND [aiConfidence] <= 1),
     [createdAt] DATETIME2(7) NOT NULL DEFAULT GETUTCDATE(),
@@ -47,7 +47,7 @@ CREATE TABLE [dbo].[Attachment] (
     [reportId] NVARCHAR(450) NOT NULL,
     [blobStorageUri] NVARCHAR(2048) NOT NULL,
     [mimeType] NVARCHAR(100) NOT NULL,
-    [fileType] NVARCHAR(50) NOT NULL CHECK ([fileType] IN ('image', 'video', 'audio')),
+    [fileType] NVARCHAR(50) NOT NULL CHECK ([fileType] IN ('image', 'video', 'audio', 'document')),
     [fileSizeBytes] BIGINT NOT NULL CHECK ([fileSizeBytes] > 0),
     CONSTRAINT [PK_Attachment] PRIMARY KEY CLUSTERED ([attachmentId]),
     CONSTRAINT [FK_Attachment_Report] FOREIGN KEY ([reportId]) REFERENCES [dbo].[Report]([reportId]) ON DELETE CASCADE

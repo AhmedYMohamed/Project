@@ -49,7 +49,7 @@ CREATE TABLE [dbo].[Report] (
     [latitude] FLOAT NULL,
     [longitude] FLOAT NULL,
     [status] NVARCHAR(50) NOT NULL DEFAULT 'Submitted'
-        CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected')),
+        CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected', 'PendingLawyerReview', 'ReturnedToCitizen')),
     [categoryId] NVARCHAR(100) NOT NULL,
     [aiConfidence] FLOAT NULL CHECK ([aiConfidence] >= 0 AND [aiConfidence] <= 1),
     [createdAt] DATETIME2(7) NOT NULL DEFAULT GETUTCDATE(),

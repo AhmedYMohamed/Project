@@ -106,6 +106,48 @@ async def lifespan(app: FastAPI):
             END
             """))
 
+            # Update check constraint on Report.status to include 'PendingLawyerReview' and 'ReturnedToCitizen'
+            conn.execute(text("""
+            DECLARE @chkReportStatus NVARCHAR(256);
+            DECLARE @defReportStatus NVARCHAR(MAX);
+
+            SELECT TOP 1 @chkReportStatus = cc.name, @defReportStatus = cc.definition
+            FROM sys.check_constraints cc
+            JOIN sys.columns c ON cc.parent_object_id = c.object_id AND cc.parent_column_id = c.column_id
+            WHERE cc.parent_object_id = OBJECT_ID(N'dbo.[Report]') AND c.name = N'status';
+
+            IF @chkReportStatus IS NOT NULL AND (@defReportStatus NOT LIKE '%PendingLawyerReview%' OR @defReportStatus NOT LIKE '%ReturnedToCitizen%')
+            BEGIN
+                EXEC('ALTER TABLE dbo.[Report] DROP CONSTRAINT [' + @chkReportStatus + '];');
+                ALTER TABLE dbo.[Report] ADD CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected', 'PendingLawyerReview', 'ReturnedToCitizen'));
+            END
+            ELSE IF @chkReportStatus IS NULL
+            BEGIN
+                ALTER TABLE dbo.[Report] ADD CONSTRAINT [CK_Report_Status] CHECK ([status] IN ('Submitted', 'Assigned', 'InProgress', 'Resolved', 'Rejected', 'PendingLawyerReview', 'ReturnedToCitizen'));
+            END
+            """))
+
+            # Update check constraint on Attachment.fileType to include 'document'
+            conn.execute(text("""
+            DECLARE @chkFileType NVARCHAR(256);
+            DECLARE @defFileType NVARCHAR(MAX);
+
+            SELECT TOP 1 @chkFileType = cc.name, @defFileType = cc.definition
+            FROM sys.check_constraints cc
+            JOIN sys.columns c ON cc.parent_object_id = c.object_id AND cc.parent_column_id = c.column_id
+            WHERE cc.parent_object_id = OBJECT_ID(N'dbo.[Attachment]') AND c.name = N'fileType';
+
+            IF @chkFileType IS NOT NULL AND @defFileType NOT LIKE '%document%'
+            BEGIN
+                EXEC('ALTER TABLE dbo.[Attachment] DROP CONSTRAINT [' + @chkFileType + '];');
+                ALTER TABLE dbo.[Attachment] ADD CONSTRAINT [CK_Attachment_FileType] CHECK ([fileType] IN ('image', 'video', 'audio', 'document'));
+            END
+            ELSE IF @chkFileType IS NULL
+            BEGIN
+                ALTER TABLE dbo.[Attachment] ADD CONSTRAINT [CK_Attachment_FileType] CHECK ([fileType] IN ('image', 'video', 'audio', 'document'));
+            END
+            """))
+
             # Add lawyer columns to Report
             conn.execute(text("""
             IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[Report]') AND name = N'lawyerId')
