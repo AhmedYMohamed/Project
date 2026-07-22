@@ -8,7 +8,7 @@ from app.core.database import get_db_ops
 from app.core.security import create_access_token, verify_token
 from app.core.config import get_settings
 from app.services.user_service import UserService
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, LawyerCreate, LawyerResponse
 from app.models.user import User
 
 
@@ -77,6 +77,17 @@ def register_officer(
     """
     user_in.role = "officer"
     return UserService.create_user(db, user_in)
+
+@router.post("/register/lawyer", response_model=LawyerResponse, status_code=status.HTTP_201_CREATED)
+def register_lawyer(
+    user_in: LawyerCreate,
+    db: Session = Depends(get_db_ops)
+):
+    """
+    Register a new Lawyer account securely.
+    Assigns role = 'lawyer' and generates a QR code.
+    """
+    return UserService.create_lawyer(db, user_in)
 
 @router.post("/login")
 def login_access_token(

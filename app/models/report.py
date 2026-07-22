@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, DateTime, Text, ForeignKey, func, CheckConstraint, Unicode, UnicodeText
+from sqlalchemy import Column, String, Float, DateTime, Text, ForeignKey, func, CheckConstraint, Unicode, UnicodeText, Boolean
 from sqlalchemy.orm import relationship
 
 from app.core.database import BaseOps  
@@ -38,6 +38,17 @@ class Report(BaseOps):
     transcribedVoiceText = Column("transcribedVoiceText", UnicodeText, nullable=True)
     officerNote = Column("officerNote", UnicodeText, nullable=True)
 
+    # Lawyer Review & Signature Fields
+    lawyerId = Column(
+        "lawyerId",
+        String(450),
+        ForeignKey("dbo.User.userId", ondelete="SET NULL"),
+        nullable=True
+    )
+    lawyerSignature = Column("lawyerSignature", UnicodeText, nullable=True)
+    lawyerFeedback = Column("lawyerFeedback", UnicodeText, nullable=True)
+    isUrgentEscalation = Column("isUrgentEscalation", Boolean, nullable=False, default=False)
+
     # Timestamps
     createdAt = Column(
         "createdAt",
@@ -54,9 +65,15 @@ class Report(BaseOps):
     )
     
     # Relationships
-    user = relationship("User", back_populates="reports")
+    user = relationship("User", foreign_keys=[userId], back_populates="reports")
+    lawyer = relationship("User", foreign_keys=[lawyerId])
     attachments = relationship(
         "Attachment",
+        back_populates="report",
+        cascade="all, delete-orphan"
+    )
+    messages = relationship(
+        "ReportMessage",
         back_populates="report",
         cascade="all, delete-orphan"
     )

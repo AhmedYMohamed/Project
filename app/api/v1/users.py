@@ -6,7 +6,7 @@ from app.core.database import get_db_ops
 from app.api.v1.auth import get_current_user
 from app.services.user_service import UserService
 from app.models.user import User
-from app.schemas.user import UserResponse, UserRoleUpdate, UserRole, UserDemographicResponse , UserListResponse # <--- Changed UserUpdate to UserRoleUpdate
+from app.schemas.user import UserResponse, UserRoleUpdate, UserRole, UserDemographicResponse , UserListResponse, LinkLawyerRequest # <--- Changed UserUpdate to UserRoleUpdate
 
 router = APIRouter()
 
@@ -104,3 +104,47 @@ def get_all_users_list(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get users list: {str(e)}"
         )
+
+@router.post("/link-lawyer", response_model=UserResponse, summary="Link a primary lawyer")
+def link_lawyer(
+    payload: LinkLawyerRequest,
+    db: Session = Depends(get_db_ops),
+    current_user: User = Depends(get_current_user)
+):
+    """Link the current Citizen to a Lawyer using syndicateId or qrCode."""
+    if current_user.role != "citizen" and current_user.role != UserRole.CITIZEN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only citizens can link a primary lawyer."
+        )
+
+    # Find the lawyer
+    lawyer = None
+    if payload.syndicateId:
+        lawyer = db.query(User).filter(User.role == "lawyer", User.syndicateId == payload.syndicateId.strip()).first()
+    elif payload.qrCode:
+        lawyer = db.query(User).filter(User.role == "lawyer", User.lawyerQrCode == payload.qrCode.strip()).first()
+
+    if not lawyer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lawyer not found with the provided details."
+        )
+
+    # Link the lawyer
+    current_user.lawyerId = lawyer.userId
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@router.get("/citizens", response_model=List[UserResponse], summary="Get citizens linked to current lawyer")
+def get_my_citizens(
+    db: Session = Depends(get_db_ops),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieve list of citizens linked to current lawyer."""
+    if current_user.role != "lawyer" and current_user.role != UserRole.LAWYER:
+        raise HTTPException(status_code=403, detail="Only lawyers can view linked citizens.")
+    
+    citizens = db.query(User).filter(User.lawyerId == current_user.userId).all()
+    return citizens

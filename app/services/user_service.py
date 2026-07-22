@@ -7,7 +7,7 @@ import uuid
 
 # Models & Schemas
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate, UserRole
+from app.schemas.user import UserCreate, UserUpdate, UserRole, LawyerCreate
 
 # Security Utilities (Already defined in app/core/security.py)
 from app.core.security import hash_password, verify_password
@@ -142,3 +142,49 @@ class UserService:
         ).order_by(
             User.createdAt.desc()
         ).all()
+
+    @staticmethod
+    def create_lawyer(db: Session, user_in: LawyerCreate) -> User:
+        """Register a new lawyer account with QR code and syndicateId."""
+        import hashlib
+        hashed_nid = hashlib.sha256(user_in.nationalId.encode()).hexdigest()
+        
+        # 1. Check if national ID exists
+        if UserService.get_by_national_id(db, hashed_nid):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="National ID already registered"
+            )
+        
+        # 2. Check if syndicateId is already registered
+        existing_syndicate = db.query(User).filter(User.syndicateId == user_in.syndicateId).first()
+        if existing_syndicate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Syndicate ID already registered"
+            )
+
+        # 3. Hash the password
+        hashed_pwd = hash_password(user_in.password)
+
+        # 4. Create Lawyer record
+        lawyer_id = f"user-{uuid.uuid4()}"
+        qr_code = f"QR-LAWYER-{uuid.uuid4().hex[:8].upper()}"
+        
+        db_user = User(
+            userId=lawyer_id,
+            email=user_in.email,
+            hashedNationalId=hashed_nid,
+            phoneNumber=user_in.phoneNumber,
+            passwordHash=hashed_pwd,
+            role="lawyer",
+            isAnonymous=False,
+            syndicateId=user_in.syndicateId,
+            digitalSignatureUrl=user_in.digitalSignatureUrl,
+            lawyerQrCode=qr_code
+        )
+        
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user

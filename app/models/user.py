@@ -1,5 +1,5 @@
-from sqlalchemy import Column, String, Boolean, DateTime, func, CheckConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, Boolean, DateTime, func, CheckConstraint, ForeignKey, Unicode
+from sqlalchemy.orm import relationship, backref
 
 from app.core.database import BaseOps 
 
@@ -27,8 +27,15 @@ class User(BaseOps):
     hashedDeviceId = Column("hashedDeviceId", String(256), nullable=True)
     passwordHash = Column(String(256), nullable=True)
 
+    # Lawyer Module Fields
+    lawyerId = Column("lawyerId", String(450), ForeignKey("dbo.User.userId", ondelete="SET NULL"), nullable=True)
+    syndicateId = Column("syndicateId", String(100), nullable=True, unique=True, index=True)
+    digitalSignatureUrl = Column("digitalSignatureUrl", Unicode(2048), nullable=True)
+    lawyerQrCode = Column("lawyerQrCode", String(256), nullable=True, unique=True, index=True)
+
     # Relationships
     reports = relationship("Report", back_populates="user")
+    citizens = relationship("User", foreign_keys=[lawyerId], backref=backref("lawyer", remote_side=[userId]))
 
     def __repr__(self):
         return f"<User(userId={self.userId}, role={self.role})>"

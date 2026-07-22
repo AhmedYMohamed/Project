@@ -33,6 +33,7 @@ class UserRole(str, Enum):
     CITIZEN = "citizen"
     OFFICER = "officer"
     ADMIN = "admin"
+    LAWYER = "lawyer"
 
 # Base shared properties
 class UserBase(BaseModel):
@@ -45,6 +46,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     nationalId: str = Field(..., min_length=5, description="Citizen National ID Number")
     password: str = Field(..., min_length=8, description="Required for Officers/Admins")
+
+class LawyerCreate(UserCreate):
+    syndicateId: str = Field(..., description="Lawyer Bar / Syndicate ID")
+    digitalSignatureUrl: Optional[str] = Field(None, description="Digital Signature asset URL")
 
 # Login Input
 class UserLogin(BaseModel):
@@ -60,9 +65,20 @@ class UserResponse(UserBase):
     userId: str
     isAnonymous: bool
     createdAt: datetime
+    lawyerId: Optional[str] = None
+    syndicateId: Optional[str] = None
+    lawyerQrCode: Optional[str] = None
+    digitalSignatureUrl: Optional[str] = None
     
     class Config:
         from_attributes = True
+
+class LawyerResponse(UserResponse):
+    pass
+
+class LinkLawyerRequest(BaseModel):
+    syndicateId: Optional[str] = None
+    qrCode: Optional[str] = None
 
 # Profile Update Input
 class UserUpdate(BaseModel):

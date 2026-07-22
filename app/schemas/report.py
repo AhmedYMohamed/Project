@@ -12,6 +12,8 @@ class ReportStatus(str, Enum):
     IN_PROGRESS = "InProgress"
     RESOLVED = "Resolved"
     REJECTED = "Rejected"
+    PENDING_LAWYER_REVIEW = "PendingLawyerReview"
+    RETURNED_TO_CITIZEN = "ReturnedToCitizen"
 
 class ReportCategory(str, Enum):
     INFRASTRUCTURE = "infrastructure"
@@ -79,6 +81,12 @@ class ReportResponse(ReportBase):
     officerNote: Optional[str] = None # Include officer Note
     reportUrl: Optional[str] = None
     
+    # Lawyer fields
+    lawyerId: Optional[str] = None
+    lawyerSignature: Optional[str] = None
+    lawyerFeedback: Optional[str] = None
+    isUrgentEscalation: bool = False
+    
     # Returns full attachment objects
     attachments: List[AttachmentResponse] = []
 
@@ -97,7 +105,10 @@ class ReportResponse(ReportBase):
             "officer_note": "officerNote",
             "transcribed_voice_text": "transcribedVoiceText",
             "hashed_device_id": "hashedDeviceId",
-            
+            "lawyer_id": "lawyerId",
+            "lawyer_signature": "lawyerSignature",
+            "lawyer_feedback": "lawyerFeedback",
+            "is_urgent_escalation": "isUrgentEscalation",
         }.get(field_name, field_name),
         populate_by_name=True
     )

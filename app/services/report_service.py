@@ -68,6 +68,16 @@ class ReportService:
             except (ValueError, TypeError):
                 pass
         
+        # Check if user has a lawyer
+        lawyer_id = None
+        report_status = "Submitted"
+        if user_id:
+            from app.services.user_service import UserService
+            creator_user = UserService.get_by_id(db, user_id)
+            if creator_user and creator_user.lawyerId:
+                lawyer_id = creator_user.lawyerId
+                report_status = "PendingLawyerReview"
+
         db_report = Report(
             reportId=report_id,
             title=report_data.title,
@@ -77,8 +87,9 @@ class ReportService:
             longitude=parsed_lon,
             categoryId=report_data.categoryId.value if report_data.categoryId else "other",
             userId=user_id,
+            lawyerId=lawyer_id,
             transcribedVoiceText=report_data.transcribedVoiceText,
-            status="Submitted",
+            status=report_status,
             aiConfidence=None,
             createdAt=report_data.createdAt if report_data.createdAt else utcnow(),
             updatedAt=utcnow()
@@ -181,6 +192,10 @@ class ReportService:
                 updatedAt=db_report.updatedAt,
                 userId=db_report.userId,
                 transcribedVoiceText=db_report.transcribedVoiceText,
+                lawyerId=db_report.lawyerId,
+                lawyerSignature=db_report.lawyerSignature,
+                lawyerFeedback=db_report.lawyerFeedback,
+                isUrgentEscalation=db_report.isUrgentEscalation,
                 attachments=attachment_responses_data,
                 reportUrl=None  # Will be set by API endpoint
             )
@@ -252,6 +267,10 @@ class ReportService:
             userId=report.userId,
             transcribedVoiceText=report.transcribedVoiceText,
             officerNote=report.officerNote,
+            lawyerId=report.lawyerId,
+            lawyerSignature=report.lawyerSignature,
+            lawyerFeedback=report.lawyerFeedback,
+            isUrgentEscalation=report.isUrgentEscalation,
             attachments=attachment_responses
         )
     @staticmethod
@@ -282,6 +301,8 @@ class ReportService:
         # Apply filters
         if status:
             query = query.filter(Report.status == status)
+        else:
+            query = query.filter(Report.status != "PendingLawyerReview", Report.status != "ReturnedToCitizen")
         if category:
             query = query.filter(Report.categoryId == category)
         
@@ -326,6 +347,10 @@ class ReportService:
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
                     officerNote=r.officerNote,
+                    lawyerId=r.lawyerId,
+                    lawyerSignature=r.lawyerSignature,
+                    lawyerFeedback=r.lawyerFeedback,
+                    isUrgentEscalation=r.isUrgentEscalation,
                     attachments=attachment_responses
                 )
             )
@@ -413,6 +438,10 @@ class ReportService:
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
                     officerNote=r.officerNote,
+                    lawyerId=r.lawyerId,
+                    lawyerSignature=r.lawyerSignature,
+                    lawyerFeedback=r.lawyerFeedback,
+                    isUrgentEscalation=r.isUrgentEscalation,
                     attachments=attachment_responses
                 )
             )
@@ -576,6 +605,12 @@ class ReportService:
             Report.longitude <= lon + radius_deg
         )
         
+        # Exclude lawyer review / returned reports from officer view
+        query = query.filter(
+            Report.status != "PendingLawyerReview",
+            Report.status != "ReturnedToCitizen"
+        )
+        
         # Get total count before pagination
         total = query.count()
         
@@ -615,6 +650,10 @@ class ReportService:
                     userId=r.userId,
                     transcribedVoiceText=r.transcribedVoiceText,
                     officerNote=getattr(r, 'officerNote', None),
+                    lawyerId=r.lawyerId,
+                    lawyerSignature=r.lawyerSignature,
+                    lawyerFeedback=r.lawyerFeedback,
+                    isUrgentEscalation=r.isUrgentEscalation,
                     attachments=attachment_responses
                 )
             )
