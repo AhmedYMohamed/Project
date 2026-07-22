@@ -77,7 +77,7 @@ jobs:
               --name moi-app-v2 \
               --resource-group rg-moi-reporting-prod \
               --settings \
-                SCM_DO_BUILD_DURING_DEPLOYMENT=false \
+                SCM_DO_BUILD_DURING_DEPLOYMENT=true \
                 PYTHONPATH="/home/site/wwwroot/.python_packages/lib/site-packages"
       # Force a real restart so the worker process reloads the new files
       # from disk instead of continuing to run whatever was already warm.
