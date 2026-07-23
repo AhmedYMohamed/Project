@@ -10,9 +10,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import '../services/report_service.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../services/location_service.dart';
+import '../widgets/language_switcher_button.dart';
 
 class ReportFormScreen extends StatefulWidget {
   const ReportFormScreen({super.key});
@@ -249,18 +249,16 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc?.translate('newReport') ?? 'New Report', style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
         ],
       ),

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../services/report_service.dart';
+import '../widgets/language_switcher_button.dart';
 import 'report_form.dart';
 import 'report_history_screen.dart';
 
@@ -153,7 +153,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -161,10 +160,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
@@ -307,22 +305,26 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   void _showLinkLawyerDialog(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Link Primary Lawyer'),
+          title: Text(loc?.translate('linkPrimaryLawyer') ?? 'Link Primary Lawyer'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Enter your lawyer\'s Syndicate ID or Bar ID to establish the link:'),
+              Text(
+                loc?.translate('enterSyndicateIdInstruction') ??
+                    'Enter your lawyer\'s Syndicate ID or Bar ID to establish the link:',
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Syndicate ID',
-                  prefixIcon: Icon(Icons.gavel),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('syndicateId') ?? 'Syndicate ID',
+                  prefixIcon: const Icon(Icons.gavel),
                 ),
               ),
             ],
@@ -330,7 +332,7 @@ class ProfileScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(loc?.translate('cancel') ?? 'Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -340,7 +342,7 @@ class ProfileScreen extends StatelessWidget {
                 Navigator.pop(ctx);
                 _linkLawyer(context, syndicateId);
               },
-              child: const Text('Link'),
+              child: Text(loc?.translate('link') ?? 'Link'),
             ),
           ],
         );
@@ -350,6 +352,7 @@ class ProfileScreen extends StatelessWidget {
 
   void _linkLawyer(BuildContext context, String syndicateId) async {
     final auth = context.read<AuthProvider>();
+    final loc = AppLocalizations.of(context);
     try {
       final dio = Dio(BaseOptions(baseUrl: ReportService.baseUrl));
       await dio.post(
@@ -362,17 +365,19 @@ class ProfileScreen extends StatelessWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lawyer linked successfully!'),
+          SnackBar(
+            content: Text(loc?.translate('lawyerLinkedSuccess') ?? 'Lawyer linked successfully!'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
+        final errorMsg = loc?.translate('failedLinkLawyer', params: {'error': e.toString()}) ??
+            'Failed to link lawyer: ${e.toString()}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to link lawyer: ${e.toString()}'),
+            content: Text(errorMsg),
             backgroundColor: Colors.red,
           ),
         );
@@ -384,18 +389,16 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc?.translate('profile') ?? 'Profile',
             style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
         ],
       ),
@@ -420,15 +423,15 @@ class ProfileScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(loc?.translate('language') ?? 'Language'),
-            subtitle: Text(localeProvider.isArabic ? 'العربية' : 'English'),
-            trailing: const Icon(Icons.swap_horiz),
-            onTap: () => localeProvider.toggleLanguage(),
+            trailing: const LanguageSwitcherButton(),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.gavel),
-            title: const Text('Associated Lawyer'),
-            subtitle: const Text('Link your primary lawyer using their Syndicate ID'),
+            title: Text(loc?.translate('associatedLawyer') ?? 'Associated Lawyer'),
+            subtitle: Text(
+              loc?.translate('linkLawyerSub') ?? 'Link your primary lawyer using their Syndicate ID',
+            ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () => _showLinkLawyerDialog(context),
           ),

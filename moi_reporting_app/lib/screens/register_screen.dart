@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/language_switcher_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -66,16 +66,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc?.translate('register') ?? 'Register'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
         ],
       ),
@@ -151,18 +149,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _syndicateIdController,
-                  decoration: const InputDecoration(
-                    labelText: 'Syndicate ID / Bar ID',
-                    prefixIcon: Icon(Icons.gavel),
+                  decoration: InputDecoration(
+                    labelText: loc?.translate('syndicateIdBarId') ?? 'Syndicate ID / Bar ID',
+                    prefixIcon: const Icon(Icons.gavel),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Please enter Syndicate ID' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? (loc?.translate('pleaseEnterSyndicateId') ?? 'Please enter Syndicate ID')
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _digitalSignatureController,
-                  decoration: const InputDecoration(
-                    labelText: 'Digital Signature URL (Optional)',
-                    prefixIcon: Icon(Icons.edit_note),
+                  decoration: InputDecoration(
+                    labelText: loc?.translate('digitalSignatureUrl') ?? 'Digital Signature URL (Optional)',
+                    prefixIcon: const Icon(Icons.edit_note),
                   ),
                 ),
               ],

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../screens/app_colors.dart';
+import '../widgets/language_switcher_button.dart';
 import 'officer_report_details_screen.dart';
 
 class OfficerMapScreen extends StatelessWidget {
@@ -22,7 +21,6 @@ class OfficerMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -32,11 +30,10 @@ class OfficerMapScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.onDark,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
         ],
         flexibleSpace: Container(

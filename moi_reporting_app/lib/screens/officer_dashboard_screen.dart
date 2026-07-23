@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../services/officer_service.dart';
 import '../screens/app_colors.dart';
+import '../widgets/language_switcher_button.dart';
 import 'officer_report_details_screen.dart';
 import 'officer_map_screen.dart';
 import '../services/location_service.dart';
@@ -169,8 +169,6 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       _locationStatus = loc?.translate('fetchingLocation') ?? 'Fetching location...';
     });
 
-    // 1. Fetch dashboard stats and reports without location first (or with cached coordinates)
-    // so the page loads and renders instantly without blocking on GPS.
     try {
       final statsData = await _officerService.getDashboardStats();
       final reportsData = await _officerService.getNearbyReports(
@@ -182,7 +180,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
         setState(() {
           _stats = Map<String, int>.from(statsData);
           _nearbyReports = _parseReports(reportsData);
-          _isLoading = false; // Stop loading spinner so user sees stats and reports immediately!
+          _isLoading = false;
         });
       }
     } catch (e) {
@@ -193,8 +191,6 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       }
     }
 
-    // 2. Fetch/update current location asynchronously in the background.
-    // Once fetched, update the location label and refresh reports by proximity.
     _getCurrentLocation().then((_) async {
       if (_currentLat != null && _currentLon != null) {
         try {
@@ -215,14 +211,12 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   }
 
   Future<void> _fetchData() async {
-    // Retained for compatibility or other callers, but forwards to _fetchLocationAndData
     await _fetchLocationAndData();
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -282,10 +276,9 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.language, color: Colors.white),
-                onPressed: () => localeProvider.toggleLanguage(),
-                tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                child: LanguageSwitcherButton(),
               ),
               IconButton(
                 icon: const Icon(Icons.refresh, color: Colors.white),
@@ -493,7 +486,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
               builder: (context) =>
                   OfficerReportDetailsScreen(reportId: report['id']),
             ),
-          ).then((_) => _fetchData()); // Refresh on return
+          ).then((_) => _fetchData());
         },
         borderRadius: BorderRadius.circular(18),
         child: Padding(

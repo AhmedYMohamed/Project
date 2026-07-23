@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import '../services/officer_service.dart';
 import '../services/auth_service.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../screens/app_colors.dart';
 import '../widgets/smart_network_image/smart_network_image.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../widgets/language_switcher_button.dart';
 
 class OfficerReportDetailsScreen extends StatefulWidget {
   final String reportId;
@@ -90,23 +90,22 @@ class _OfficerReportDetailsScreenState
     setState(() => _isSubmitting = true);
     try {
       final noteText = _noteController.text;
-      debugPrint('=== OFFICER UPDATE SUBMISSION ===');
-      debugPrint('Report ID: ${widget.reportId}');
-      debugPrint('Status: $_selectedStatus');
-      debugPrint('Officer Note Text: "$noteText"');
       await _officerService.updateReportStatus(
           widget.reportId, _selectedStatus, noteText);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(loc?.translate('statusUpdatedSuccess') ?? 'Status updated successfully!'),
-            backgroundColor: AppColors.statusResolved));
-        Navigator.pop(context, true);
+          content: Text(loc?.translate('statusUpdatedSuccess') ??
+              'Status updated successfully!'),
+          backgroundColor: Colors.green,
+        ));
+        _fetchReportDetails();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('${loc?.translate('updateFailed') ?? 'Update failed'}: $e'),
-            backgroundColor: AppColors.statusRejected));
+          content: Text('${loc?.translate('updateFailed') ?? 'Update failed'}: $e'),
+          backgroundColor: Colors.red,
+        ));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -114,7 +113,9 @@ class _OfficerReportDetailsScreenState
   }
 
   String _resolveUrl(String url) {
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
     final baseUrl = AuthService.baseUrl.endsWith('/')
         ? AuthService.baseUrl.substring(0, AuthService.baseUrl.length - 1)
         : AuthService.baseUrl;
@@ -125,7 +126,6 @@ class _OfficerReportDetailsScreenState
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -136,11 +136,10 @@ class _OfficerReportDetailsScreenState
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: AppColors.headerGradient),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
         ],
         iconTheme: const IconThemeData(color: Colors.white),

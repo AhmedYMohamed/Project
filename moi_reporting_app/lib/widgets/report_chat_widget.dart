@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'dart:async';
 import '../models/models.dart';
 import '../services/report_service.dart';
+import '../l10n/app_localizations.dart';
 
 class ReportChatWidget extends StatefulWidget {
   final String reportId;
@@ -32,7 +33,6 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
   void initState() {
     super.initState();
     _fetchMessages();
-    // Poll for new messages every 3 seconds
     _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       _fetchMessages(silent: true);
     });
@@ -102,9 +102,10 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
       }
     } catch (e) {
       if (mounted) {
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to send message: ${e.toString()}'),
+            content: Text('${loc?.translate('updateFailed') ?? 'Failed to send message'}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -126,6 +127,8 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -138,7 +141,7 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E3A8A).withOpacity(0.05),
+              color: const Color(0xFF1E3A8A).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -148,9 +151,9 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
               children: [
                 const Icon(Icons.forum_outlined, color: Color(0xFF1E3A8A), size: 20),
                 const SizedBox(width: 8),
-                const Text(
-                  'Legal Counsel Chat',
-                  style: TextStyle(
+                Text(
+                  loc?.translate('legalDiscussionChat') ?? 'Legal Counsel Chat',
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1E3A8A),
                   ),
@@ -171,7 +174,7 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
             child: _messages.isEmpty
                 ? Center(
                     child: Text(
-                      'No messages yet. Start the discussion.',
+                      loc?.translate('noMessagesYet') ?? 'No messages yet. Start the discussion.',
                       style: TextStyle(color: Colors.grey[400], fontSize: 13),
                     ),
                   )
@@ -182,7 +185,7 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
                     itemBuilder: (context, index) {
                       final msg = _messages[index];
                       final isMe = msg.senderId == widget.currentUserId;
-                      return _buildMessageBubble(msg, isMe);
+                      return _buildMessageBubble(msg, isMe, loc);
                     },
                   ),
           ),
@@ -197,7 +200,7 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
                     controller: _messageController,
                     style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'Type your message...',
+                      hintText: loc?.translate('typeMessage') ?? 'Type your message...',
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
@@ -228,7 +231,16 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
     );
   }
 
-  Widget _buildMessageBubble(ReportMessageModel msg, bool isMe) {
+  Widget _buildMessageBubble(ReportMessageModel msg, bool isMe, AppLocalizations? loc) {
+    String senderLabel;
+    if (isMe) {
+      senderLabel = loc?.locale.languageCode == 'ar' ? 'أنت' : 'You';
+    } else if (msg.senderRole == 'lawyer') {
+      senderLabel = loc?.translate('lawyer') ?? 'Advocate';
+    } else {
+      senderLabel = loc?.translate('citizen') ?? 'Citizen';
+    }
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -250,9 +262,8 @@ class _ReportChatWidgetState extends State<ReportChatWidget> {
           crossAxisAlignment:
               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            // Sender role indicator
             Text(
-              isMe ? 'You' : (msg.senderRole == 'lawyer' ? 'Advocate' : 'Citizen'),
+              senderLabel,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,

@@ -21,11 +21,14 @@ class AppLocalizations {
       'arabic': 'العربية',
       'english': 'English',
       
+      // Roles
+      'citizen': 'Citizen',
+      'officer': 'Officer',
+      'lawyer': 'Lawyer',
+
       // Login Screen
       'welcomeBack': 'Welcome Back',
       'signInSub': 'Sign in to your MoI account',
-      'citizen': 'Citizen',
-      'officer': 'Officer',
       'nationalId': 'National ID Number',
       'password': 'Password',
       'login': 'Login',
@@ -44,6 +47,9 @@ class AppLocalizations {
       'pleaseEnterEmail': 'Please enter email',
       'registrationSuccess': 'Registration successful! Please login.',
       'registrationFailed': 'Registration failed: {error}',
+      'syndicateIdBarId': 'Syndicate ID / Bar ID',
+      'digitalSignatureUrl': 'Digital Signature URL (Optional)',
+      'pleaseEnterSyndicateId': 'Please enter Syndicate ID',
 
       // Main Navigation / Citizen Dashboard
       'home': 'Home',
@@ -69,6 +75,15 @@ class AppLocalizations {
       'logout': 'Logout',
       'settingsSoon': 'Settings coming soon!',
       'helpSoon': 'Help & Support coming soon!',
+      'associatedLawyer': 'Associated Lawyer',
+      'linkLawyerSub': 'Link your primary lawyer using their Syndicate ID',
+      'linkPrimaryLawyer': 'Link Primary Lawyer',
+      'enterSyndicateIdInstruction': "Enter your lawyer's Syndicate ID or Bar ID to establish the link:",
+      'syndicateId': 'Syndicate ID',
+      'cancel': 'Cancel',
+      'link': 'Link',
+      'lawyerLinkedSuccess': 'Lawyer linked successfully!',
+      'failedLinkLawyer': 'Failed to link lawyer: {error}',
 
       // Report Form Screen
       'newReport': 'New Report',
@@ -149,9 +164,37 @@ class AppLocalizations {
       'noOfficerNotesYet': 'No officer notes added yet.',
       'updated': 'Updated',
 
+      // Lawyer / Advocate Portal
+      'advocatePortal': 'MoI Advocate Portal',
+      'incidents': 'Incidents',
+      'myClients': 'My Clients',
+      'viewQrCode': 'View QR Code',
+      'myAdvocateQrCode': 'My Advocate QR Code',
+      'shareQrInstruction': 'Share this QR code string or Syndicate ID with clients to link their accounts:',
+      'close': 'Close',
+      'noClientIncidents': 'No client incidents reported yet.',
+      'urgentEscalation': 'URGENT ESCALATION',
+      'noClientsLinked': 'No citizens are linked to your profile.',
+      'anonymousEmail': 'Anonymous Email',
+      'phone': 'Phone',
+      'approveAndEndorse': 'Approve & Endorse',
+      'returnToCitizen': 'Return to Citizen',
+      'directEscalation': 'Direct Escalation',
+      'legalDiscussionChat': 'Legal Discussion & Chat',
+      'typeMessage': 'Type a message...',
+      'send': 'Send',
+      'legalFeedback': 'Legal Feedback / Requirements',
+      'returnFeedbackInstruction': 'Please provide specific feedback on what the client needs to correct or add to this incident report:',
+      'actionExecutedSuccess': 'Action "{action}" executed successfully!',
+      'failedExecuteAction': 'Failed to execute action: {error}',
+      'noMessagesYet': 'No messages yet. Start the legal discussion!',
+
       // Statuses
       'status_submitted': 'Submitted',
-      'status_inprogress': 'InProgress',
+      'status_pendinglawyerreview': 'Pending Review',
+      'status_returnedtocitizen': 'Returned to Citizen',
+      'status_assigned': 'Assigned',
+      'status_inprogress': 'In Progress',
       'status_resolved': 'Resolved',
       'status_rejected': 'Rejected',
     },
@@ -162,11 +205,14 @@ class AppLocalizations {
       'arabic': 'العربية',
       'english': 'English',
 
+      // Roles
+      'citizen': 'مواطن',
+      'officer': 'ضابط',
+      'lawyer': 'محامي',
+
       // Login Screen
       'welcomeBack': 'مرحباً بك مجدداً',
       'signInSub': 'تسجيل الدخول إلى حسابك في وزارة الداخلية',
-      'citizen': 'مواطن',
-      'officer': 'ضابط',
       'nationalId': 'رقم الهوية الوطنية',
       'password': 'كلمة المرور',
       'login': 'تسجيل الدخول',
@@ -185,6 +231,9 @@ class AppLocalizations {
       'pleaseEnterEmail': 'الرجاء إدخال البريد الإلكتروني',
       'registrationSuccess': 'تم التسجيل بنجاح! يرجى تسجيل الدخول.',
       'registrationFailed': 'فشل التسجيل: {error}',
+      'syndicateIdBarId': 'رقم القيد بنقابة المحامين',
+      'digitalSignatureUrl': 'رابط التوقيع الرقمي (اختياري)',
+      'pleaseEnterSyndicateId': 'الرجاء إدخال رقم القيد بالنقابة',
 
       // Main Navigation / Citizen Dashboard
       'home': 'الرئيسية',
@@ -210,6 +259,15 @@ class AppLocalizations {
       'logout': 'تسجيل الخروج',
       'settingsSoon': 'الإعدادات قريباً!',
       'helpSoon': 'المساعدة والدعم قريباً!',
+      'associatedLawyer': 'المحامي المرتبط',
+      'linkLawyerSub': 'ربط محاميك الخاص باستخدام رقم القيد بالنقابة',
+      'linkPrimaryLawyer': 'ربط المحامي الخاص',
+      'enterSyndicateIdInstruction': 'أدخل رقم القيد بالنقابة للمحامي الخاص بك لربط الحساب:',
+      'syndicateId': 'رقم القيد بالنقابة',
+      'cancel': 'إلغاء',
+      'link': 'ربط',
+      'lawyerLinkedSuccess': 'تم ربط المحامي بنجاح!',
+      'failedLinkLawyer': 'فشل ربط المحامي: {error}',
 
       // Report Form Screen
       'newReport': 'بلاغ جديد',
@@ -290,8 +348,36 @@ class AppLocalizations {
       'noOfficerNotesYet': 'لم يقم الضابط بإضافة ملاحظات بعد.',
       'updated': 'تم التحديث',
 
+      // Lawyer / Advocate Portal
+      'advocatePortal': 'بوابة المحامين - وزارة الداخلية',
+      'incidents': 'البلاغات والقضايا',
+      'myClients': 'الموكلين',
+      'viewQrCode': 'عرض رمز QR',
+      'myAdvocateQrCode': 'رمز QR للمحامي',
+      'shareQrInstruction': 'شارك رمز QR أو رقم القيد بالنقابة مع الموكلين لربط حساباتهم:',
+      'close': 'إغلاق',
+      'noClientIncidents': 'لا توجد بلاغات للموكلين حالياً.',
+      'urgentEscalation': 'تصعيد عاجل',
+      'noClientsLinked': 'لا يوجد مواطنون مرتبطون بحسابك حالياً.',
+      'anonymousEmail': 'بريد إلكتروني',
+      'phone': 'الهاتف',
+      'approveAndEndorse': 'الموافقة والإعتماد',
+      'returnToCitizen': 'إعادة للمواطن لتعديل البيانات',
+      'directEscalation': 'تصعيد مباشر',
+      'legalDiscussionChat': 'المناقشات والاستشارات القانونية',
+      'typeMessage': 'اكتب رسالة...',
+      'send': 'إرسال',
+      'legalFeedback': 'الملاحظات والمتطلبات القانونية',
+      'returnFeedbackInstruction': 'يرجى تزويد المواطن بمتطلبات أو تعديلات الملاحظات القانونية للبلاغ:',
+      'actionExecutedSuccess': 'تم تنفيذ الإجراء "{action}" بنجاح!',
+      'failedExecuteAction': 'فشل تنفيذ الإجراء: {error}',
+      'noMessagesYet': 'لا توجد رسائل بعد. ابدأ المناقشة القانونية!',
+
       // Statuses
       'status_submitted': 'تم التقديم',
+      'status_pendinglawyerreview': 'قيد مراجعة المحامي',
+      'status_returnedtocitizen': 'تم الإعادة للمواطن',
+      'status_assigned': 'مُسند',
       'status_inprogress': 'قيد التنفيذ',
       'status_resolved': 'تم الحل',
       'status_rejected': 'مرفوض',

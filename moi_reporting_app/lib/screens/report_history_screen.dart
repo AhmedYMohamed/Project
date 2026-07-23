@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../services/report_service.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/language_switcher_button.dart';
 import 'package:intl/intl.dart';
 import 'citizen_report_details_screen.dart';
 
@@ -32,17 +32,15 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc?.translate('myReports') ?? 'My Reports', style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
@@ -129,7 +127,7 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        '${loc?.translate('officerNotes') ?? 'ملاحظات الضابط'}: ${report.officerNote}',
+                        '${loc?.translate('officerNotes') ?? 'Officer Notes'}: ${report.officerNote}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.blue.shade900, fontSize: 12, fontWeight: FontWeight.bold),

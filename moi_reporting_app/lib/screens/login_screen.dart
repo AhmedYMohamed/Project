@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/language_switcher_button.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -45,25 +45,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          TextButton.icon(
-            onPressed: () => localeProvider.toggleLanguage(),
-            icon: const Icon(Icons.language, color: Color(0xFF1E3A8A)),
-            label: Text(
-              localeProvider.isArabic ? 'English' : 'العربية',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A8A),
-              ),
-            ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: Center(
@@ -137,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              'Lawyer',
+                              loc?.translate('lawyer') ?? 'Lawyer',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: _roleSelection == 'lawyer'

@@ -6,10 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import '../services/report_service.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/smart_network_image/smart_network_image.dart';
 import '../widgets/report_chat_widget.dart';
+import '../widgets/language_switcher_button.dart';
 import 'app_colors.dart';
 
 class CitizenReportDetailsScreen extends StatefulWidget {
@@ -124,7 +124,6 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -139,10 +138,9 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 2,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            tooltip: loc?.translate('toggleLanguage') ?? 'Switch Language',
-            onPressed: () => localeProvider.toggleLanguage(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),

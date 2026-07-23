@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../services/report_service.dart';
 import '../widgets/smart_network_image/smart_network_image.dart';
 import '../widgets/report_chat_widget.dart';
+import '../widgets/language_switcher_button.dart';
 
 class LawyerReportDetailsScreen extends StatefulWidget {
   final String reportId;
@@ -38,6 +40,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
 
   Future<void> _submitAction(String action, {String? signature, String? feedback}) async {
     final auth = context.read<AuthProvider>();
+    final loc = AppLocalizations.of(context);
     if (auth.token == null) return;
 
     try {
@@ -54,9 +57,11 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
       );
 
       if (mounted) {
+        final successMsg = loc?.translate('actionExecutedSuccess', params: {'action': action}) ??
+            'Action "$action" executed successfully!';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Action "$action" executed successfully!'),
+            content: Text(successMsg),
             backgroundColor: Colors.green,
           ),
         );
@@ -66,9 +71,11 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final errorMsg = loc?.translate('failedExecuteAction', params: {'error': e.toString()}) ??
+            'Failed to execute action: ${e.toString()}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to execute action: ${e.toString()}'),
+            content: Text(errorMsg),
             backgroundColor: Colors.red,
           ),
         );
@@ -77,23 +84,27 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
   }
 
   void _showReturnDialog() {
+    final loc = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Return to Client'),
+          title: Text(loc?.translate('returnToCitizen') ?? 'Return to Citizen'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Please provide specific feedback on what the client needs to correct or add to this incident report:'),
+              Text(
+                loc?.translate('returnFeedbackInstruction') ??
+                    'Please provide specific feedback on what the client needs to correct or add to this incident report:',
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Legal Feedback / Requirements',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('legalFeedback') ?? 'Legal Feedback / Requirements',
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -101,7 +112,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(loc?.translate('cancel') ?? 'Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -110,7 +121,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                 Navigator.pop(ctx);
                 _submitAction('return', feedback: feedback);
               },
-              child: const Text('Return to Client'),
+              child: Text(loc?.translate('returnToCitizen') ?? 'Return to Citizen'),
             ),
           ],
         );
@@ -119,22 +130,26 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
   }
 
   void _showApproveDialog() {
+    final loc = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Approve & Forward to MoI'),
+          title: Text(loc?.translate('approveAndEndorse') ?? 'Approve & Endorse'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Enter digital signature seal/text (Optional, default signature will be used if left blank):'),
+              Text(
+                loc?.translate('digitalSignatureUrl') ??
+                    'Enter digital signature seal/text (Optional, default signature will be used if left blank):',
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Digital Signature Seal',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('digitalSignatureUrl') ?? 'Digital Signature Seal',
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -142,7 +157,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(loc?.translate('cancel') ?? 'Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -150,7 +165,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                 Navigator.pop(ctx);
                 _submitAction('approve', signature: signature.isNotEmpty ? signature : null);
               },
-              child: const Text('Approve & Forward'),
+              child: Text(loc?.translate('approveAndEndorse') ?? 'Approve & Forward'),
             ),
           ],
         );
@@ -159,32 +174,36 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
   }
 
   void _showEscalateDialog() {
+    final loc = AppLocalizations.of(context);
     final sigController = TextEditingController();
     final feedController = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Urgently Escalate Incident'),
+          title: Text(loc?.translate('urgentEscalation') ?? 'Urgently Escalate Incident'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Urgently escalate to MoI officers. This flags high priority risk.'),
+              Text(
+                loc?.translate('directEscalation') ??
+                    'Urgently escalate to MoI officers. This flags high priority risk.',
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: feedController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Escalation Legal Reason',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('legalFeedback') ?? 'Escalation Legal Reason',
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: sigController,
-                decoration: const InputDecoration(
-                  labelText: 'Digital Signature Seal',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: loc?.translate('digitalSignatureUrl') ?? 'Digital Signature Seal',
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -192,7 +211,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(loc?.translate('cancel') ?? 'Cancel'),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -206,7 +225,10 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                   feedback: feedback.isNotEmpty ? feedback : null,
                 );
               },
-              child: const Text('Urgently Escalate', style: TextStyle(color: Colors.white)),
+              child: Text(
+                loc?.translate('urgentEscalation') ?? 'Urgently Escalate',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -216,10 +238,22 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Incident Review', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text(
+          loc?.translate('reportDetailsTitle') ?? 'Incident Review',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF1E3A8A),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
+          ),
+          SizedBox(width: 8),
+        ],
       ),
       body: FutureBuilder<ReportModel>(
         future: _reportFuture,
@@ -231,7 +265,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData) {
-            return const Center(child: Text('Report not found'));
+            return Center(child: Text(loc?.translate('reportNotFound') ?? 'Report not found'));
           }
 
           final report = snapshot.data!;
@@ -255,10 +289,10 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Incident #${report.reportId}',
+                              '${loc?.translate('report') ?? "Incident"} #${report.reportId}',
                               style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)),
                             ),
-                            _buildStatusChip(report.status),
+                            _buildStatusChip(report.status, loc),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -267,7 +301,10 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        Text('Submitted: $dateStr', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        Text(
+                          '${loc?.translate('submitted') ?? "Submitted"}: $dateStr',
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
                       ],
                     ),
                   ),
@@ -276,14 +313,17 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
 
                 // Review actions block
                 if (report.status == 'PendingLawyerReview') ...[
-                  const Text('Advocate Review Action Required', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    loc?.translate('quickActions') ?? 'Advocate Review Action Required',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.check, size: 16),
-                          label: const Text('Approve'),
+                          label: Text(loc?.translate('approveAndEndorse') ?? 'Approve'),
                           onPressed: _showApproveDialog,
                         ),
                       ),
@@ -292,7 +332,7 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                           icon: const Icon(Icons.reply, size: 16),
-                          label: const Text('Return'),
+                          label: Text(loc?.translate('returnToCitizen') ?? 'Return'),
                           onPressed: _showReturnDialog,
                         ),
                       ),
@@ -304,7 +344,10 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                       icon: const Icon(Icons.warning_amber, size: 16),
-                      label: const Text('Urgently Escalate to MoI', style: TextStyle(color: Colors.white)),
+                      label: Text(
+                        loc?.translate('urgentEscalation') ?? 'Urgently Escalate to MoI',
+                        style: const TextStyle(color: Colors.white),
+                      ),
                       onPressed: _showEscalateDialog,
                     ),
                   ),
@@ -312,14 +355,20 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                 ],
 
                 // Incident Description
-                const Text('Incident Description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  loc?.translate('description') ?? 'Incident Description',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 const SizedBox(height: 8),
                 Text(report.descriptionText, style: const TextStyle(fontSize: 14)),
                 const SizedBox(height: 16),
 
                 // Attachments/Evidence
                 if (report.attachments.isNotEmpty) ...[
-                  const Text('Attachments & Evidence', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    loc?.translate('evidence') ?? 'Attachments & Evidence',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 120,
@@ -354,9 +403,9 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                 ],
 
                 // Live Legal Counsel Chat
-                const Text(
-                  'Legal Counsel Communications',
-                  style: TextStyle(
+                Text(
+                  loc?.translate('legalDiscussionChat') ?? 'Legal Counsel Communications',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1E3A8A),
@@ -380,8 +429,11 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
     );
   }
 
-  Widget _buildStatusChip(String status) {
+  Widget _buildStatusChip(String status, AppLocalizations? loc) {
     Color color = Colors.grey;
+    String key = 'status_${status.toLowerCase()}';
+    String label = loc?.translate(key) ?? status;
+
     switch (status) {
       case 'Submitted':
         color = Colors.blue;
@@ -409,11 +461,11 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        status,
+        label,
         style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
       ),
     );

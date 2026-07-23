@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../services/report_service.dart';
+import '../widgets/language_switcher_button.dart';
 import 'lawyer_report_details_screen.dart';
 
 class LawyerDashboardScreen extends StatefulWidget {
@@ -109,20 +110,22 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
   }
 
   void _showQrDialog() {
+    final loc = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('My Advocate QR Code'),
+          title: Text(loc?.translate('myAdvocateQrCode') ?? 'My Advocate QR Code'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.qr_code_2, size: 120, color: Color(0xFF1E3A8A)),
               const SizedBox(height: 16),
-              const Text(
-                'Share this QR code string or Syndicate ID with clients to link their accounts:',
+              Text(
+                loc?.translate('shareQrInstruction') ??
+                    'Share this QR code string or Syndicate ID with clients to link their accounts:',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13),
+                style: const TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 16),
               Container(
@@ -142,7 +145,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
               ),
               const SizedBox(height: 8),
               Text(
-                'Syndicate ID: ${_profile?.syndicateId ?? "N/A"}',
+                '${loc?.translate('syndicateId') ?? 'Syndicate ID'}: ${_profile?.syndicateId ?? "N/A"}',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -150,7 +153,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Close'),
+              child: Text(loc?.translate('close') ?? 'Close'),
             ),
           ],
         );
@@ -161,27 +164,28 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
-    final localeProvider = Provider.of<LocaleProvider>(context);
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'MoI Advocate Portal',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          loc?.translate('advocatePortal') ?? 'MoI Advocate Portal',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: const Color(0xFF1E3A8A),
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code, color: Colors.white),
-            tooltip: 'View QR Code',
+            tooltip: loc?.translate('viewQrCode') ?? 'View QR Code',
             onPressed: _showQrDialog,
           ),
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            onPressed: () => localeProvider.toggleLanguage(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+            child: LanguageSwitcherButton(),
           ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: loc?.translate('logout') ?? 'Logout',
             onPressed: () => auth.logout(),
           ),
         ],
@@ -190,17 +194,17 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
-          tabs: const [
-            Tab(icon: Icon(Icons.gavel), text: 'Incidents'),
-            Tab(icon: Icon(Icons.people), text: 'My Clients'),
+          tabs: [
+            Tab(icon: const Icon(Icons.gavel), text: loc?.translate('incidents') ?? 'Incidents'),
+            Tab(icon: const Icon(Icons.people), text: loc?.translate('myClients') ?? 'My Clients'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildIncidentsTab(),
-          _buildClientsTab(),
+          _buildIncidentsTab(loc),
+          _buildClientsTab(loc),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -214,7 +218,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
     );
   }
 
-  Widget _buildIncidentsTab() {
+  Widget _buildIncidentsTab(AppLocalizations? loc) {
     if (_isLoadingReports) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -227,7 +231,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
             Icon(Icons.assignment_turned_in_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No client incidents reported yet.',
+              loc?.translate('noClientIncidents') ?? 'No client incidents reported yet.',
               style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
@@ -270,7 +274,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _buildStatusChip(r.status),
+                    _buildStatusChip(r.status, loc),
                     const SizedBox(width: 8),
                     if (r.isUrgentEscalation)
                       Container(
@@ -279,9 +283,9 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
                           color: Colors.red.shade50,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'URGENT ESCALATION',
-                          style: TextStyle(
+                        child: Text(
+                          loc?.translate('urgentEscalation') ?? 'URGENT ESCALATION',
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: Colors.red,
@@ -308,7 +312,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
     );
   }
 
-  Widget _buildClientsTab() {
+  Widget _buildClientsTab(AppLocalizations? loc) {
     if (_isLoadingClients) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -321,7 +325,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
             Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No citizens are linked to your profile.',
+              loc?.translate('noClientsLinked') ?? 'No citizens are linked to your profile.',
               style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
@@ -334,6 +338,8 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
       itemCount: _clients.length,
       itemBuilder: (context, index) {
         final c = _clients[index];
+        final phoneLabel = loc?.translate('phone') ?? 'Phone';
+
         return Card(
           elevation: 1,
           margin: const EdgeInsets.only(bottom: 12),
@@ -347,32 +353,30 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
               child: Icon(Icons.person, color: Colors.white),
             ),
             title: Text(
-              c.email ?? 'Anonymous Email',
+              c.email ?? (loc?.translate('anonymousEmail') ?? 'Anonymous Email'),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text('Phone: ${c.phoneNumber ?? "N/A"}'),
+            subtitle: Text('$phoneLabel: ${c.phoneNumber ?? "N/A"}'),
           ),
         );
       },
     );
   }
 
-  Widget _buildStatusChip(String status) {
+  Widget _buildStatusChip(String status, AppLocalizations? loc) {
     Color color = Colors.grey;
-    String label = status;
+    String key = 'status_${status.toLowerCase()}';
+    String label = loc?.translate(key) ?? status;
 
     switch (status) {
       case 'Submitted':
         color = Colors.blue;
-        label = 'Submitted';
         break;
       case 'PendingLawyerReview':
         color = Colors.orange;
-        label = 'Pending Review';
         break;
       case 'ReturnedToCitizen':
         color = Colors.redAccent;
-        label = 'Returned';
         break;
       case 'Assigned':
         color = Colors.purple;
@@ -391,7 +395,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
