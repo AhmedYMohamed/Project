@@ -2,15 +2,21 @@
 	"name": "TR_Sync_Every_15_Minutes",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Sync_Operations_To_Analytics",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Month",
-				"interval": 15,
+				"frequency": "Hour",
+				"interval": 1,
 				"startTime": "2025-11-22T16:34:00",
-				"endTime": "2025-12-07T17:23:15",
 				"timeZone": "Egypt Standard Time"
 			}
 		}

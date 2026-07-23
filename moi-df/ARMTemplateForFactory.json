@@ -211,8 +211,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT *\nFROM [hot].[Fact_Reports] h\nWHERE NOT EXISTS (\n    SELECT 1\n    FROM [cold].[Fact_Reports] c\n    WHERE c.reportId = h.reportId\n);\n",
+								"sqlReaderQuery": "SELECT \n    h.[reportId],\n    h.[title],\n    h.[status],\n    h.[categoryId],\n    h.[createdAt],\n    h.[updatedAt],\n    h.[userRole],\n    h.[isAnonymous],\n    h.[attachmentCount],\n    h.[aiConfidence],\n    h.[ExtractedAt]\nFROM [hot].[Fact_Reports] h\nWHERE NOT EXISTS (\n    SELECT 1\n    FROM [cold].[Fact_Reports] c\n    WHERE c.reportId = h.reportId\n);\n",
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
@@ -785,7 +784,7 @@
 				"typeProperties": {
 					"recurrence": {
 						"frequency": "Hour",
-						"interval": 6,
+						"interval": 1,
 						"startTime": "2025-12-05T17:47:00",
 						"timeZone": "Egypt Standard Time"
 					}
