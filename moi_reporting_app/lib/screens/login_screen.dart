@@ -30,8 +30,16 @@ class _LoginScreenState extends State<LoginScreen> {
           );
     } catch (e) {
       if (mounted) {
-        final errorMsg = loc?.translate('loginFailed', params: {'error': e.toString()}) ??
-            'Login failed: ${e.toString()}';
+        final errStr = e.toString();
+        String errorMsg;
+        if (errStr.contains('ACCOUNT_NOT_FOUND') || errStr.contains('User not found') || errStr.contains('404')) {
+          errorMsg = loc?.translate('accountNotFound') ?? 'Account / Email / National ID not found.';
+        } else if (errStr.contains('INVALID_PASSWORD') || errStr.contains('401')) {
+          errorMsg = loc?.translate('incorrectPassword') ?? 'Incorrect password. Please try again.';
+        } else {
+          errorMsg = loc?.translate('loginFailed', params: {'error': errStr}) ??
+              'Login failed: $errStr';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMsg),

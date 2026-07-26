@@ -104,6 +104,9 @@ class AuthService {
         'role': role ?? 'citizen',
       };
     } catch (e) {
+      if (e is DioException && e.response?.data != null && e.response?.data['detail'] != null) {
+        throw e.response!.data['detail'].toString();
+      }
       rethrow;
     }
   }

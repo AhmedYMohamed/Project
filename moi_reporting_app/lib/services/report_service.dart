@@ -20,6 +20,7 @@ class ReportService {
     required String categoryId,
     required String token,
     required String location,
+    bool sendToLawyer = false,
     List<Uint8List>? fileBytesList,
     List<String>? fileNamesList,
   }) async {
@@ -29,6 +30,7 @@ class ReportService {
         'descriptionText': description,
         'categoryId': categoryId,
         'location': location,
+        'sendToLawyer': sendToLawyer.toString(),
       });
 
       if (fileBytesList != null && fileNamesList != null) {

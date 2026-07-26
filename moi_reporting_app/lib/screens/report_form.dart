@@ -27,6 +27,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   String _selectedCategory = 'environmental';
+  bool _sendToLawyer = false;
   
   List<Uint8List> _selectedFileBytes = [];
   List<String> _selectedFileNames = [];
@@ -142,6 +143,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         categoryId: _selectedCategory,
         token: auth.token!,
         location: finalLocation,
+        sendToLawyer: _sendToLawyer,
         fileBytesList: _selectedFileBytes.isNotEmpty ? _selectedFileBytes : null,
         fileNamesList: _selectedFileNames.isNotEmpty ? _selectedFileNames : null,
       );
@@ -159,13 +161,19 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           _selectedFileBytes = [];
           _selectedFileNames = [];
           _currentLocationText = null;
+          _sendToLawyer = false;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
+        String errorMsg = e.toString();
+        if (errorMsg.contains('No lawyer linked') || errorMsg.contains('do not have a linked lawyer')) {
+          errorMsg = loc?.translate('noLawyerLinkedWarning') ??
+              'No lawyer linked to your account. Please link a lawyer in your profile or select Officer.';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
         );
         setState(() => _isLoading = false);
       }
@@ -338,7 +346,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               // File Picker Section
               _buildFilePicker(loc),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
+
+              // Recipient Selector Section (Officer vs Lawyer)
+              _buildRecipientSelector(loc),
+
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitReport,
                 style: ElevatedButton.styleFrom(
@@ -514,6 +527,96 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecipientSelector(AppLocalizations? loc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          loc?.translate('sendReportTo') ?? 'Send Report To',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildRecipientCard(
+                title: loc?.translate('sendToOfficer') ?? 'Officer (Directly)',
+                subtitle: loc?.translate('sendToOfficerDesc') ?? 'Send directly to police officers',
+                icon: Icons.local_police,
+                isSelected: !_sendToLawyer,
+                onTap: () => setState(() => _sendToLawyer = false),
+                activeColor: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildRecipientCard(
+                title: loc?.translate('sendToLawyer') ?? 'Your Lawyer (Review)',
+                subtitle: loc?.translate('sendToLawyerDesc') ?? 'Send to lawyer for review first',
+                icon: Icons.gavel,
+                isSelected: _sendToLawyer,
+                onTap: () => setState(() => _sendToLawyer = true),
+                activeColor: Colors.amber[800]!,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecipientCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required Color activeColor,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? activeColor.withOpacity(0.08) : Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? activeColor : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 32, color: isSelected ? activeColor : Colors.grey[600]),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: isSelected ? activeColor : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
         ),
       ),
     );
