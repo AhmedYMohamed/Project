@@ -54,6 +54,13 @@ BEGIN
 END;
 GO
 
+-- 4. Add fcmToken column to dbo.[User]
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[User]') AND name = N'fcmToken')
+BEGIN
+    ALTER TABLE dbo.[User] ADD [fcmToken] NVARCHAR(500) NULL;
+END;
+GO
+
 
 -- =========================================================================
 -- PART 2: Run this query against your Analytics Database (e.g. moi-al / moi-sql-cold)

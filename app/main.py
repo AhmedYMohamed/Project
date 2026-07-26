@@ -84,6 +84,12 @@ async def lifespan(app: FastAPI):
                 ALTER TABLE dbo.[User] ADD CONSTRAINT UC_User_QrCode UNIQUE (lawyerQrCode);
             END
             """))
+            conn.execute(text("""
+            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.[User]') AND name = N'fcmToken')
+            BEGIN
+                ALTER TABLE dbo.[User] ADD [fcmToken] NVARCHAR(500) NULL;
+            END
+            """))
 
             # Update check constraint on User.role to allow 'lawyer'
             conn.execute(text("""
