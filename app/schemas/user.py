@@ -80,7 +80,11 @@ class LinkLawyerRequest(BaseModel):
     syndicateId: Optional[str] = None
     qrCode: Optional[str] = None
 
+class FcmTokenRequest(BaseModel):
+    fcmToken: str = Field(..., description="Firebase Cloud Messaging device token")
+
 # Profile Update Input
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     phoneNumber: Optional[str] = None
+    fcmToken: Optional[str] = None

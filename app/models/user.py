@@ -26,6 +26,7 @@ class User(BaseOps):
     hashedNationalId = Column("hashedNationalId", String(256), nullable=True, unique=True, index=True)
     hashedDeviceId = Column("hashedDeviceId", String(256), nullable=True)
     passwordHash = Column(String(256), nullable=True)
+    fcmToken = Column("fcmToken", String(500), nullable=True)
 
     # Lawyer Module Fields
     lawyerId = Column("lawyerId", String(450), ForeignKey("dbo.User.userId", ondelete="SET NULL"), nullable=True)

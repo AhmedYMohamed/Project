@@ -11,6 +11,7 @@ from app.models.report_message import ReportMessage
 from app.schemas.report import ReportResponse, ReportListResponse
 from app.schemas.lawyer import LawyerReviewAction, ReportMessageCreate, ReportMessageResponse
 from app.services.report_service import ReportService, utcnow
+from app.services.notification_service import NotificationService
 
 router = APIRouter()
 
@@ -131,6 +132,24 @@ def lawyer_report_action(
     db.commit()
     db.refresh(report)
 
+    # Push Notification to Citizen (and Officers if Escalated)
+    try:
+        citizen = db.query(User).filter(User.userId == report.userId).first()
+        action_text_map = {
+            "approve": "تمت موافقة المحامي على بلاغك وإحالته للجهات المختصة.",
+            "return": f"قام المحامي بإعادة البلاغ للتعديل: {report.lawyerFeedback}",
+            "escalate": "تم تصعيد البلاغ بشكل عاجل من المحامي."
+        }
+        notif_body = action_text_map.get(action, "تحديث جديد من المحامي")
+        NotificationService.send_notification_to_user(
+            user=citizen,
+            title="تحديث على البلاغ من المحامي ⚖️",
+            body=notif_body,
+            data={"type": "lawyer_action", "reportId": report_id, "action": action}
+        )
+    except Exception as e:
+        print(f"Notification error in lawyer_report_action: {e}")
+
     return ReportService.get_report(db, report_id)
 
 @router.get("/reports/{report_id}/messages", response_model=List[ReportMessageResponse], summary="Get private chat logs")
@@ -181,4 +200,20 @@ def create_report_message(
     db.add(message)
     db.commit()
     db.refresh(message)
+
+    # Push Notification Trigger for Chat Recipient
+    try:
+        recipient_id = report.lawyerId if current_user.userId == report.userId else report.userId
+        if recipient_id:
+            recipient = db.query(User).filter(User.userId == recipient_id).first()
+            sender_title = "رسالة جديدة من المحامي ⚖️" if current_user.role == "lawyer" else "رسالة جديدة من المواطن 💬"
+            NotificationService.send_notification_to_user(
+                user=recipient,
+                title=sender_title,
+                body=payload.messageText,
+                data={"type": "chat_message", "reportId": report_id, "senderId": current_user.userId}
+            )
+    except Exception as e:
+        print(f"Notification error in create_report_message: {e}")
+
     return message

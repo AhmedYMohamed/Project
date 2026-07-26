@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../services/report_service.dart';
 
 class UserModel {
   final String userId;
@@ -107,9 +108,21 @@ class AttachmentModel {
 
   /// Primary URL to use for rendering/downloading attachments.
   /// Prefers SAS token URL (downloadUrl) if available, falling back to blobStorageUri.
-  String get displayUrl => (downloadUrl != null && downloadUrl!.trim().isNotEmpty)
-      ? downloadUrl!
-      : blobStorageUri;
+  /// Automatically resolves relative paths (e.g. /local_storage/...) against backend baseUrl.
+  String get displayUrl {
+    final raw = (downloadUrl != null && downloadUrl!.trim().isNotEmpty)
+        ? downloadUrl!.trim()
+        : blobStorageUri.trim();
+    if (raw.isEmpty) return '';
+    if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('blob:')) {
+      return raw;
+    }
+    final base = ReportService.baseUrl.endsWith('/')
+        ? ReportService.baseUrl.substring(0, ReportService.baseUrl.length - 1)
+        : ReportService.baseUrl;
+    final path = raw.startsWith('/') ? raw : '/$raw';
+    return '$base$path';
+  }
 
   factory AttachmentModel.fromJson(Map<String, dynamic> json) {
     return AttachmentModel(

@@ -36,6 +36,7 @@ from app.models.attachment import Attachment
 # Services
 from app.services.report_service import ReportService
 from app.services.blob_service import BlobStorageService
+from app.services.notification_service import NotificationService
 
 router = APIRouter()
 
@@ -248,6 +249,34 @@ def update_report_status(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Report with ID {report_id} not found"
         )
+
+    # Push Notifications to Citizen and Lawyer
+    try:
+        raw_report = db.query(Report).filter(Report.reportId == report_id).first()
+        if raw_report:
+            citizen = db.query(User).filter(User.userId == raw_report.userId).first()
+            new_status = status_update.status or raw_report.status
+            status_msg = f"تم تغيير حالة بلاغك إلى: {new_status}"
+            if status_update.officerNote:
+                status_msg += f"\nملاحظة الظابط: {status_update.officerNote}"
+
+            NotificationService.send_notification_to_user(
+                user=citizen,
+                title="تحديث حالة البلاغ 👮‍♂️",
+                body=status_msg,
+                data={"type": "status_update", "reportId": report_id, "status": str(new_status)}
+            )
+
+            if raw_report.lawyerId:
+                lawyer = db.query(User).filter(User.userId == raw_report.lawyerId).first()
+                NotificationService.send_notification_to_user(
+                    user=lawyer,
+                    title="تحديث حالة بلاغ موكل ⚖️",
+                    body=status_msg,
+                    data={"type": "status_update", "reportId": report_id, "status": str(new_status)}
+                )
+    except Exception as e:
+        print(f"Notification error in update_report_status: {e}")
     
     print(f"[DEBUG UPDATE_REPORT_STATUS] Returned ReportResponse.officerNote after update: {repr(report.officerNote)}")
     return report

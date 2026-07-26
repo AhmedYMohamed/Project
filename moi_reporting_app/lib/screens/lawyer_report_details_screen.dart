@@ -377,21 +377,57 @@ class _LawyerReportDetailsScreenState extends State<LawyerReportDetailsScreen> {
                       itemCount: report.attachments.length,
                       itemBuilder: (context, idx) {
                         final att = report.attachments[idx];
-                        return Container(
-                          width: 120,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SmartNetworkImage(
-                              url: att.displayUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                color: Colors.grey[200],
-                                child: const Icon(Icons.broken_image, color: Colors.grey),
+                        return InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => Dialog(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    AppBar(
+                                      title: Text(loc?.translate('evidence') ?? 'Attachment Preview'),
+                                      automaticallyImplyLeading: false,
+                                      actions: [
+                                        IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () => Navigator.pop(ctx),
+                                        ),
+                                      ],
+                                    ),
+                                    Flexible(
+                                      child: InteractiveViewer(
+                                        child: SmartNetworkImage(
+                                          url: att.displayUrl,
+                                          fit: BoxFit.contain,
+                                          errorBuilder: (context, error, stackTrace) => Container(
+                                            padding: const EdgeInsets.all(32),
+                                            child: const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 120,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[300]!),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: SmartNetworkImage(
+                                url: att.displayUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.broken_image, color: Colors.grey),
+                                ),
                               ),
                             ),
                           ),
