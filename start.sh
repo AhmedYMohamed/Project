@@ -2,7 +2,7 @@
 
 # Start backend services
 echo "Starting backend services..."
-docker compose up -d
+docker compose up -d --build
 
 # Wait for services to be ready
 echo "Waiting for services to start..."

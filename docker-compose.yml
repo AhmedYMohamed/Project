@@ -16,6 +16,7 @@ services:
     volumes:
       - ./app:/app/app
       - ./attachments:/app/attachments
+      - ./RAG_pipeline:/app/RAG_pipeline
     depends_on:
       - db-init
     restart: unless-stopped
