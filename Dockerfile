@@ -33,8 +33,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application code and RAG pipeline
 COPY ./app ./app
+COPY ./RAG_pipeline ./RAG_pipeline
 
 # Expose port
 EXPOSE 8000

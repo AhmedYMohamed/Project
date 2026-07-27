@@ -16,3 +16,10 @@ openai-whisper
 azure-identity
 azure-keyvault-secrets
 azure-storage-blob
+langchain
+langchain-community
+langchain-text-splitters
+pypdf
+ollama
+sentence-transformers
+faiss-cpu

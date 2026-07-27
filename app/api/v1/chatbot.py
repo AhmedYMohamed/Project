@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from typing import Optional, List
+from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 
@@ -12,11 +12,36 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Resolve path to RAG_pipeline directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-RAG_DIR = os.path.join(BASE_DIR, "RAG_pipeline")
-if RAG_DIR not in sys.path:
-    sys.path.insert(0, RAG_DIR)
+def find_rag_dir() -> str:
+    """
+    Robustly locate the RAG_pipeline directory across different deployment environments
+    (Local, Docker, Azure App Service, /tmp deployment folders).
+    """
+    # 1. Search upwards from current file location
+    curr = os.path.abspath(__file__)
+    for _ in range(6):
+        curr = os.path.dirname(curr)
+        candidate = os.path.join(curr, "RAG_pipeline")
+        if os.path.isdir(candidate):
+            return candidate
+
+    # 2. Check relative to current working directory
+    cwd_candidate = os.path.join(os.getcwd(), "RAG_pipeline")
+    if os.path.isdir(cwd_candidate):
+        return cwd_candidate
+
+    # 3. Check well-known Azure / Docker paths
+    known_paths = [
+        "/app/RAG_pipeline",
+        "/home/site/wwwroot/RAG_pipeline",
+        os.path.join(os.getcwd()),
+    ]
+    for kp in known_paths:
+        if os.path.isdir(kp) and (os.path.exists(os.path.join(kp, "faiss_index")) or os.path.exists(os.path.join(kp, "All_Law_Books"))):
+            return kp
+
+    raise FileNotFoundError("مجلد RAG_pipeline غير موجود في المسار المحدد (RAG_pipeline directory not found).")
+
 
 _rag_pipeline = None
 
@@ -26,12 +51,16 @@ def get_rag_instance():
     """
     global _rag_pipeline
     if _rag_pipeline is None:
-        logger.info(f"Initializing RAG DataPipeline from {RAG_DIR}...")
+        rag_dir = find_rag_dir()
+        logger.info(f"Initializing RAG DataPipeline from {rag_dir}...")
+        if rag_dir not in sys.path:
+            sys.path.insert(0, rag_dir)
+
         orig_cwd = os.getcwd()
         try:
-            os.chdir(RAG_DIR)
+            os.chdir(rag_dir)
             from Data_Indexing.pipeline_DataLoad import DataPipeline
-            law_books_path = os.path.join(RAG_DIR, "All_Law_Books")
+            law_books_path = os.path.join(rag_dir, "All_Law_Books")
             _rag_pipeline = DataPipeline(pdf_path=law_books_path, verbose=False)
             logger.info("✓ RAG DataPipeline initialized successfully.")
         except Exception as e:
@@ -70,9 +99,18 @@ async def legal_chatbot_query(
 
     logger.info(f"Chatbot query from Citizen {current_user.userId}: '{request.query[:50]}...'")
 
+    try:
+        rag_dir = find_rag_dir()
+    except FileNotFoundError as fnf_err:
+        logger.error(str(fnf_err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"تعذر العثور على ملفات القانون والـ RAG: {str(fnf_err)}"
+        )
+
     orig_cwd = os.getcwd()
     try:
-        os.chdir(RAG_DIR)
+        os.chdir(rag_dir)
         pipeline = get_rag_instance()
         answer = pipeline.llm_response(request.query)
         return ChatResponse(answer=answer, status="success")
