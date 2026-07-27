@@ -55,6 +55,12 @@ class AppLocalizations {
 
       // Main Navigation / Citizen Dashboard
       'home': 'Home',
+      'chatbot': 'Legal AI',
+      'legalAdvisor': 'Legal AI Assistant',
+      'askLegalQuestion': 'Ask Legal Assistant',
+      'chatbotSub': 'Get legal guidance based on Egyptian Law books',
+      'typeQuestionHint': 'Type your question or report inquiry here...',
+      'clearChat': 'Clear Chat',
       'report': 'Report',
       'history': 'History',
       'profile': 'Profile',
@@ -247,6 +253,12 @@ class AppLocalizations {
 
       // Main Navigation / Citizen Dashboard
       'home': 'الرئيسية',
+      'chatbot': 'المستشار القانوني',
+      'legalAdvisor': 'المستشار القانوني الذكي',
+      'askLegalQuestion': 'استشارة قانونية ذكية',
+      'chatbotSub': 'استفسر عن العقوبات والإجراءات في القانون المصري',
+      'typeQuestionHint': 'اكتب سؤالك أو استفسارك القانوني هنا...',
+      'clearChat': 'مسح المحادثة',
       'report': 'إبلاغ',
       'history': 'السجل',
       'profile': 'الملف الشخصي',

@@ -8,7 +8,7 @@ import logging
 
 from app.core.config import get_settings
 from app.core.database import test_database_connections, engine_ops
-from app.api.v1 import reports, admin,users, auth, voice, officer, lawyer
+from app.api.v1 import reports, admin, users, auth, voice, officer, lawyer, chatbot
 
 # Import models to register with SQLAlchemy (but don't use them directly)
 from app.models import user, report, attachment, report_message
@@ -289,6 +289,12 @@ app.include_router(
     lawyer.router,
     prefix="/api/v1/lawyer",
     tags=["Lawyer"]
+)
+
+app.include_router(
+    chatbot.router,
+    prefix="/api/v1/chatbot",
+    tags=["Legal Chatbot (Citizen)"]
 )
 
 @app.exception_handler(Exception)

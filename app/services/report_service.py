@@ -68,15 +68,25 @@ class ReportService:
             except (ValueError, TypeError):
                 pass
         
-        # Check if user has a lawyer
+        # Check destination preference (Officer vs Lawyer)
         lawyer_id = None
         report_status = "Submitted"
         if user_id:
             from app.services.user_service import UserService
             creator_user = UserService.get_by_id(db, user_id)
-            if creator_user and creator_user.lawyerId:
-                lawyer_id = creator_user.lawyerId
-                report_status = "PendingLawyerReview"
+            if report_data.sendToLawyer:
+                if creator_user and creator_user.lawyerId:
+                    lawyer_id = creator_user.lawyerId
+                    report_status = "PendingLawyerReview"
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="You do not have a linked lawyer. Please link a lawyer in your profile or select 'Officer'."
+                    )
+            else:
+                # Direct to officer
+                report_status = "Submitted"
+                lawyer_id = None
 
         db_report = Report(
             reportId=report_id,

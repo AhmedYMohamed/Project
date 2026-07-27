@@ -59,6 +59,7 @@ async def create_report(
     location: str = Form(...),
     categoryId: Optional[ReportCategory] = Form(None),
     isAnonymous: bool = Form(False),
+    sendToLawyer: bool = Form(False),
     transcribedVoiceText: Optional[str] = Form(None),
     hashedDeviceId: Optional[str] = Form(None),
     createdAt: Optional[datetime] = Form(None),
@@ -69,6 +70,7 @@ async def create_report(
     print(f"\n{'='*60}")
     print(f"DEBUG: create_report received")
     print(f"  title={title}")
+    print(f"  sendToLawyer={sendToLawyer}")
     print(f"  descriptionText={descriptionText[:50]}...")
     print(f"  location={location}")
     print(f"  categoryId={categoryId}")
@@ -93,6 +95,7 @@ async def create_report(
         location=location,
         categoryId=categoryId,
         isAnonymous=isAnonymous,
+        sendToLawyer=sendToLawyer,
         transcribedVoiceText=transcribedVoiceText,
         hashedDeviceId=hashedDeviceId,
         createdAt=createdAt,
