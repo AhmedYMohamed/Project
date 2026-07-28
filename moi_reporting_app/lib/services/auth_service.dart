@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'push_notification_service.dart';
 
 class AuthService {
   // IMPORTANT: Replace with your computer's IP address if testing on a real device
@@ -92,12 +93,20 @@ class AuthService {
         await prefs.setString('user_role', role);
       }
 
+      // Sync Push Notification Token
+      try {
+        await PushNotificationService().initialize();
+      } catch (_) {}
+
       return {
         'token': token,
         'userId': userId,
         'role': role ?? 'citizen',
       };
     } catch (e) {
+      if (e is DioException && e.response?.data != null && e.response?.data['detail'] != null) {
+        throw e.response!.data['detail'].toString();
+      }
       rethrow;
     }
   }

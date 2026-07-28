@@ -45,6 +45,7 @@ class ReportCreate(ReportBase):
     location: str = Field(..., description="Physical address, landmark, or Google Maps link")
     transcribedVoiceText: Optional[str] = None
     isAnonymous: bool = Field(False, description="True if user wants to remain anonymous")
+    sendToLawyer: bool = Field(False, description="True if citizen wants to send report to assigned lawyer")
     hashedDeviceId: Optional[str] = Field(None, description="Required if isAnonymous=True for tracking")
     createdAt: Optional[datetime] = None
     # Nested Attachments: Client sends list of file metadata with the report

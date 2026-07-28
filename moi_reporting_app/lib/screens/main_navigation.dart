@@ -10,6 +10,7 @@ import 'report_history_screen.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'citizen_report_details_screen.dart';
+import 'chatbot_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -69,6 +70,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           _saveTabPreference(index);
         },
       ),
+      const ChatbotScreen(),
       const ReportFormScreen(),
       const ReportHistoryScreen(),
       const ProfileScreen(),
@@ -87,6 +89,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           BottomNavigationBarItem(
               icon: const Icon(Icons.home_outlined),
               label: loc?.translate('home') ?? 'Home'),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.gavel_outlined),
+              label: loc?.translate('chatbot') ?? 'Legal AI'),
           BottomNavigationBarItem(
               icon: const Icon(Icons.add_circle_outline),
               label: loc?.translate('report') ?? 'Report'),
@@ -194,10 +199,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
             _buildActionCard(
               context,
+              title: loc?.translate('askLegalQuestion') ?? 'المستشار القانوني الذكي',
+              icon: Icons.gavel_rounded,
+              color: const Color(0xFF3B82F6),
+              onTap: () => widget.onTabSelected(1),
+            ),
+            const SizedBox(height: 16),
+            _buildActionCard(
+              context,
               title: loc?.translate('fileNewReport') ?? 'File a New Report',
               icon: Icons.add_circle,
               color: const Color(0xFF1E3A8A),
-              onTap: () => widget.onTabSelected(1),
+              onTap: () => widget.onTabSelected(2),
             ),
             const SizedBox(height: 16),
             _buildActionCard(

@@ -6,7 +6,7 @@ from app.core.database import get_db_ops
 from app.api.v1.auth import get_current_user
 from app.services.user_service import UserService
 from app.models.user import User
-from app.schemas.user import UserResponse, UserRoleUpdate, UserRole, UserDemographicResponse , UserListResponse, LinkLawyerRequest # <--- Changed UserUpdate to UserRoleUpdate
+from app.schemas.user import UserResponse, UserRoleUpdate, UserRole, UserDemographicResponse , UserListResponse, LinkLawyerRequest, FcmTokenRequest
 
 router = APIRouter()
 
@@ -148,3 +148,15 @@ def get_my_citizens(
     
     citizens = db.query(User).filter(User.lawyerId == current_user.userId).all()
     return citizens
+
+@router.post("/fcm-token", response_model=UserResponse, summary="Register or update user FCM device push token")
+def register_fcm_token(
+    payload: FcmTokenRequest,
+    db: Session = Depends(get_db_ops),
+    current_user: User = Depends(get_current_user)
+):
+    """Save or update the mobile FCM device token for the current user."""
+    current_user.fcmToken = payload.fcmToken.strip()
+    db.commit()
+    db.refresh(current_user)
+    return current_user

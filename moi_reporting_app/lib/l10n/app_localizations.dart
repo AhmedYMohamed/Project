@@ -36,6 +36,8 @@ class AppLocalizations {
       'pleaseEnterNationalId': 'Please enter National ID',
       'pleaseEnterPassword': 'Please enter password',
       'loginFailed': 'Login failed: {error}',
+      'accountNotFound': 'Account, National ID, or Email not found.',
+      'incorrectPassword': 'Incorrect password. Please check and try again.',
 
       // Register Screen
       'register': 'Register',
@@ -53,6 +55,12 @@ class AppLocalizations {
 
       // Main Navigation / Citizen Dashboard
       'home': 'Home',
+      'chatbot': 'Legal AI',
+      'legalAdvisor': 'Legal AI Assistant',
+      'askLegalQuestion': 'Ask Legal Assistant',
+      'chatbotSub': 'Get legal guidance based on Egyptian Law books',
+      'typeQuestionHint': 'Type your question or report inquiry here...',
+      'clearChat': 'Clear Chat',
       'report': 'Report',
       'history': 'History',
       'profile': 'Profile',
@@ -110,6 +118,12 @@ class AppLocalizations {
       'maxFilesAllowed': 'Maximum 5 files allowed',
       'fileTooLarge': 'File is too large. Max size: 10MB',
       'fetchLocationFirst': 'Please fetch current location first',
+      'sendReportTo': 'Send Report To',
+      'sendToOfficer': 'Officer (Directly)',
+      'sendToOfficerDesc': 'Send directly to police officers for immediate handling',
+      'sendToLawyer': 'Your Lawyer (For Review)',
+      'sendToLawyerDesc': 'Send report to your linked lawyer for legal review first',
+      'noLawyerLinkedWarning': 'No lawyer linked to your account. Please link a lawyer in your profile or choose to send directly to an officer.',
 
       // Categories
       'cat_environmental': 'Environmental',
@@ -220,6 +234,8 @@ class AppLocalizations {
       'pleaseEnterNationalId': 'الرجاء إدخال رقم الهوية الوطنية',
       'pleaseEnterPassword': 'الرجاء إدخال كلمة المرور',
       'loginFailed': 'فشل تسجيل الدخول: {error}',
+      'accountNotFound': 'الحساب أو البريد الإلكتروني غير مسجل.',
+      'incorrectPassword': 'كلمة المرور غير صحيحة. يرجى التأكد وإعادة المحاولة.',
 
       // Register Screen
       'register': 'إنشاء حساب',
@@ -237,6 +253,12 @@ class AppLocalizations {
 
       // Main Navigation / Citizen Dashboard
       'home': 'الرئيسية',
+      'chatbot': 'المستشار القانوني',
+      'legalAdvisor': 'المستشار القانوني الذكي',
+      'askLegalQuestion': 'استشارة قانونية ذكية',
+      'chatbotSub': 'استفسر عن العقوبات والإجراءات في القانون المصري',
+      'typeQuestionHint': 'اكتب سؤالك أو استفسارك القانوني هنا...',
+      'clearChat': 'مسح المحادثة',
       'report': 'إبلاغ',
       'history': 'السجل',
       'profile': 'الملف الشخصي',
@@ -294,6 +316,12 @@ class AppLocalizations {
       'maxFilesAllowed': 'الحد الأقصى 5 ملفات فقط',
       'fileTooLarge': 'الملف كبير جداً. الحد الأقصى: 10 ميجابايت',
       'fetchLocationFirst': 'يرجى جلب الموقع الحالي أولاً',
+      'sendReportTo': 'إرسال البلاغ إلى',
+      'sendToOfficer': 'الظابط (مباشرة)',
+      'sendToOfficerDesc': 'إرسال البلاغ مباشرة لضباط الشرطة لاتخاذ الإجراءات',
+      'sendToLawyer': 'المحامي الخاص بك (للمراجعة)',
+      'sendToLawyerDesc': 'إرسال البلاغ للمحامي المرتبط بحسابك لمراجعته أولاً',
+      'noLawyerLinkedWarning': 'لم تقم بربط حسابك بمحامٍ حتى الآن. يرجى ربط محامٍ من ملفك الشخصي أو اختيار الإرسال للظابط مباشرة.',
 
       // Categories
       'cat_environmental': 'بيئي',

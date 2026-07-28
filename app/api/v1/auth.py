@@ -99,12 +99,6 @@ def login_access_token(
     """
     user = UserService.authenticate(db, login_id=form_data.username, password=form_data.password)
     
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect national ID or password",
-        )
-        
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     return {

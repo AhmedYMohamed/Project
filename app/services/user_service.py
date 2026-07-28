@@ -73,17 +73,23 @@ class UserService:
 
     @staticmethod
     def authenticate(db: Session, login_id: str, password: str) -> Optional[User]:
-        """Verify national ID and password."""
+        """Verify national ID or email and password."""
         import hashlib
-        hashed_nid = hashlib.sha256(login_id.encode()).hexdigest()
+        hashed_nid = hashlib.sha256(login_id.strip().encode()).hexdigest()
         user = UserService.get_by_national_id(db, hashed_nid)
         if not user:
-            return None
-        if not user.passwordHash:
-            return None # User exists but has no password (maybe OTP user)
+            user = UserService.get_by_email(db, login_id.strip())
             
-        if not verify_password(password, user.passwordHash):
-            return None
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="ACCOUNT_NOT_FOUND"
+            )
+        if not user.passwordHash or not verify_password(password, user.passwordHash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="INVALID_PASSWORD"
+            )
             
         return user
 

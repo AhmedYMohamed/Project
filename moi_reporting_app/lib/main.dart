@@ -9,7 +9,12 @@ import 'screens/main_navigation.dart';
 import 'screens/officer_dashboard_screen.dart';
 import 'screens/lawyer_dashboard_screen.dart';
 
-void main() {
+import 'services/push_notification_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await PushNotificationService().initialize();
+
   runApp(
     MultiProvider(
       providers: [
