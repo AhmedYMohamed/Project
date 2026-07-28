@@ -51,7 +51,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
   Future<void> _pickFile() async {
     final loc = AppLocalizations.of(context);
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       withData: true,
       allowMultiple: true,
       type: FileType.media, // Restrict to Photos and Videos
