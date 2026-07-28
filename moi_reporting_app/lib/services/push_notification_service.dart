@@ -44,7 +44,7 @@ class PushNotificationService {
         iOS: iosSettings,
       );
 
-      await _localNotifications.initialize(initSettings);
+      await _localNotifications.initialize(settings: initSettings);
 
       // 4. Request Permissions
       NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
@@ -122,10 +122,10 @@ class PushNotificationService {
 
     if (notification != null) {
       _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
+        id: notification.hashCode,
+        title: notification.title,
+        body: notification.body,
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'moi_high_importance_channel',
             'MoI Notifications',

@@ -126,4 +126,35 @@ class ReportService {
       rethrow;
     }
   }
+
+  Future<Response> updateReport({
+    required String reportId,
+    required String token,
+    required String title,
+    required String description,
+    required String location,
+    required String categoryId,
+  }) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'title': title,
+        'descriptionText': description,
+        'location': location,
+        'categoryId': categoryId,
+      });
+
+      return await _dio.put(
+        '/api/v1/reports/$reportId',
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
