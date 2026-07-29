@@ -119,7 +119,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             const SizedBox(width: 10),
             Text(
               loc?.translate('legalAdvisor') ?? 'المستشار القانوني الذكي',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
             ),
           ],
         ),
@@ -141,7 +144,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A).withOpacity(0.06),
+                color: const Color(0xFF1E3A8A).withValues(alpha: 0.06),
                 border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
               ),
               child: Row(
@@ -149,16 +152,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E3A8A).withOpacity(0.1),
+                      color: const Color(0xFF1E3A8A).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.auto_awesome, color: Color(0xFF1E3A8A), size: 20),
+                    child: const Icon(Icons.auto_awesome,
+                        color: Color(0xFF1E3A8A), size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      loc?.translate('chatbotSub') ?? 'مساعد قانوني مدعوم بالذكاء الاصطناعي للإجابة عن الاستفسارات وتوضيح العقوبات والإجراءات.',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+                      loc?.translate('chatbotSub') ??
+                          'مساعد قانوني مدعوم بالذكاء الاصطناعي للإجابة عن الاستفسارات وتوضيح العقوبات والإجراءات.',
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey.shade800),
                     ),
                   ),
                 ],
@@ -183,23 +189,26 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             // Loading Indicator
             if (_isLoading)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     const CircleAvatar(
                       radius: 16,
                       backgroundColor: Color(0xFF1E3A8A),
-                      child: Icon(Icons.smart_toy, size: 18, color: Colors.white),
+                      child:
+                          Icon(Icons.smart_toy, size: 18, color: Colors.white),
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -211,10 +220,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                           SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1E3A8A)),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Color(0xFF1E3A8A)),
                           ),
                           SizedBox(width: 10),
-                          Text("جاري البحث في الكتب والقوانين...", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                          Text("جاري البحث في الكتب والقوانين...",
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey)),
                         ],
                       ),
                     ),
@@ -239,15 +251,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E3A8A).withOpacity(0.08),
+              color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.smart_toy_rounded, size: 64, color: Color(0xFF1E3A8A)),
+            child: const Icon(Icons.smart_toy_rounded,
+                size: 64, color: Color(0xFF1E3A8A)),
           ),
           const SizedBox(height: 16),
           Text(
             loc?.translate('legalAdvisor') ?? 'المستشار القانوني الذكي',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)),
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A)),
           ),
           const SizedBox(height: 8),
           Text(
@@ -260,7 +276,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             alignment: Alignment.centerRight,
             child: Text(
               "💡 أسئلة شائعة ومقترحة:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey.shade800),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.grey.shade800),
             ),
           ),
           const SizedBox(height: 12),
@@ -269,11 +288,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             runSpacing: 10,
             children: _suggestedQuestions.map((q) {
               return ActionChip(
-                avatar: const Icon(Icons.help_outline, size: 16, color: Color(0xFF1E3A8A)),
+                avatar: const Icon(Icons.help_outline,
+                    size: 16, color: Color(0xFF1E3A8A)),
                 label: Text(q, style: const TextStyle(fontSize: 13)),
                 backgroundColor: Colors.white,
-                side: BorderSide(color: const Color(0xFF1E3A8A).withOpacity(0.3)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                side: BorderSide(
+                    color: const Color(0xFF1E3A8A).withValues(alpha: 0.3)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
                 onPressed: () => _handleSubmitted(q),
               );
             }).toList(),
@@ -288,7 +310,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
@@ -312,7 +335,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -347,11 +370,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.copy, size: 14, color: Colors.grey.shade600),
+                            Icon(Icons.copy,
+                                size: 14, color: Colors.grey.shade600),
                             const SizedBox(width: 4),
                             Text(
                               "نسخ النص",
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                  fontSize: 11, color: Colors.grey.shade600),
                             ),
                           ],
                         ),
@@ -393,9 +418,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 minLines: 1,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: loc?.translate('typeQuestionHint') ?? 'اكتب سؤالك أو استفسارك القانوني هنا...',
+                  hintText: loc?.translate('typeQuestionHint') ??
+                      'اكتب سؤالك أو استفسارك القانوني هنا...',
                   hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
@@ -414,7 +441,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 onTap: () => _handleSubmitted(_textController.text),
                 child: const Padding(
                   padding: EdgeInsets.all(12.0),
-                  child: Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                  child:
+                      Icon(Icons.send_rounded, color: Colors.white, size: 20),
                 ),
               ),
             ),

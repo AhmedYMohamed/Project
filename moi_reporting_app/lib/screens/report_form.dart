@@ -28,7 +28,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   final _descriptionController = TextEditingController();
   String _selectedCategory = 'environmental';
   bool _sendToLawyer = false;
-  
+
   List<Uint8List> _selectedFileBytes = [];
   List<String> _selectedFileNames = [];
   bool _isLoading = false;
@@ -66,7 +66,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(loc?.translate('maxFilesAllowed') ?? 'Maximum 5 files allowed'),
+                    content: Text(loc?.translate('maxFilesAllowed') ??
+                        'Maximum 5 files allowed'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -79,7 +80,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(loc?.translate('fileTooLarge') ?? 'File is too large. Max size: 10MB'),
+                    content: Text(loc?.translate('fileTooLarge') ??
+                        'File is too large. Max size: 10MB'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -106,7 +108,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting location: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error getting location: $e'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -121,14 +125,15 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
     setState(() => _isLoading = true);
 
-    String finalLocation = _useCurrentLocation 
-        ? (_currentLocationText ?? 'Unknown Location') 
+    String finalLocation = _useCurrentLocation
+        ? (_currentLocationText ?? 'Unknown Location')
         : _manualLocationController.text;
 
     if (_useCurrentLocation && _currentLocationText == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(loc?.translate('fetchLocationFirst') ?? 'Please fetch current location first'),
+          content: Text(loc?.translate('fetchLocationFirst') ??
+              'Please fetch current location first'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -144,14 +149,17 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         token: auth.token!,
         location: finalLocation,
         sendToLawyer: _sendToLawyer,
-        fileBytesList: _selectedFileBytes.isNotEmpty ? _selectedFileBytes : null,
-        fileNamesList: _selectedFileNames.isNotEmpty ? _selectedFileNames : null,
+        fileBytesList:
+            _selectedFileBytes.isNotEmpty ? _selectedFileBytes : null,
+        fileNamesList:
+            _selectedFileNames.isNotEmpty ? _selectedFileNames : null,
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(loc?.translate('reportSubmittedSuccess') ?? 'Report submitted successfully!'),
+            content: Text(loc?.translate('reportSubmittedSuccess') ??
+                'Report submitted successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -168,7 +176,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     } catch (e) {
       if (mounted) {
         String errorMsg = e.toString();
-        if (errorMsg.contains('No lawyer linked') || errorMsg.contains('do not have a linked lawyer')) {
+        if (errorMsg.contains('No lawyer linked') ||
+            errorMsg.contains('do not have a linked lawyer')) {
           errorMsg = loc?.translate('noLawyerLinkedWarning') ??
               'No lawyer linked to your account. Please link a lawyer in your profile or select Officer.';
         }
@@ -201,7 +210,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       if (await _audioRecorder.hasPermission()) {
         const config = RecordConfig();
         setState(() => _isRecording = true);
-        await _audioRecorder.start(config, path: ''); 
+        await _audioRecorder.start(config, path: '');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -229,27 +238,28 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         }
 
         final auth = context.read<AuthProvider>();
-        String transcribedText = await ReportService().transcribeVoice(
-          audioBytes, 
-          'voice_recording.m4a', 
-          auth.token!
-        );
+        String transcribedText = await ReportService()
+            .transcribeVoice(audioBytes, 'voice_recording.m4a', auth.token!);
 
         setState(() {
-          _descriptionController.text = "${_descriptionController.text} $transcribedText".trim();
+          _descriptionController.text =
+              "${_descriptionController.text} $transcribedText".trim();
           _isTranscribing = false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(loc?.translate('voiceTranscribedSuccess') ?? 'Voice transcribed successfully'),
+            content: Text(loc?.translate('voiceTranscribedSuccess') ??
+                'Voice transcribed successfully'),
           ),
         );
       }
     } catch (e) {
       setState(() => _isTranscribing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Transcription error: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Transcription error: $e'),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -260,7 +270,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc?.translate('newReport') ?? 'New Report', style: const TextStyle(color: Colors.white)),
+        title: Text(loc?.translate('newReport') ?? 'New Report',
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
         actions: const [
@@ -279,11 +290,13 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             children: [
               Text(
                 loc?.translate('submitIncident') ?? 'Submit an Incident',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                loc?.translate('enterDetailsSub') ?? 'Enter details below to report an issue to the MoI.',
+                loc?.translate('enterDetailsSub') ??
+                    'Enter details below to report an issue to the MoI.',
                 style: TextStyle(color: Colors.grey[600]),
               ),
               const SizedBox(height: 32),
@@ -295,10 +308,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return loc?.translate('pleaseEnterTitle') ?? 'Please enter a title';
+                    return loc?.translate('pleaseEnterTitle') ??
+                        'Please enter a title';
                   }
                   if (value.length < 3) {
-                    return loc?.translate('titleMinChars') ?? 'Title must be at least 3 characters';
+                    return loc?.translate('titleMinChars') ??
+                        'Title must be at least 3 characters';
                   }
                   return null;
                 },
@@ -314,7 +329,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                   final label = loc?.translate('cat_$catKey') ?? catKey;
                   return DropdownMenuItem(value: catKey, child: Text(label));
                 }).toList(),
-                onChanged: (String? newValue) => setState(() => _selectedCategory = newValue!),
+                onChanged: (String? newValue) =>
+                    setState(() => _selectedCategory = newValue!),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -326,10 +342,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return loc?.translate('pleaseEnterDesc') ?? 'Please enter a description';
+                    return loc?.translate('pleaseEnterDesc') ??
+                        'Please enter a description';
                   }
                   if (value.length < 10) {
-                    return loc?.translate('descMinChars') ?? 'Description must be at least 10 characters';
+                    return loc?.translate('descMinChars') ??
+                        'Description must be at least 10 characters';
                   }
                   return null;
                 },
@@ -337,12 +355,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               const SizedBox(height: 8),
               _buildVoiceRecordButton(loc),
               const SizedBox(height: 16),
-              
+
               // Location Picker
               _buildLocationPicker(loc),
-              
+
               const SizedBox(height: 24),
-              
+
               // File Picker Section
               _buildFilePicker(loc),
 
@@ -363,7 +381,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         loc?.translate('submitReport') ?? 'Submit Report',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
             ],
@@ -412,7 +431,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 Expanded(
                   child: Text(
                     _currentLocationText ??
-                        (loc?.translate('pressToFetchLocation') ?? 'Press button to fetch location'),
+                        (loc?.translate('pressToFetchLocation') ??
+                            'Press button to fetch location'),
                     style: const TextStyle(fontSize: 14),
                   ),
                 ),
@@ -428,7 +448,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             controller: _manualLocationController,
             decoration: InputDecoration(
               labelText: loc?.translate('manualLocation') ?? 'Manual Location',
-              hintText: loc?.translate('enterCityOrAddress') ?? 'Enter city or address',
+              hintText: loc?.translate('enterCityOrAddress') ??
+                  'Enter city or address',
               prefixIcon: const Icon(Icons.edit_location),
             ),
           ),
@@ -453,8 +474,10 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
               itemCount: _selectedFileNames.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  leading: const Icon(Icons.insert_drive_file, color: Colors.blue),
-                  title: Text(_selectedFileNames[index], overflow: TextOverflow.ellipsis),
+                  leading:
+                      const Icon(Icons.insert_drive_file, color: Colors.blue),
+                  title: Text(_selectedFileNames[index],
+                      overflow: TextOverflow.ellipsis),
                   trailing: IconButton(
                     icon: const Icon(Icons.remove_circle, color: Colors.red),
                     onPressed: () {
@@ -493,7 +516,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ),
         ),
         child: InkWell(
-          onTap: _isTranscribing ? null : (_isRecording ? _stopRecording : _startRecording),
+          onTap: _isTranscribing
+              ? null
+              : (_isRecording ? _stopRecording : _startRecording),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -501,7 +526,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.blue),
                 )
               else
                 Icon(
@@ -518,7 +544,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                 Text(
                   _isRecording
                       ? (loc?.translate('stopRecording') ?? 'Stop Recording')
-                      : (loc?.translate('recordDescription') ?? 'Record Description'),
+                      : (loc?.translate('recordDescription') ??
+                          'Record Description'),
                   style: TextStyle(
                     color: _isRecording ? Colors.red : Colors.blue,
                     fontWeight: FontWeight.bold,
@@ -546,7 +573,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             Expanded(
               child: _buildRecipientCard(
                 title: loc?.translate('sendToOfficer') ?? 'Officer (Directly)',
-                subtitle: loc?.translate('sendToOfficerDesc') ?? 'Send directly to police officers',
+                subtitle: loc?.translate('sendToOfficerDesc') ??
+                    'Send directly to police officers',
                 icon: Icons.local_police,
                 isSelected: !_sendToLawyer,
                 onTap: () => setState(() => _sendToLawyer = false),
@@ -557,7 +585,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             Expanded(
               child: _buildRecipientCard(
                 title: loc?.translate('sendToLawyer') ?? 'Your Lawyer (Review)',
-                subtitle: loc?.translate('sendToLawyerDesc') ?? 'Send to lawyer for review first',
+                subtitle: loc?.translate('sendToLawyerDesc') ??
+                    'Send to lawyer for review first',
                 icon: Icons.gavel,
                 isSelected: _sendToLawyer,
                 onTap: () => setState(() => _sendToLawyer = true),
@@ -585,7 +614,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor.withOpacity(0.08) : Colors.grey[50],
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.08)
+              : Colors.grey[50],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? activeColor : Colors.grey[300]!,
@@ -594,7 +625,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: isSelected ? activeColor : Colors.grey[600]),
+            Icon(icon,
+                size: 32, color: isSelected ? activeColor : Colors.grey[600]),
             const SizedBox(height: 8),
             Text(
               title,
