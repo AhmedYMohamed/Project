@@ -33,41 +33,55 @@
 
 ## 🎯 Overview
 
-The **MoI Digital Reporting System** is a modern, cloud-native platform that empowers citizens to report incidents quickly and securely. Built with cutting-edge technology, it features:
+The **MoI Digital Reporting System** is a modern, secure, and cloud-native platform that empowers citizens to report incidents, consult legal AI advisors, link private lawyers for legal review, and enables law enforcement officers to track and manage reports. Built with high-security standards and cutting-edge artificial intelligence, the platform features:
 
-- **Voice-to-Text Reporting** - Report incidents by speaking
-- **AI-Powered Categorization** - Automatic incident classification
-- **Anonymous Reporting** - Privacy-first design
-- **Real-time Status Tracking** - Know exactly what's happening with your report
-- **Geolocation Support** - Pinpoint incident locations on a map
-- **Multi-media Attachments** - Upload photos, videos, and audio evidence
+- **Dual Database Strategy** - Separate transactional (OLTP) database for high-concurrency writes/reads and analytical (OLAP) star schema database for reporting.
+- **Lawyer & Advocate Portal** - Citizens can link a primary lawyer via Syndicate/Bar ID, routing reports for pre-filing legal review, digital signatures, or urgent legal escalation.
+- **AI Legal Advisor Chatbot** - Integrated RAG (Retrieval-Augmented Generation) pipeline querying authoritative Egyptian law books using FAISS vector indexing to answer citizen legal questions.
+- **Secure Hashed National ID Authentication** - Citizens register and authenticate using their National ID, which is hashed deterministically (`SHA-256`) to ensure privacy while allowing indexed database lookup.
+- **Egyptian Arabic Voice Reporting** - AI-powered voice description transcription using an OpenAI Whisper "turbo" model optimized with custom prompts for Egyptian Arabic speech.
+- **High-Accuracy Geolocation Services** - Automated high-accuracy GPS capture (`desiredAccuracy: LocationAccuracy.best`) and server-side cached reverse geocoding.
+- **Multimedia Evidence Attachments** - Support for photo and video uploads with rigid format enforcement (media files only) and inline playback.
+- **Real-Time Status & Case Management** - Seamless status tracking across Citizen, Lawyer, Officer, and Admin dashboards.
 
 ---
 
 ## ✨ Features
 
-### For Citizens
-- 📱 **Mobile-First Design** - Optimized for smartphones
-- 🎤 **Voice Reporting** - Speak your report, we'll transcribe it
-- 📸 **Photo/Video Upload** - Attach evidence instantly
-- 🕵️ **Anonymous Mode** - Report without revealing identity
-- 🗺️ **Location Services** - Auto-detect or manually set location
-- 🔔 **Real-time Notifications** - Get updates on your reports
-- 📊 **Report Tracking** - See status from submission to resolution
+### 📱 Citizen Reporting Module (Mobile App)
+*The public interface for incident submission and legal advisory.*
+- 🔐 **Secure Authentication** - Safe login and registration using deterministic hashed National ID combined with email. Anonymous reporting is also supported.
+- ⚖️ **Lawyer Linking & Pre-Filing Review** - Link a primary lawyer using their Syndicate ID. Choose to send incident reports directly to law enforcement or route to your linked lawyer for legal review first.
+- 💬 **Private Client-Lawyer Chat** - Built-in secure messaging channel between citizens and their linked lawyer regarding active incident reports, complete with real-time push notifications.
+- 🤖 **AI Legal Advisor (RAG Chatbot)** - Ask legal questions in natural Arabic; the system retrieves relevant clauses from Egyptian Law Books using FAISS vector search and RAG generation.
+- 🎤 **AI Voice-to-Text Reporting** - Submit incident descriptions by speaking in Egyptian Arabic. The backend transcribes it via OpenAI Whisper.
+- 🗺️ **High-Accuracy Location Tracking** - Automatically captures high-precision coordinates (`desiredAccuracy: LocationAccuracy.best`) to pinpoint incidents.
+- 📸 **Media-Only Uploads** - Rigidly restricts uploads to images and videos to prevent security vulnerabilities.
+- 📊 **Report History & Tracking** - Citizens can browse their past reports and monitor status transitions seamlessly.
 
-### For Officials
-- 📋 **Dashboard View** - See all reports at a glance
-- 🔍 **Advanced Filtering** - Find reports by status, category, location
-- 📍 **Map View** - Visualize incident hotspots
-- ✅ **Status Management** - Update report progress
-- 👥 **Assignment System** - Assign reports to team members
-- 📈 **Analytics** - Track trends and performance metrics
+### ⚖️ Lawyer & Advocate Portal (Mobile & API)
+*Dedicated workflow console for legal advocates reviewing client reports.*
+- 📜 **Client Reports Queue** - View reports submitted by linked clients seeking legal review (`status: PendingLawyerReview`).
+- ✍️ **Digital Signature & Approval** - Approve and digitally sign reports (`lawyerSignature`) before forwarding them to official law enforcement channels (`status: Submitted`).
+- ↩️ **Return for Edits** - Return reports to citizens with specific legal feedback (`lawyerFeedback`) if evidence or descriptions are incomplete (`status: ReturnedToCitizen`).
+- 🚨 **Urgent Legal Escalation** - Urgently escalate critical cases (`isUrgentEscalation: true`) to trigger high-priority alerts for officers.
+- 💬 **Encrypted Client Messaging** - Real-time two-way communication channel with citizens regarding case strategy.
 
-### For Administrators
-- 🔐 **User Management** - Control access and permissions
-- 📊 **System Analytics** - Monitor system health and usage
-- 🔧 **Configuration** - Manage categories, workflows
-- 📝 **Audit Logs** - Complete activity tracking
+### 👮 Officer Module & Dashboard (Mobile App)
+*The workflow console tailored for ground officers and law enforcement responders.*
+- 📋 **Officer Dashboard** - Real-time stats showing count of reports per status (Submitted, InProgress, Resolved) queried directly from the stable Operations DB.
+- 📍 **Proximity-Based Queue** - Query and view incident reports near the officer's active coordinates or assigned service area using database spatial radius matching.
+- 🗺️ **Open on External Maps** - Directly open report locations on Google Maps via deep links to navigate to the incident.
+- 💬 **Server-Side Reverse Geocoding** - Display human-readable region and suburb names by reverse geocoding coordinates on the backend via OpenStreetMap Nominatim, utilizing LRU caching to bypass CORS issues and increase performance.
+- 🎬 **Inline Evidence Player** - Render media attachments inline (images are loaded in dialogs; video files are played directly using the `video_player` package).
+- ✅ **Status Management** - Update incidents (e.g. from "Submitted" to "InProgress" or "Resolved") and append officer notes.
+
+### 📊 Admin & Analytics (Backend API)
+*Analytical tools and star schema data models for high-level monitoring.*
+- 📂 **Analytics Database Foundation** - Read-only analytics DB featuring a star schema (`hot.Fact_Reports` for the last 90 days and `cold.Fact_Reports` for historical records).
+- 📈 **KPIs & Metrics Breakdown** - Analytics endpoints returning total counts, average AI confidence, status counts, monthly category breakdowns, and category-status matrices.
+- 📥 **CSV Export** - Endpoint to download reports in CSV format for offline reporting and data science analysis.
+- 💡 **Note**: The **Admin Dashboard UI console** is maintained in a **separate repository** and is kept as is; this repository provides the full SQL schema, ETL pipelines, and REST API endpoints powering it.
 
 ---
 
@@ -104,6 +118,33 @@ The **MoI Digital Reporting System** is a modern, cloud-native platform that emp
 - **AI/ML**: Azure Cognitive Services (Speech, ML)
 - **ORM**: SQLAlchemy 2.0
 - **Validation**: Pydantic v2
+
+---
+
+## 🔄 Data Engineering & Azure Data Factory (ADF)
+
+The project leverages **Azure Data Factory (ADF)** for automated, serverless ETL orchestration between the operational database (`MoI_Reporting_Ops_DB`) and the analytics data warehouse (`MoI_Reporting_Analytics_DB`).
+
+### Pipelines & Workflows
+
+1. **`PL_Sync_Operations_To_Analytics`** (Incremental Watermarked Sync):
+   - **Lookup_Old_Watermark**: Reads the latest extracted timestamp from `ETL_Watermark` (`SELECT LastExtractedValue FROM ETL_Watermark WHERE TableName = 'Report'`).
+   - **Lookup_New_Watermark**: Calculates the maximum modification timestamp in Operations DB (`SELECT MAX(updatedAt) AS NewWatermark FROM [dbo].[Report]`).
+   - **Copy_Incremental_Reports**: Extracts updated records (`r.updatedAt > OldWatermark AND r.updatedAt <= NewWatermark`), joins `User` and `Attachment` count, and performs an **Upsert** into `hot.Fact_Reports` using `reportId` as primary key.
+   - **Copy_To_Cold**: Copies non-existing records into `cold.Fact_Reports` for historical archiving.
+   - **Update_Watermark**: Executes stored procedure `[dbo].[sp_UpdateWatermark]` to save the new watermark timestamp.
+
+2. **`P_Data_Archival_90Day`** (Automated Data Archival & Purging):
+   - Executes stored procedure `[dbo].[sp_ArchiveAndPurge90DayData]` on the Analytics DB to automatically archive active reports older than 90 days from `hot.Fact_Reports` into `cold.Fact_Reports` and purge cold data beyond retention rules.
+
+### Schedule Triggers
+
+- **`TRIGGER_EVERY_15_MINUTES`**: Triggers `PL_Sync_Operations_To_Analytics` on a 15-minute recurring interval.
+- **`Triger for purge and archive`**: Triggers `P_Data_Archival_90Day` every 91 days to maintain data tiering compliance.
+
+### Infrastructure as Code (IaC)
+
+- **ARM Templates**: Complete ADF deployment infrastructure templates are stored in `moi-df/ARMTemplateForFactory.json` and parameter files `moi-df/ARMTemplateParametersForFactory.json` for automated DevOps deployment.
 
 ---
 
