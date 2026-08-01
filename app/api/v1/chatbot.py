@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import asyncio
 from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, Field
@@ -112,7 +113,7 @@ async def legal_chatbot_query(
     try:
         os.chdir(rag_dir)
         pipeline = get_rag_instance()
-        answer = pipeline.llm_response(request.query)
+        answer = await asyncio.to_thread(pipeline.llm_response, request.query)
         return ChatResponse(answer=answer, status="success")
     except Exception as e:
         logger.error(f"Error executing Chatbot query: {str(e)}", exc_info=True)

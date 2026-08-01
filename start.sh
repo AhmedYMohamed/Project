@@ -8,7 +8,6 @@ docker compose up -d --build
 echo "Waiting for services to start..."
 sleep 10
 
-
 # Start Flutter web app
 echo "Starting Flutter web app..."
 cd moi_reporting_app

@@ -35,10 +35,11 @@ try:
     engine_ops = create_engine(
         url_ops,
         pool_pre_ping=True,
-        pool_size=5,
-        max_overflow=10,
-        pool_recycle=3600,
-        echo=settings.DEBUG
+        pool_size=15,
+        max_overflow=25,
+        pool_timeout=30,
+        pool_recycle=1800,
+        echo=False
     )
     
     SessionLocalOps = sessionmaker(

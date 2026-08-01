@@ -5,7 +5,6 @@ import uuid
 import logging
 import requests
 import json
-import whisper
 from typing import Optional
 from app.api.v1.auth import get_current_user
 from app.models.user import User
@@ -29,13 +28,14 @@ _model = None
 def get_whisper_model():
     global _model
     if _model is None:
-        logger.info("Loading local Whisper model for fallback...")
+        import whisper
+        logger.info("Loading local Whisper 'base' model for fallback...")
         try:
-            _model = whisper.load_model("turbo")
-            logger.info("Local Whisper 'turbo' model loaded successfully.")
-        except Exception as e:
-            logger.warning(f"Could not load Whisper 'turbo' model: {e}. Trying 'base'...")
             _model = whisper.load_model("base")
+            logger.info("Local Whisper 'base' model loaded successfully.")
+        except Exception as e:
+            logger.warning(f"Could not load Whisper 'base' model: {e}. Trying 'tiny'...")
+            _model = whisper.load_model("tiny")
     return _model
 
 
@@ -146,6 +146,8 @@ def _enhance_with_qwen(raw_text: str) -> str:
     return raw_text
 
 
+import asyncio
+
 @router.post("/transcribe", status_code=status.HTTP_200_OK)
 async def transcribe_voice(
     file: UploadFile = File(...),
@@ -165,19 +167,20 @@ async def transcribe_voice(
     temp_file_path = os.path.join(temp_dir, temp_filename)
     
     try:
+        content = await file.read()
         with open(temp_file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(content)
         
-        # 1. Primary: Try Munsit API
-        transcribed_text = _transcribe_with_munsit(temp_file_path)
+        # 1. Primary: Try Munsit API in threadpool (non-blocking)
+        transcribed_text = await asyncio.to_thread(_transcribe_with_munsit, temp_file_path)
         
         # 2. Secondary: Fallback to local Whisper if Munsit failed
         if not transcribed_text:
             logger.info("Munsit API unavailable or returned empty result. Switching to Whisper fallback.")
-            transcribed_text = _transcribe_with_whisper(temp_file_path)
+            transcribed_text = await asyncio.to_thread(_transcribe_with_whisper, temp_file_path)
             
         # 3. Optional enhancement via Qwen if available
-        final_text = _enhance_with_qwen(transcribed_text)
+        final_text = await asyncio.to_thread(_enhance_with_qwen, transcribed_text)
         
         logger.info(f"Final transcription completed successfully ({len(final_text)} chars).")
         return {"text": final_text}

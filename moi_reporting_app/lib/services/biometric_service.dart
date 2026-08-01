@@ -4,7 +4,9 @@ import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
   final LocalAuthentication _localAuth = LocalAuthentication();
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   static const String _keyNationalId = 'biometric_national_id';
   static const String _keyPassword = 'biometric_password';
@@ -17,6 +19,8 @@ class BiometricService {
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       return canAuthenticateWithBiometrics || isDeviceSupported;
     } on PlatformException catch (_) {
+      return false;
+    } catch (_) {
       return false;
     }
   }
@@ -32,9 +36,12 @@ class BiometricService {
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: false, // Allows device PIN fallback
+          useErrorDialogs: true,
         ),
       );
     } on PlatformException catch (_) {
+      return false;
+    } catch (_) {
       return false;
     }
   }

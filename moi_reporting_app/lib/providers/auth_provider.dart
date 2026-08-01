@@ -124,8 +124,12 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.logout();
-    await _biometricService.clearCredentials();
     _token = null;
+    notifyListeners();
+  }
+
+  Future<void> clearBiometricData() async {
+    await _biometricService.clearCredentials();
     notifyListeners();
   }
 }

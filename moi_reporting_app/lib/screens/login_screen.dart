@@ -17,6 +17,33 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _roleSelection = 'citizen';
+  bool _hasBiometrics = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final auth = context.read<AuthProvider>();
+    final hasCreds = await auth.hasBiometricCredentials();
+    if (mounted) {
+      setState(() => _hasBiometrics = hasCreds);
+    }
+    if (hasCreds) {
+      _triggerBiometricLogin();
+    }
+  }
+
+  Future<void> _triggerBiometricLogin() async {
+    if (!mounted) return;
+    final auth = context.read<AuthProvider>();
+    final success = await auth.loginWithBiometrics();
+    if (!success && mounted) {
+      // Stays on LoginScreen so user can enter credentials manually
+    }
+  }
 
   void _login() async {
     final loc = AppLocalizations.of(context);
@@ -217,40 +244,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: const TextStyle(fontSize: 16),
                         ),
                 ),
-                const SizedBox(height: 12),
-                FutureBuilder<bool>(
-                  future: context.read<AuthProvider>().hasBiometricCredentials(),
-                  builder: (context, snapshot) {
-                    if (snapshot.data == true) {
-                      return OutlinedButton.icon(
-                        onPressed: () async {
-                          final success = await context.read<AuthProvider>().loginWithBiometrics();
-                          if (!success && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Biometric/PIN authentication failed or canceled. Please log in with password.'),
-                                backgroundColor: Colors.orange,
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.fingerprint, size: 24, color: Color(0xFF1E3A8A)),
-                        label: const Text(
-                          'Login with Biometrics / PIN',
-                          style: TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: Color(0xFF1E3A8A)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
+                if (_hasBiometrics) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _triggerBiometricLogin,
+                    icon: const Icon(Icons.fingerprint, size: 24, color: Color(0xFF1E3A8A)),
+                    label: const Text(
+                      'Login with Biometrics / PIN',
+                      style: TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: Color(0xFF1E3A8A)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => Navigator.push(
