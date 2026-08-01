@@ -8,6 +8,7 @@ import '../screens/app_colors.dart';
 import '../widgets/language_switcher_button.dart';
 import 'officer_report_details_screen.dart';
 import 'officer_map_screen.dart';
+import 'notification_center_screen.dart';
 import '../services/location_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -276,6 +277,15 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
               ),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationCenterScreen()),
+                  );
+                },
+              ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
                 child: LanguageSwitcherButton(),

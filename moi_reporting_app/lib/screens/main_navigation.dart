@@ -11,6 +11,7 @@ import 'report_history_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'citizen_report_details_screen.dart';
 import 'chatbot_screen.dart';
+import 'notification_center_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -165,6 +166,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E3A8A),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationCenterScreen()),
+              );
+            },
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
             child: LanguageSwitcherButton(),

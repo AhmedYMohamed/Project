@@ -71,12 +71,33 @@ class NotificationService:
         user: Any,
         title: str,
         body: str,
-        data: Optional[Dict[str, Any]] = None
+        data: Optional[Dict[str, Any]] = None,
+        db: Optional[Any] = None
     ) -> bool:
         """
-        Helper to send notification directly using a User model instance.
+        Helper to send notification directly using a User model instance and store in DB.
         """
         if not user:
             return False
+
+        # Store in DB for In-App Notification Center
+        if db:
+            try:
+                import uuid
+                from app.models.notification import Notification
+                notif = Notification(
+                    notificationId=f"notif-{uuid.uuid4()}",
+                    userId=user.userId,
+                    title=title,
+                    body=body,
+                    type=data.get("type") if data else None,
+                    reportId=data.get("reportId") if data else None,
+                    isRead=False
+                )
+                db.add(notif)
+                db.commit()
+            except Exception as e:
+                logger.error(f"Error persisting notification to DB: {e}")
+
         fcm_token = getattr(user, "fcmToken", None)
         return cls.send_push_notification(fcm_token=fcm_token, title=title, body=body, data=data)

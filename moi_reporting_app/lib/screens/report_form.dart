@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'package:geolocator/geolocator.dart';
@@ -52,47 +54,47 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
   Future<void> _pickFile() async {
     final loc = AppLocalizations.of(context);
-    FilePickerResult? result = await FilePicker.pickFiles(
-      withData: true,
-      allowMultiple: true,
-      type: FileType.media, // Restrict to Photos and Videos
-    );
-    if (result != null) {
-      setState(() {
-        for (var file in result.files) {
-          if (file.bytes != null && !_selectedFileNames.contains(file.name)) {
-            // Limit number of files to prevent performance issues
-            if (_selectedFileNames.length >= 5) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(loc?.translate('maxFilesAllowed') ??
-                        'Maximum 5 files allowed'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-              break;
-            }
-            // Add file size limit to prevent performance issues
-            const maxFileSize = 10 * 1024 * 1024; // 10MB limit
-            if (file.size > maxFileSize) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(loc?.translate('fileTooLarge') ??
-                        'File is too large. Max size: 10MB'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-              continue;
-            }
-            _selectedFileBytes.add(file.bytes!);
-            _selectedFileNames.add(file.name);
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> pickedFiles = await picker.pickMultipleMedia();
+
+    if (pickedFiles.isNotEmpty) {
+      for (var file in pickedFiles) {
+        final bytes = await file.readAsBytes();
+        final fileName = file.name;
+        final fileSize = await file.length();
+
+        if (_selectedFileNames.contains(fileName)) continue;
+
+        if (_selectedFileNames.length >= 5) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(loc?.translate('maxFilesAllowed') ?? 'Maximum 5 files allowed'),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
+          break;
         }
-      });
+
+        const maxFileSize = 10 * 1024 * 1024; // 10MB limit
+        if (fileSize > maxFileSize) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(loc?.translate('fileTooLarge') ?? 'File is too large. Max size: 10MB'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          continue;
+        }
+
+        setState(() {
+          _selectedFileBytes.add(bytes);
+          _selectedFileNames.add(fileName);
+        });
+      }
     }
   }
 
@@ -210,7 +212,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       if (await _audioRecorder.hasPermission()) {
         const config = RecordConfig();
         setState(() => _isRecording = true);
-        await _audioRecorder.start(config, path: '');
+        String recordPath = '';
+        if (!kIsWeb) {
+          final tempDir = await getTemporaryDirectory();
+          recordPath = '${tempDir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        }
+        await _audioRecorder.start(config, path: recordPath);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

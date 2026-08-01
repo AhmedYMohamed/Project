@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../services/report_service.dart';
 import '../widgets/language_switcher_button.dart';
 import 'lawyer_report_details_screen.dart';
+import 'notification_center_screen.dart';
 
 class LawyerDashboardScreen extends StatefulWidget {
   const LawyerDashboardScreen({super.key});
@@ -174,6 +175,15 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> with Sing
         ),
         backgroundColor: const Color(0xFF1E3A8A),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationCenterScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.qr_code, color: Colors.white),
             tooltip: loc?.translate('viewQrCode') ?? 'View QR Code',

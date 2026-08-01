@@ -4,8 +4,12 @@ import '../services/auth_service.dart';
 
 import '../utils/web_helper.dart';
 
+import '../services/biometric_service.dart';
+
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final BiometricService _biometricService = BiometricService();
+
   String? _token;
   String? _userId;
   String _selectedRole = 'citizen';
@@ -24,16 +28,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _loadToken() async {
-    // If this is a fresh launch (not a reload), force redirect to login
-    if (!isReloadNavigation()) {
-      await _authService.logout();
-      _token = null;
-      _userId = null;
-      _isInitialized = true;
-      notifyListeners();
-      return;
-    }
-
     _token = await _authService.getToken();
     _userId = await _authService.getUserId();
     final role = await _authService.getUserRole();
@@ -42,6 +36,23 @@ class AuthProvider extends ChangeNotifier {
     }
     _isInitialized = true;
     notifyListeners();
+  }
+
+  Future<bool> hasBiometricCredentials() async {
+    return await _biometricService.hasStoredCredentials();
+  }
+
+  Future<bool> loginWithBiometrics() async {
+    final bool authenticated = await _biometricService.authenticate();
+    if (!authenticated) return false;
+
+    final creds = await _biometricService.getCredentials();
+    if (creds != null) {
+      await setSelectedRole(creds['role']!);
+      await login(creds['nationalId']!, creds['password']!);
+      return true;
+    }
+    return false;
   }
 
   Future<void> setSelectedRole(String role) async {
@@ -99,6 +110,12 @@ class AuthProvider extends ChangeNotifier {
       if (result['role'] != null) {
         _selectedRole = result['role']!;
       }
+      // Save credentials for biometric login
+      await _biometricService.saveCredentials(
+        nationalId: nationalId,
+        password: password,
+        role: _selectedRole,
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -107,6 +124,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.logout();
+    await _biometricService.clearCredentials();
     _token = null;
     notifyListeners();
   }

@@ -9,10 +9,12 @@ import 'screens/main_navigation.dart';
 import 'screens/officer_dashboard_screen.dart';
 import 'screens/lawyer_dashboard_screen.dart';
 
+import 'services/permission_service.dart';
 import 'services/push_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PermissionService.requestAllPermissionsIfFirstLaunch();
   await PushNotificationService().initialize();
 
   runApp(

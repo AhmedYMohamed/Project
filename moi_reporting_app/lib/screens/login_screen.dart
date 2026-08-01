@@ -217,6 +217,40 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: const TextStyle(fontSize: 16),
                         ),
                 ),
+                const SizedBox(height: 12),
+                FutureBuilder<bool>(
+                  future: context.read<AuthProvider>().hasBiometricCredentials(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data == true) {
+                      return OutlinedButton.icon(
+                        onPressed: () async {
+                          final success = await context.read<AuthProvider>().loginWithBiometrics();
+                          if (!success && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Biometric/PIN authentication failed or canceled. Please log in with password.'),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.fingerprint, size: 24, color: Color(0xFF1E3A8A)),
+                        label: const Text(
+                          'Login with Biometrics / PIN',
+                          style: TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: const BorderSide(color: Color(0xFF1E3A8A)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => Navigator.push(
