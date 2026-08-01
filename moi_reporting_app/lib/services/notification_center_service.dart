@@ -3,7 +3,11 @@ import '../models/notification_model.dart';
 import 'auth_service.dart';
 
 class NotificationCenterService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: AuthService.baseUrl));
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: AuthService.baseUrl,
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 10),
+  ));
 
   Future<List<NotificationModel>> getNotifications(String token) async {
     try {

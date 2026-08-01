@@ -65,55 +65,9 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   Future<void> _getCurrentLocation() async {
     final loc = AppLocalizations.of(context);
     try {
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        if (mounted) {
-          setState(() => _locationStatus = loc?.translate('locationServicesDisabled') ?? 'Location services disabled');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(loc?.translate('locationServicesDisabled') ??
-                    'Location services are disabled. Please enable them.'),
-                backgroundColor: Colors.orange),
-          );
-        }
-        return;
-      }
-
-      // Check location permissions
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (mounted) {
-            setState(() => _locationStatus = loc?.translate('locationPermissionDenied') ?? 'Location permission denied');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(loc?.translate('locationPermissionDenied') ??
-                      'Location permission is required'),
-                  backgroundColor: Colors.orange),
-            );
-          }
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          setState(
-              () => _locationStatus = loc?.translate('locationPermissionPermanentlyDenied') ?? 'Location permission permanently denied');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(loc?.translate('locationPermissionPermanentlyDenied') ??
-                    'Location permission is permanently denied. Please enable it in app settings.'),
-                backgroundColor: Colors.orange),
-          );
-        }
-        return;
-      }
-
-      // Get current position
       final Position position = await LocationService.getCurrentLocation();
+      _currentLat = position.latitude;
+      _currentLon = position.longitude;
 
       String addressName =
           '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
@@ -127,19 +81,12 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
       if (mounted) {
         final zonePrefix = loc?.translate('zone') ?? 'Zone';
         setState(() {
-          _currentLat = position.latitude;
-          _currentLon = position.longitude;
           _locationStatus = '$zonePrefix: $addressName';
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _locationStatus = loc?.translate('errorFetchingLocation') ?? 'Error fetching location');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('${loc?.translate('errorFetchingLocation') ?? 'Error fetching location'}: $e'),
-              backgroundColor: Colors.red),
-        );
+        setState(() => _locationStatus = loc?.translate('errorFetchingLocation') ?? 'Active Area');
       }
     }
   }
@@ -164,6 +111,7 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   }
 
   Future<void> _fetchLocationAndData() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       final loc = AppLocalizations.of(context);
@@ -171,44 +119,27 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
     });
 
     try {
-      final statsData = await _officerService.getDashboardStats();
-      final reportsData = await _officerService.getNearbyReports(
-        latitude: _currentLat,
-        longitude: _currentLon,
-      );
+      await _getCurrentLocation();
+      final results = await Future.wait([
+        _officerService.getDashboardStats(),
+        _officerService.getNearbyReports(
+          latitude: _currentLat,
+          longitude: _currentLon,
+        ),
+      ]);
 
       if (mounted) {
         setState(() {
-          _stats = Map<String, int>.from(statsData);
-          _nearbyReports = _parseReports(reportsData);
+          _stats = Map<String, int>.from(results[0] as Map<String, dynamic>);
+          _nearbyReports = _parseReports(results[1] as List<dynamic>);
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error loading dashboard: $e')));
       }
     }
-
-    _getCurrentLocation().then((_) async {
-      if (_currentLat != null && _currentLon != null) {
-        try {
-          final reportsData = await _officerService.getNearbyReports(
-            latitude: _currentLat,
-            longitude: _currentLon,
-          );
-          if (mounted) {
-            setState(() {
-              _nearbyReports = _parseReports(reportsData);
-            });
-          }
-        } catch (e) {
-          debugPrint('Background location reports refresh failed: $e');
-        }
-      }
-    });
   }
 
   Future<void> _fetchData() async {
