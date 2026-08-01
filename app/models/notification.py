@@ -1,9 +1,9 @@
 import uuid
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.sql import func
-from app.core.database import Base
+from app.core.database import BaseOps
 
-class Notification(Base):
+class Notification(BaseOps):
     __tablename__ = "Notification"
     __table_args__ = {"schema": "dbo"}
 

@@ -75,6 +75,20 @@ CREATE TABLE [dbo].[Attachment] (
 );
 GO
 
+CREATE TABLE [dbo].[Notification] (
+    [notificationId] NVARCHAR(450) NOT NULL,
+    [userId] NVARCHAR(450) NOT NULL,
+    [title] NVARCHAR(500) NOT NULL,
+    [body] NVARCHAR(2000) NOT NULL,
+    [type] NVARCHAR(50) NULL,
+    [reportId] NVARCHAR(450) NULL,
+    [isRead] BIT NOT NULL DEFAULT 0,
+    [createdAt] DATETIME2(7) NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT [PK_Notification] PRIMARY KEY ([notificationId]),
+    CONSTRAINT [FK_Notification_User] FOREIGN KEY ([userId]) REFERENCES [dbo].[User]([userId])
+);
+GO
+
 -- Operational indexes 
 CREATE NONCLUSTERED INDEX [IX_User_Role] ON [dbo].[User] ([role]) INCLUDE ([userId], [isAnonymous]);
 CREATE UNIQUE NONCLUSTERED INDEX [IX_User_HashedNationalId] ON [dbo].[User] ([hashedNationalId]) WHERE [hashedNationalId] IS NOT NULL;
