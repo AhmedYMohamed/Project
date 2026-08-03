@@ -15,6 +15,8 @@ class AuthProvider extends ChangeNotifier {
   String _selectedRole = 'citizen';
   bool _isLoading = false;
   bool _isInitialized = false;
+  bool _biometricVerified = false;
+  bool _isAuthenticating = false;
 
   String? get token => _token;
   String? get userId => _userId;
@@ -22,6 +24,8 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _token != null;
   bool get isInitialized => _isInitialized;
+  bool get biometricVerified => _biometricVerified;
+  bool get isAuthenticating => _isAuthenticating;
 
   AuthProvider() {
     _loadToken();
@@ -34,6 +38,12 @@ class AuthProvider extends ChangeNotifier {
     if (role != null) {
       _selectedRole = role;
     }
+    if (_token != null) {
+      final hasBiometrics = await hasBiometricCredentials();
+      _biometricVerified = !hasBiometrics;
+    } else {
+      _biometricVerified = true;
+    }
     _isInitialized = true;
     notifyListeners();
   }
@@ -43,15 +53,28 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> loginWithBiometrics() async {
-    final bool authenticated = await _biometricService.authenticate();
-    if (!authenticated) return false;
+    _isAuthenticating = true;
+    notifyListeners();
+    try {
+      final bool authenticated = await _biometricService.authenticate();
+      if (!authenticated) {
+        _isAuthenticating = false;
+        notifyListeners();
+        return false;
+      }
 
-    final creds = await _biometricService.getCredentials();
-    if (creds != null) {
-      await setSelectedRole(creds['role']!);
-      await login(creds['nationalId']!, creds['password']!);
-      return true;
-    }
+      final creds = await _biometricService.getCredentials();
+      if (creds != null) {
+        await setSelectedRole(creds['role']!);
+        await login(creds['nationalId']!, creds['password']!);
+        _biometricVerified = true;
+        _isAuthenticating = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (_) {}
+    _isAuthenticating = false;
+    notifyListeners();
     return false;
   }
 
@@ -116,15 +139,44 @@ class AuthProvider extends ChangeNotifier {
         password: password,
         role: _selectedRole,
       );
+      _biometricVerified = true;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  Future<void> lockApp() async {
+    if (_token != null) {
+      final hasBiometrics = await hasBiometricCredentials();
+      if (hasBiometrics) {
+        _biometricVerified = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<bool> verifyBiometric() async {
+    _isAuthenticating = true;
+    notifyListeners();
+    try {
+      final bool authenticated = await _biometricService.authenticate();
+      if (authenticated) {
+        _biometricVerified = true;
+        _isAuthenticating = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (_) {}
+    _isAuthenticating = false;
+    notifyListeners();
+    return false;
+  }
+
   Future<void> logout() async {
     await _authService.logout();
     _token = null;
+    _biometricVerified = false;
     notifyListeners();
   }
 

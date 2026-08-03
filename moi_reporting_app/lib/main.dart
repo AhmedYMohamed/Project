@@ -8,6 +8,7 @@ import 'screens/login_screen.dart';
 import 'screens/main_navigation.dart';
 import 'screens/officer_dashboard_screen.dart';
 import 'screens/lawyer_dashboard_screen.dart';
+import 'screens/biometric_gate_screen.dart';
 
 import 'services/permission_service.dart';
 import 'services/push_notification_service.dart';
@@ -28,8 +29,35 @@ void main() async {
   );
 }
 
-class MoiReportingApp extends StatelessWidget {
+class MoiReportingApp extends StatefulWidget {
   const MoiReportingApp({super.key});
+
+  @override
+  State<MoiReportingApp> createState() => _MoiReportingAppState();
+}
+
+class _MoiReportingAppState extends State<MoiReportingApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.isAuthenticated && !auth.isAuthenticating) {
+        auth.lockApp();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +110,9 @@ class MoiReportingApp extends StatelessWidget {
             );
           }
           if (auth.isAuthenticated) {
+            if (!auth.biometricVerified) {
+              return const BiometricGateScreen();
+            }
             if (auth.selectedRole == 'officer') {
               return const OfficerDashboardScreen();
             } else if (auth.selectedRole == 'lawyer') {

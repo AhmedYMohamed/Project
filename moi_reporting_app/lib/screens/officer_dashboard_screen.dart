@@ -38,28 +38,6 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   void initState() {
     super.initState();
     _fetchLocationAndData();
-    _restoreLastRoute();
-  }
-
-  Future<void> _restoreLastRoute() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastRoute = prefs.getString('last_route');
-    await prefs.setString('last_route', 'officer_dashboard');
-
-    if (lastRoute == 'officer_report_details') {
-      final reportId = prefs.getString('last_report_id');
-      if (reportId != null && mounted) {
-        await prefs.setString('last_route', 'officer_dashboard');
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OfficerReportDetailsScreen(reportId: reportId),
-            ),
-          ).then((_) => _fetchData());
-        }
-      }
-    }
   }
 
   Future<void> _getCurrentLocation() async {

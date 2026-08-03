@@ -29,6 +29,7 @@ class _OfficerReportDetailsScreenState
   bool _isLoading = true;
   bool _isSubmitting = false;
   Map<String, dynamic>? _report;
+  bool _hasFetched = false;
 
   // Tracks which attachment is shown in the inline preview panel.
   int _selectedAttachmentIndex = 0;
@@ -36,28 +37,21 @@ class _OfficerReportDetailsScreenState
   @override
   void initState() {
     super.initState();
-    _fetchReportDetails();
-    _saveRouteState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasFetched) {
+      _hasFetched = true;
+      _fetchReportDetails();
+    }
   }
 
   @override
   void dispose() {
     _noteController.dispose();
-    _resetRouteState();
     super.dispose();
-  }
-
-  Future<void> _saveRouteState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_route', 'officer_report_details');
-    await prefs.setString('last_report_id', widget.reportId);
-  }
-
-  Future<void> _resetRouteState() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('last_route') == 'officer_report_details') {
-      await prefs.setString('last_route', 'officer_dashboard');
-    }
   }
 
   Future<void> _fetchReportDetails() async {

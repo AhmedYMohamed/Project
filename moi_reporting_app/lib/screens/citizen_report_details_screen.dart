@@ -34,31 +34,11 @@ class _CitizenReportDetailsScreenState extends State<CitizenReportDetailsScreen>
   void initState() {
     super.initState();
     _loadReport();
-    _saveRouteState();
   }
 
   @override
   void dispose() {
-    _resetRouteState();
     super.dispose();
-  }
-
-  Future<void> _saveRouteState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_route', 'citizen_report_details');
-    await prefs.setString('last_report_id', widget.reportId);
-    await prefs.setString('last_route_citizen', 'citizen_report_details');
-    await prefs.setString('last_report_id_citizen', widget.reportId);
-  }
-
-  Future<void> _resetRouteState() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('last_route') == 'citizen_report_details') {
-      await prefs.setString('last_route', 'citizen_dashboard');
-    }
-    if (prefs.getString('last_route_citizen') == 'citizen_report_details') {
-      await prefs.setString('last_route_citizen', 'citizen_dashboard');
-    }
   }
 
   void _loadReport() {
