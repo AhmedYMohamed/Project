@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     AZURE_SPEECH_REGION: str = "eastus"
     AZURE_ML_ENDPOINT: Optional[str] = None
     AZURE_ML_API_KEY: Optional[str] = None
+    AZURE_OPENAI_ENDPOINT: Optional[str] = None
+    AZURE_OPENAI_KEY: Optional[str] = None
+    AZURE_OPENAI_DEPLOYMENT: Optional[str] = None
     
     # =========================================================
     # ⚙️ Static Config
@@ -96,7 +99,10 @@ def get_settings() -> Settings:
                 "azure-service-bus-connection-string": "AZURE_SERVICE_BUS_CONNECTION_STRING",
                 "azure-speech-key": "AZURE_SPEECH_KEY",
                 "azure-ml-api-key": "AZURE_ML_API_KEY",
-                "secret-key": "SECRET_KEY"
+                "secret-key": "SECRET_KEY",
+                "azure-openai-endpoint": "AZURE_OPENAI_ENDPOINT",
+                "azure-openai-key": "AZURE_OPENAI_KEY",
+                "azure-openai-deployment": "AZURE_OPENAI_DEPLOYMENT"
             }
             
             for secret_name, setting_name in secret_mapping.items():
