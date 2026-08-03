@@ -29,35 +29,8 @@ void main() async {
   );
 }
 
-class MoiReportingApp extends StatefulWidget {
+class MoiReportingApp extends StatelessWidget {
   const MoiReportingApp({super.key});
-
-  @override
-  State<MoiReportingApp> createState() => _MoiReportingAppState();
-}
-
-class _MoiReportingAppState extends State<MoiReportingApp> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      final auth = Provider.of<AuthProvider>(context, listen: false);
-      if (auth.isAuthenticated && !auth.isAuthenticating) {
-        auth.lockApp();
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
