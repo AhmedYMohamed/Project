@@ -156,6 +156,11 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             _selectedFileNames.isNotEmpty ? _selectedFileNames : null,
       );
 
+      // Refresh reports cache in background
+      try {
+        await ReportService().getUserReports(auth.token!, auth.userId!);
+      } catch (_) {}
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

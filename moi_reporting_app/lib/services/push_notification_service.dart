@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
+import 'report_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -72,6 +73,7 @@ class PushNotificationService {
         // 6. Listen for Foreground Messages
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           _showForegroundNotification(message);
+          _refreshReportsCache();
         });
       }
 
@@ -81,6 +83,17 @@ class PushNotificationService {
         print('PushNotificationService initialization warning: $e');
       }
     }
+  }
+
+  Future<void> _refreshReportsCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      final userId = prefs.getString('user_id');
+      if (token != null && userId != null) {
+        await ReportService().getUserReports(token, userId);
+      }
+    } catch (_) {}
   }
 
   Future<void> syncFcmTokenWithBackend(String token) async {

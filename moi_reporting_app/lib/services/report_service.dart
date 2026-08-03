@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/models.dart';
 
 class ReportService {
@@ -60,6 +62,9 @@ class ReportService {
   }
 
   Future<List<ReportModel>> getUserReports(String token, String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cacheKey = 'cached_user_reports_$userId';
+
     try {
       final response = await _dio.get(
         '/api/v1/reports/user/$userId',
@@ -73,8 +78,19 @@ class ReportService {
       // The backend returns a ReportListResponse object with a 'reports' field
       final List reportsJson = response.data['reports'] ?? [];
 
+      // Save to local cache
+      await prefs.setString(cacheKey, jsonEncode(reportsJson));
+
       return reportsJson.map((json) => ReportModel.fromJson(json)).toList();
     } catch (e) {
+      // Fallback to cache on error
+      final cachedData = prefs.getString(cacheKey);
+      if (cachedData != null) {
+        try {
+          final List decoded = jsonDecode(cachedData);
+          return decoded.map((json) => ReportModel.fromJson(json)).toList();
+        } catch (_) {}
+      }
       rethrow;
     }
   }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/notification_model.dart';
 import '../services/notification_center_service.dart';
+import '../services/report_service.dart';
 import '../l10n/app_localizations.dart';
 
 class NotificationCenterScreen extends StatefulWidget {
@@ -24,12 +25,22 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
   }
 
   Future<void> _fetchNotifications() async {
-    final token = context.read<AuthProvider>().token;
+    final auth = context.read<AuthProvider>();
+    final token = auth.token;
+    final userId = auth.userId;
     if (token == null) return;
 
     setState(() => _isLoading = true);
     try {
       final list = await _service.getNotifications(token);
+      
+      // Refresh reports cache in the background
+      if (userId != null) {
+        try {
+          await ReportService().getUserReports(token, userId);
+        } catch (_) {}
+      }
+
       if (mounted) {
         setState(() {
           _notifications = list;

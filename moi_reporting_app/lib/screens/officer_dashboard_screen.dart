@@ -37,7 +37,9 @@ class _OfficerDashboardScreenState extends State<OfficerDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchLocationAndData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchLocationAndData();
+    });
   }
 
   Future<void> _getCurrentLocation() async {
