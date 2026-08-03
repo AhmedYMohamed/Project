@@ -267,7 +267,8 @@ def update_report_status(
                 user=citizen,
                 title="تحديث حالة البلاغ 👮‍♂️",
                 body=status_msg,
-                data={"type": "status_update", "reportId": report_id, "status": str(new_status)}
+                data={"type": "status_update", "reportId": report_id, "status": str(new_status)},
+                db=db
             )
 
             if raw_report.lawyerId:
@@ -276,7 +277,8 @@ def update_report_status(
                     user=lawyer,
                     title="تحديث حالة بلاغ موكل ⚖️",
                     body=status_msg,
-                    data={"type": "status_update", "reportId": report_id, "status": str(new_status)}
+                    data={"type": "status_update", "reportId": report_id, "status": str(new_status)},
+                    db=db
                 )
     except Exception as e:
         print(f"Notification error in update_report_status: {e}")

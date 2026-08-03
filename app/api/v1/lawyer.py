@@ -145,7 +145,8 @@ def lawyer_report_action(
             user=citizen,
             title="تحديث على البلاغ من المحامي ⚖️",
             body=notif_body,
-            data={"type": "lawyer_action", "reportId": report_id, "action": action}
+            data={"type": "lawyer_action", "reportId": report_id, "action": action},
+            db=db
         )
     except Exception as e:
         print(f"Notification error in lawyer_report_action: {e}")
@@ -211,7 +212,8 @@ def create_report_message(
                 user=recipient,
                 title=sender_title,
                 body=payload.messageText,
-                data={"type": "chat_message", "reportId": report_id, "senderId": current_user.userId}
+                data={"type": "chat_message", "reportId": report_id, "senderId": current_user.userId},
+                db=db
             )
     except Exception as e:
         print(f"Notification error in create_report_message: {e}")

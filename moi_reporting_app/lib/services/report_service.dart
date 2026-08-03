@@ -61,9 +61,19 @@ class ReportService {
     }
   }
 
-  Future<List<ReportModel>> getUserReports(String token, String userId) async {
+  Future<List<ReportModel>> getUserReports(String token, String userId, {bool forceRefresh = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final cacheKey = 'cached_user_reports_$userId';
+
+    if (!forceRefresh) {
+      final cachedData = prefs.getString(cacheKey);
+      if (cachedData != null) {
+        try {
+          final List decoded = jsonDecode(cachedData);
+          return decoded.map((json) => ReportModel.fromJson(json)).toList();
+        } catch (_) {}
+      }
+    }
 
     try {
       final response = await _dio.get(
@@ -83,7 +93,7 @@ class ReportService {
 
       return reportsJson.map((json) => ReportModel.fromJson(json)).toList();
     } catch (e) {
-      // Fallback to cache on error
+      // Fallback to cache on error if not already returned
       final cachedData = prefs.getString(cacheKey);
       if (cachedData != null) {
         try {

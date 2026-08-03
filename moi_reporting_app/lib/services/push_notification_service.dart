@@ -91,7 +91,7 @@ class PushNotificationService {
       final token = prefs.getString('jwt_token');
       final userId = prefs.getString('user_id');
       if (token != null && userId != null) {
-        await ReportService().getUserReports(token, userId);
+        await ReportService().getUserReports(token, userId, forceRefresh: true);
       }
     } catch (_) {}
   }

@@ -24,9 +24,9 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
     _loadReports();
   }
 
-  void _loadReports() {
+  void _loadReports({bool forceRefresh = false}) {
     final auth = context.read<AuthProvider>();
-    _reportsFuture = ReportService().getUserReports(auth.token!, auth.userId!);
+    _reportsFuture = ReportService().getUserReports(auth.token!, auth.userId!, forceRefresh: forceRefresh);
   }
 
   @override
@@ -45,7 +45,7 @@ class _ReportHistoryScreenState extends State<ReportHistoryScreen> {
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             tooltip: loc?.translate('refresh') ?? 'Refresh',
-            onPressed: () => setState(() => _loadReports()),
+            onPressed: () => setState(() => _loadReports(forceRefresh: true)),
           ),
         ],
       ),

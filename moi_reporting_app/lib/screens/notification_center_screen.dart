@@ -37,7 +37,7 @@ class _NotificationCenterScreenState extends State<NotificationCenterScreen> {
       // Refresh reports cache in the background
       if (userId != null) {
         try {
-          await ReportService().getUserReports(token, userId);
+          await ReportService().getUserReports(token, userId, forceRefresh: true);
         } catch (_) {}
       }
 

@@ -94,12 +94,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchStats();
   }
 
-  Future<void> _fetchStats() async {
+  Future<void> _fetchStats({bool forceRefresh = false}) async {
     setState(() => _isLoading = true);
     try {
       final auth = context.read<AuthProvider>();
       final reports =
-          await ReportService().getUserReports(auth.token!, auth.userId!);
+          await ReportService().getUserReports(auth.token!, auth.userId!, forceRefresh: forceRefresh);
       if (mounted) {
         setState(() {
           _totalCount = reports.length;
@@ -147,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             tooltip: loc?.translate('refresh') ?? 'Refresh',
-            onPressed: _fetchStats,
+            onPressed: () => _fetchStats(forceRefresh: true),
           ),
         ],
       ),
