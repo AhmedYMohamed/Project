@@ -6,6 +6,7 @@ class AuthService {
   // IMPORTANT: Replace with your computer's IP address if testing on a real device
   static const String baseUrl =
       'https://moi-app-v2-c0bxdabgf7eteaab.israelcentral-01.azurewebsites.net/';
+
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     headers: {
@@ -104,7 +105,9 @@ class AuthService {
         'role': role ?? 'citizen',
       };
     } catch (e) {
-      if (e is DioException && e.response?.data != null && e.response?.data['detail'] != null) {
+      if (e is DioException &&
+          e.response?.data != null &&
+          e.response?.data['detail'] != null) {
         throw e.response!.data['detail'].toString();
       }
       rethrow;

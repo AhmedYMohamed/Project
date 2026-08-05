@@ -86,7 +86,7 @@ jobs:
               --name moi-app-v2 \
               --resource-group rg-moi-reporting-prod \
               --settings \
-                SCM_DO_BUILD_DURING_DEPLOYMENT=true \
+                SCM_DO_BUILD_DURING_DEPLOYMENT=false \
                 PYTHONPATH="/home/site/wwwroot/.python_packages/lib/site-packages" \
                 AZURE_KEY_VAULT_NAME="moi-reporting-kv" \
                 AZURE_CLIENT_ID="af1e897b-5776-4fee-8607-3d86ba2f9152" \

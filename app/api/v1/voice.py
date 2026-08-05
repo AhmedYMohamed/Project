@@ -96,6 +96,7 @@ def _enhance_with_qwen(raw_text: str) -> str:
 المهمة: قم بتصحيح الأخطاء الإملائية أو النطقية في البلاغ التالي بشكل طفيف جداً وواضح بدون تغيير المعنى الجنائي أو المكان.
 أرجع فقط النص المصحح بدون أي مقدمات أو ملاحظات أو علامات إضافية.
 
+متغيرش في اللهجة المصرية ركز عليها جدا و مترجعليش عربي فصحى 
 النص المفرغ:
 {raw_text}
 """
@@ -103,7 +104,7 @@ def _enhance_with_qwen(raw_text: str) -> str:
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0.1}
+        "options": {"temperature": 0.08}
     }
     
     try:
