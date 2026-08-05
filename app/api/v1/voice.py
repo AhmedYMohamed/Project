@@ -116,7 +116,7 @@ def _enhance_with_qwen(raw_text: str) -> str:
             if corrected and len(corrected) > 2:
                 return corrected
     except Exception:
-        pass
+        raise Exception
         
     return raw_text
 
