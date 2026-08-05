@@ -115,8 +115,8 @@ def _enhance_with_qwen(raw_text: str) -> str:
                 corrected = "\n".join([l for l in lines if not l.startswith("```")]).strip()
             if corrected and len(corrected) > 2:
                 return corrected
-    except Exception:
-        raise Exception
+    except Exception as e:
+        logger.warning(f"⚠ Ollama enhancement failed: {e}")
         
     return raw_text
 

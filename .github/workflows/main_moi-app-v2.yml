@@ -90,7 +90,7 @@ jobs:
                 PYTHONPATH="/home/site/wwwroot/.python_packages/lib/site-packages" \
                 AZURE_KEY_VAULT_NAME="moi-reporting-kv" \
                 AZURE_CLIENT_ID="af1e897b-5776-4fee-8607-3d86ba2f9152" \
-                OLLAMA_URL="https://https://ollama-service.grayocean-bf77a031.uaenorth.azurecontainerapps.io/api/generate" \
+                OLLAMA_URL="https://ollama-service.grayocean-bf77a031.uaenorth.azurecontainerapps.io/api/generate" \
                 OLLAMA_MODEL="qwen2.5:7b" \
                 OLLAMA_TIMEOUT="30"
 
