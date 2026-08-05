@@ -78,11 +78,7 @@ jobs:
               --resource-group rg-moi-reporting-prod \
               --settings \
                 SCM_DO_BUILD_DURING_DEPLOYMENT=true \
-                PYTHONPATH="/home/site/wwwroot/.python_packages/lib/site-packages" \
-                OLLAMA_URL="http://localhost:11434/api/generate" \
-                OLLAMA_MODEL="qwen2.5:7b" \
-                OLLAMA_TIMEOUT="15" \
-                WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
+                PYTHONPATH="/home/site/wwwroot/.python_packages/lib/site-packages"
       # Force a real restart so the worker process reloads the new files
       # from disk instead of continuing to run whatever was already warm.
       - name: Restart Azure Web App
