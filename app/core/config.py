@@ -79,12 +79,15 @@ def get_settings() -> Settings:
     if settings.AZURE_KEY_VAULT_NAME:
         logger.info(f"Connecting to Azure Key Vault: {settings.AZURE_KEY_VAULT_NAME}")
         try:
-            from azure.identity import DefaultAzureCredential
+            from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
             from azure.keyvault.secrets import SecretClient
             
             # Setup credential with user-assigned identity Client ID if provided
             if settings.AZURE_CLIENT_ID:
-                credential = DefaultAzureCredential(managed_identity_client_id=settings.AZURE_CLIENT_ID)
+                try:
+                    credential = ManagedIdentityCredential(client_id=settings.AZURE_CLIENT_ID)
+                except Exception:
+                    credential = DefaultAzureCredential(managed_identity_client_id=settings.AZURE_CLIENT_ID)
             else:
                 credential = DefaultAzureCredential()
                 
