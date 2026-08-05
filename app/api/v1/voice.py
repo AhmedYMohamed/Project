@@ -22,21 +22,12 @@ MUNSIT_API_KEY = os.getenv(
 )
 MUNSIT_URL = os.getenv("MUNSIT_URL", "https://api.cntxt.tools/audio/transcribe")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "15"))
 
 # Whisper Local Model Singleton (Fallback)
 _model = None
 
-def get_whisper_model():
-    global _model
-    if _model is None:
-        logger.info("Loading local Whisper model for fallback...")
-        try:
-            _model = whisper.load_model("turbo")
-            logger.info("Local Whisper 'turbo' model loaded successfully.")
-        except Exception as e:
-            logger.warning(f"Could not load Whisper 'turbo' model: {e}. Trying 'base'...")
-            _model = whisper.load_model("base")
-    return _model
 
 
 def _transcribe_with_munsit(file_path: str) -> Optional[str]:
@@ -63,7 +54,7 @@ def _transcribe_with_munsit(file_path: str) -> Optional[str]:
 
         with open(file_path, "rb") as audio_file:
             files_data = {"file": (file_base_name, audio_file, mime_type)}
-            data = {"model": "munsit"}
+            data = {"model": "munsit-en-ar"}
             
             response = requests.post(
                 MUNSIT_URL,
@@ -93,22 +84,6 @@ def _transcribe_with_munsit(file_path: str) -> Optional[str]:
         return None
 
 
-def _transcribe_with_whisper(file_path: str) -> str:
-    """
-    Fallback transcription using local OpenAI Whisper model.
-    """
-    logger.info("Executing local Whisper fallback transcription...")
-    model = get_whisper_model()
-    my_prompt = "يا باشا، إحنا هنا بنتكلم مصري عادي، وبنقول كلام زي 'إزيك' و'عملت إيه' و'شغل الموتور'. ركز مع اللهجة المصرية."
-    
-    result = model.transcribe(
-        file_path,
-        language="ar",
-        initial_prompt=my_prompt
-    )
-    return result.get("text", "").strip()
-
-
 def _enhance_with_qwen(raw_text: str) -> str:
     """
     Optional enhancement via local Qwen/Ollama for minor dialect & spell corrections.
@@ -125,14 +100,14 @@ def _enhance_with_qwen(raw_text: str) -> str:
 {raw_text}
 """
     payload = {
-        "model": "qwen2.5:7b",
+        "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
         "options": {"temperature": 0.1}
     }
     
     try:
-        response = requests.post(OLLAMA_URL, json=payload, timeout=5)
+        response = requests.post(OLLAMA_URL, json=payload, timeout=OLLAMA_TIMEOUT)
         if response.status_code == 200:
             corrected = response.json().get("response", "").strip()
             if corrected.startswith("```"):
@@ -169,12 +144,7 @@ async def transcribe_voice(
             shutil.copyfileobj(file.file, buffer)
         
         # 1. Primary: Try Munsit API
-        transcribed_text = _transcribe_with_munsit(temp_file_path)
-        
-        # 2. Secondary: Fallback to local Whisper if Munsit failed
-        if not transcribed_text:
-            logger.info("Munsit API unavailable or returned empty result. Switching to Whisper fallback.")
-            transcribed_text = _transcribe_with_whisper(temp_file_path)
+        transcribed_text = _transcribe_with_munsit(temp_file_path)    
             
         # 3. Optional enhancement via Qwen if available
         final_text = _enhance_with_qwen(transcribed_text)

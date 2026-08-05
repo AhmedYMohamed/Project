@@ -8,6 +8,9 @@ services:
     env_file:
       - .env
     environment:
+      - OLLAMA_URL=http://ollama:11434/api/generate
+      - OLLAMA_MODEL=qwen2.5:7b
+      - OLLAMA_TIMEOUT=15
       - ENVIRONMENT=development
       - DEBUG=True
       - LOCAL_STORAGE_PATH=/app/attachments
@@ -19,6 +22,7 @@ services:
       - ./RAG_pipeline:/app/RAG_pipeline
     depends_on:
       - db-init
+      - ollama
     restart: unless-stopped
 
   mssql:
@@ -33,6 +37,15 @@ services:
       - mssql-data:/var/opt/mssql
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_storage:/root/.ollama
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull qwen2.5:7b && tail -f /dev/null"]
+    restart: unless-stopped
+      
   db-init:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
@@ -44,3 +57,4 @@ services:
 
 volumes:
   mssql-data:
+  ollama_storage:
